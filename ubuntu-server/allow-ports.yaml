@@ -1,0 +1,14 @@
+---
+- name: Enable firewall
+  become: True
+  ufw:
+    state: enabled
+
+- name: Allow port
+  become: true
+  ufw:
+    rule: allow
+    port: "{{ item }}"
+  with_items:
+    - "{{ ports }}"
+

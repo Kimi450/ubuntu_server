@@ -1,0 +1,36 @@
+---
+- name: Install and configure Minikube
+  hosts: all
+  gather_facts: false
+  remote_user: kimi450
+  vars:
+    host_port: 6969
+  tasks:
+    - name: Install Minikube
+      # https://minikube.sigs.k8s.io/docs/start/
+      block:
+      - name: Download minikube package
+        shell:  curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube_latest_amd64.deb
+
+      - name: Install minikube
+        become: true
+        shell:  dpkg -i minikube_latest_amd64.deb
+      
+      - name: Delete minikube package
+        file:
+          path: minikube_latest_amd64.deb
+          state: absent
+
+    - name: Start minikube
+      shell:  minikube start
+    
+    - name: Enable nginx ingress controller
+      shell: minikube addons enable ingress
+    
+    - name: Run a reverse proxy to expose the API server on 0.0.0.0:6969
+      shell: "nohup kubectl proxy --address='0.0.0.0' --port={{ host_port }} --accept-hosts='.*' >/dev/null 2>&1 &"
+    
+    - include_tasks: allow-ports.yaml
+      vars:
+        ports: 
+          - "{{ host_port }}"

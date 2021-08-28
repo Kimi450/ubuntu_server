@@ -1,0 +1,34 @@
+---
+- name: Install basic charts
+  hosts: all
+  gather_facts: false
+  remote_user: kimi450
+  vars:
+    release_name: kube-prometheus-stack
+    namespace: monitoring
+    grafana_port: 3000
+  tasks:
+    - name: Install kube-prometheus-stack
+      # https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
+      block:
+      - name: Add helm repo
+        shell:  helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+
+      - name: Update helm repo
+        shell: helm repo update
+
+      - name: Create monitoring namespace
+        shell: "kubectl create namespace {{ namespace }}"
+        ignore_errors: True
+
+      - name: Install chart
+        shell: "helm install -n {{ namespace }} {{ release_name }} prometheus-community/kube-prometheus-stack --wait"
+        ignore_errors: True
+        
+    - name: Expose grafana on the given port
+      shell: "nohup kubectl port-forward -n monitoring svc/prometheus-stack-grafana {{ grafana_port }}:80 --address 0.0.0.0 > /dev/null 2>&1 &"
+
+    - include_tasks: allow-ports.yaml
+      vars:
+        ports: 
+          - "{{ grafana_port }}"

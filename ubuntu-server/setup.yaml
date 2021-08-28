@@ -1,0 +1,35 @@
+---
+- name: Setup home server
+  hosts: all
+  gather_facts: false
+  remote_user: kimi450
+  vars:
+    remote_user: kimi450
+  tasks:
+  - name: Ensure all basic dependencies are present
+    become: true
+    apt:
+      update_cache: yes
+      pkg:
+        - git
+        - curl
+        - vim
+      state: latest
+
+  - name: Create repos directory
+    file:
+      path: "/home/{{ remote_user }}/repos"
+      state: directory
+      mode: '0755'
+
+- import_playbook: install-and-configure-spotifyd.yaml
+
+- import_playbook: install-cn-basics.yaml
+
+- import_playbook: install-and-configure-minikube.yaml
+
+- import_playbook: install-charts.yaml
+
+
+# get kubeconfig setup for remote access
+

@@ -1,0 +1,74 @@
+---
+- name: Install docker, kubectl and helm
+  hosts: all
+  gather_facts: false
+  remote_user: kimi450
+  vars:
+    remote_user: kimi450
+  tasks:
+    - name: Install docker
+      # https://docs.docker.com/engine/install/ubuntu/
+      block:
+      - name: Download convinience script
+        shell:  echo $PWD && curl -fsSL https://get.docker.com -o get-docker.sh
+
+      - name: Run convinience script
+        become: true
+        shell: sh get-docker.sh
+      
+      - name: Delete convinience script
+        file:
+          path: get-docker.sh
+          state: absent
+
+    - name: Install kubectl
+      # https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/
+      block:
+      - name: Install Prerequisits
+        become: true
+        apt:
+          update_cache: yes
+          pkg:
+            - apt-transport-https
+            - curl
+            - ca-certificates
+
+      - name: Download google cloud public signing key
+        become: true
+        shell: curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+
+      - name: Add the Kubernetes apt repository
+        become: true
+        shell: echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list
+ 
+      - name: Install kubectl
+        become: true
+        apt:
+          update_cache: yes
+          pkg:
+            - kubectl
+  
+    - name: Install helm
+      # https://helm.sh/docs/intro/install/
+      block:
+      - name: Add repo key
+        become: true
+        shell: curl https://baltocdn.com/helm/signing.asc | apt-key add -
+
+      - name: Install Prerequisits
+        become: true
+        apt:
+          update_cache: yes
+          pkg:
+            - apt-transport-https
+
+      - name: Add repository
+        become: true
+        shell: echo "deb https://baltocdn.com/helm/stable/debian/ all main" | tee /etc/apt/sources.list.d/helm-stable-debian.list
+
+      - name: Install helm
+        become: true
+        apt:
+          update_cache: yes
+          pkg:
+            - helm
