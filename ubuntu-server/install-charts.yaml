@@ -4,8 +4,9 @@
   gather_facts: false
   remote_user: kimi450
   vars:
+    user_namespace: kimi450
     release_name: kube-prometheus-stack
-    namespace: monitoring
+    monitoring_namespace: monitoring
     grafana_port: "3000"
   tasks:
     - name: Install kube-prometheus-stack
@@ -18,11 +19,14 @@
         shell: helm repo update
 
       - name: Create monitoring namespace
-        shell: "kubectl create namespace {{ namespace }}"
+        shell: "kubectl create namespace {{ item }}"
         ignore_errors: True
+        with_items:
+          - "{{ monitoring_namespace }}"
+          - "{{ user_namespace }}"
 
       - name: Install chart
-        shell: "helm install -n {{ namespace }} {{ release_name }} prometheus-community/kube-prometheus-stack --wait"
+        shell: "helm install -n {{ monitoring_namespace }} {{ release_name }} prometheus-community/kube-prometheus-stack --wait"
         ignore_errors: True
         
     - name: Expose grafana on the given port

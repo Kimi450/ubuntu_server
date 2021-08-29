@@ -1,5 +1,5 @@
-# How to set it up?
-## On the server
+# Setup
+### On the server
 - Install Ubuntu
   - https://ubuntu.com/download/desktop
   - Expected user is: `kimi450`
@@ -16,7 +16,7 @@
 - Disable sleep/suspend
   -  ```sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target```
 
-## On the client
+### On the client
 - Enable passwordless ssh access from remote machine to server (required for ansible to work)
     https://www.linuxbabe.com/linux-server/setup-passwordless-ssh-login
     ```
@@ -25,5 +25,18 @@
     ssh-copy-id <remote-user>@<server-ip>
     ```
 - Update the hosts.yaml file to update the IP of the server
+- Install ansible
+  - ```
+    sudo apt update
+    sudo apt install software-properties-common
+    sudo add-apt-repository --yes --update ppa:ansible/ansible
+    sudo apt install ansible
+    ```
 - Run the ansible runner script
   - `./run.sh`
+
+# Exposed services
+### Grafana
+Grafana can be accessed on `<SERVER_IP>:3000` through the client on the same LAN.
+### Kubernetes API server
+The kubernetes API server is accessible on `<SERVER_IP>:6969` through the client on the same LAN/

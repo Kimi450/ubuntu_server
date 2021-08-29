@@ -6,29 +6,43 @@
   vars:
     remote_user: kimi450
   tasks:
-  - name: Upgrade the system
-    become: true
-    apt:
-      update_cache: yes
-      upgrade: yes
+    - name: Upgrade the system
+      become: true
+      apt:
+        update_cache: yes
+        upgrade: yes
 
-  - name: Ensure all basic dependencies are present
-    become: true
-    apt:
-      update_cache: yes
-      pkg:
-        - git
-        - curl
-        - vim
-        - python3
-        - python3-pip
-      state: latest
+    - name: Ensure all basic dependencies are present
+      become: true
+      apt:
+        update_cache: yes
+        pkg:
+          - git
+          - curl
+          - vim
+          - python3
+          - python3-pip
+        state: latest
 
-  - name: Create repos directory
-    file:
-      path: "/home/{{ remote_user }}/repos"
-      state: directory
-      mode: '0755'
+    - name: Create repos directory
+      file:
+        path: "/home/{{ remote_user }}/repos"
+        state: directory
+        mode: '0755'
+
+    - name: Transfer bashrc file
+      copy:
+        src: ../.bashrc
+        dest: "/home/{{ remote_user }}"
+
+    - name: Transfer vim pimping script
+      copy:
+        src: ../vimmer.sh
+        dest: "/home/{{ remote_user }}/repos"
+        mode: "0755"
+
+    - name: Run vim pimping script
+      command: "/home/{{ remote_user }}/repos/vimmer.sh"
 
 - import_playbook: install-tightvnc-and-ssh.yaml
 
