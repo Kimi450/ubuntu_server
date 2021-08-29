@@ -6,6 +6,12 @@
   vars:
     remote_user: kimi450
   tasks:
+  - name: Upgrade the system
+    become: true
+    apt:
+      update_cache: yes
+      upgrade: yes
+
   - name: Ensure all basic dependencies are present
     become: true
     apt:
@@ -21,6 +27,8 @@
       path: "/home/{{ remote_user }}/repos"
       state: directory
       mode: '0755'
+
+- import_playbook: install-tightnvc-and-ssh.yaml
 
 - import_playbook: install-and-configure-spotifyd.yaml
 

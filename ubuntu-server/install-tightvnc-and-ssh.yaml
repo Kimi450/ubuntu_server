@@ -1,0 +1,53 @@
+---
+- name: Setup home server
+  hosts: all
+  gather_facts: false
+  remote_user: kimi450
+  vars:
+    remote_user: kimi450
+    vnc_display: 4
+  tasks:
+    #https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-vnc-on-ubuntu-18-04
+    - name: Install tightvnc and ssh
+      become: true
+      apt:
+        update_cache: yes
+        pkg:
+          - openssh-server
+          - tightvncserver
+          - xfce4 
+          - xfce4-goodies
+
+    - name: Backup old config
+      command: mv /home/{{ remote_user }}/.vnc/xstartup /home/{{ remote_user }}/.vnc/xstartup.bak
+      ignore_errors: True
+    
+    - name: Copy over the new config
+      copy:
+        src: tightvnc-config/xstartup
+        dest: /home/{{ remote_user }}/.vnc/xstartup
+        mode: "755"
+
+    - name: Copy over the service file for systemd
+      become: true
+      copy:
+        src: tightvnc-config/vncserver@.service
+        dest: /etc/systemd/system/vncserver@.service
+
+    - name: Reload to see new unit file
+      become: true
+      shell: systemctl daemon-reload
+
+    - name: Start the service on specified display
+      become: True
+      shell: "systemctl start vncserver@{{ vnc_display }}.service"
+
+    - name: Enable the service on specified display
+      become: True
+      shell: "systemctl enable vncserver@{{ vnc_display }}.service"
+
+    - include_tasks: allow-ports.yaml # should already work
+      vars:
+        ports: 
+          - "ssh"
+          - "590{{ vnc_display }}"
