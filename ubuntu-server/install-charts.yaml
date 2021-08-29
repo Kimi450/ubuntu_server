@@ -1,13 +1,14 @@
 ---
 - name: Install basic charts
   hosts: all
-  gather_facts: false
+  gather_facts: true
   remote_user: kimi450
   vars:
     user_namespace: kimi450
     release_name: kube-prometheus-stack
     monitoring_namespace: monitoring
     grafana_port: "3000"
+    grafana_admin_password: admin
   tasks:
     - name: Install kube-prometheus-stack
       # https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
@@ -28,7 +29,13 @@
       - name: Install chart
         shell: "helm install -n {{ monitoring_namespace }} {{ release_name }} prometheus-community/kube-prometheus-stack --wait"
         ignore_errors: True
-        
+      
+      - name: "Reset Grafana admin password to '{{ grafana_admin_password }}'"  
+        shell: "kubectl exec -it $(kubectl get pods | grep grafana | awk '{print $1}') -c grafana -- grafana-cli admin reset-admin-password {{ grafana_admin_password }}"
+      
+      - debug:
+          msg: "You can log into Grafana at {{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}:{{ grafana_port }} using admin/{{ grafana_admin_password }}"
+
     - name: Expose grafana on the given port
       shell: "nohup kubectl port-forward -n monitoring svc/{{ release_name }}-grafana {{ grafana_port }}:80 --address 0.0.0.0 > /dev/null 2>&1 &"
 
