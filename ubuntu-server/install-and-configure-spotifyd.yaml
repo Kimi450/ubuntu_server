@@ -15,60 +15,60 @@
       prompt: What is your Spotify password?
 
   tasks:
-  - name: Install spotifyd
     # https://spotifyd.github.io/spotifyd/installation/Ubuntu.html#building-spotifyd
-    block: 
-      - name: Required dependencies
-        become: true
-        apt:
-          update_cache: yes
-          pkg:
-            - rustc 
-            - cargo
-            - libasound2-dev
-            - libssl-dev
-            - pkg-config
-          state: latest
+    - name: Required dependencies
+      become: true
+      apt:
+        update_cache: yes
+        pkg:
+          - rustc 
+          - cargo
+          - libasound2-dev
+          - libssl-dev
+          - pkg-config
+        state: latest
 
-      - name: Delete spotifyd directory
-        file:
-          path: "{{ repo_dir }}"
-          state: absent
+    - name: Delete spotifyd directory
+      file:
+        path: "{{ repo_dir }}"
+        state: absent
 
-      - name: Create spotifyd directory
-        file:
-          path: "{{ repo_dir }}"
-          state: directory
-          mode: '0755'
+    - name: Create spotifyd directory
+      file:
+        path: "{{ repo_dir }}"
+        state: directory
+        mode: '0755'
 
-      - name: Clone repo
-        git:
-          repo: https://github.com/Spotifyd/spotifyd.git
-          dest: "{{ repo_dir }}"
+    - name: Clone repo
+      git:
+        repo: https://github.com/Spotifyd/spotifyd.git
+        dest: "{{ repo_dir }}"
 
-      - name: Build the project
-        shell: "cd {{ repo_dir }} && cargo build --release"
+    - name: Build the project
+      shell: "cd {{ repo_dir }} && cargo build --release"
 
-      - name: Move the binaries
-        become: true
-        command: "mv {{ repo_dir }}/target/release/spotifyd /bin/spotifyd"
-    
-      - name: Move systemd service file
-        command: "mv {{ repo_dir }}/contrib/spotifyd.service ~/.config/systemd/user/"
+    - name: Move the binaries
+      become: true  
+      command: "mv {{ repo_dir }}/target/release/spotifyd /usr/bin/spotifyd"
+  
+    - name: Move systemd service file
+      become: true  
+      command: "mv {{ repo_dir }}/contrib/spotifyd.service /etc/systemd/user/"
 
-      - name: Add user login info
-        lineinfile: 
-          path: ~/.config/systemd/user/spotifyd.service
-          regexp: '^ExecStart(.*)$' 
-          line: 'ExecStart=/usr/bin/spotifyd --no-daemon -u {{ username }} -p {{ password }}'
-          backrefs: yes
+    - name: Add user login info
+      become: true  
+      lineinfile: 
+        path: /etc/systemd/user/spotifyd.service
+        regexp: '^ExecStart(.*)$' 
+        line: 'ExecStart=/usr/bin/spotifyd --no-daemon -u {{ username }} -p {{ password }}'
+        backrefs: yes
 
-      - name: Enable service
-        shell: systemctl --user enable spotifyd.service
+    - name: Enable service
+      shell: systemctl --user enable spotifyd.service
 
-      - name: Start service
-        shell: systemctl --user start spotifyd.service
+    - name: Start service
+      shell: systemctl --user start spotifyd.service
 
-      - name: Give user audio permissions
-        shell: "adduser {{ remote_user }} audio"
-        become: true
+    - name: Give user audio permissions
+      shell: "adduser {{ remote_user }} audio"
+      become: true

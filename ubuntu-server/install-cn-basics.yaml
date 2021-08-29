@@ -21,6 +21,13 @@
           path: get-docker.sh
           state: absent
 
+      - name: Adding existing user "{{ remote_user }}" to group docker
+        become: true
+        user:
+          name: "{{ remote_user }}"
+          groups: docker
+          append: yes
+
     - name: Install kubectl
       # https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/
       block:

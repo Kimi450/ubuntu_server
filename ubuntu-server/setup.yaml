@@ -20,6 +20,8 @@
         - git
         - curl
         - vim
+        - python3
+        - python3-pip
       state: latest
 
   - name: Create repos directory
@@ -28,7 +30,7 @@
       state: directory
       mode: '0755'
 
-- import_playbook: install-tightnvc-and-ssh.yaml
+- import_playbook: install-tightvnc-and-ssh.yaml
 
 - import_playbook: install-and-configure-spotifyd.yaml
 

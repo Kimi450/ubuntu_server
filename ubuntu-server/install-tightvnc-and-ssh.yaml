@@ -5,6 +5,7 @@
   remote_user: kimi450
   vars:
     remote_user: kimi450
+    vnc_password: kimi450
     vnc_display: 4
   tasks:
     #https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-vnc-on-ubuntu-18-04
@@ -21,7 +22,15 @@
     - name: Backup old config
       command: mv /home/{{ remote_user }}/.vnc/xstartup /home/{{ remote_user }}/.vnc/xstartup.bak
       ignore_errors: True
-    
+
+    - name: Setup password
+      expect:
+        command: vncpasswd
+        responses:
+          Password: "{{ vnc_password }}"
+          Verify: "{{ vnc_password }}"
+          "Would you like to enter a view-only password (y/n)?": n
+
     - name: Copy over the new config
       copy:
         src: tightvnc-config/xstartup

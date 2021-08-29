@@ -2,3 +2,4 @@ all:
   hosts:
     home:
       ansible_host: 192.168.178.2
+      ansible_user: kimi450
