@@ -38,5 +38,7 @@
 # Exposed services
 ### Grafana
 Grafana can be accessed on `<SERVER_IP>:3000` through the client on the same LAN.
+#### Good dashboards
+- [Node Exporter Full](https://grafana.com/grafana/dashboards/1860)
 ### Kubernetes API server
 The kubernetes API server is accessible on `<SERVER_IP>:6969` through the client on the same LAN/
