@@ -6,6 +6,7 @@
   vars:
     remote_user: kimi450
     repo_dir: /home/kimi450/repos/spotifyd
+    systemd_file_location: /etc/systemd/user/
   vars_prompt:
     - name: username
       prompt: What is your Spotify username?
@@ -53,12 +54,12 @@
   
     - name: Move systemd service file
       become: true  
-      command: "mv {{ repo_dir }}/contrib/spotifyd.service /etc/systemd/user/"
+      command: "mv {{ repo_dir }}/contrib/spotifyd.service {{ systemd_file_location }}"
 
     - name: Add user login info
       become: true  
       lineinfile: 
-        path: /etc/systemd/user/spotifyd.service
+        path: "{{ systemd_file_location }}spotifyd.service"
         regexp: '^ExecStart(.*)$' 
         line: 'ExecStart=/usr/bin/spotifyd --no-daemon -u {{ username }} -p {{ password }}'
         backrefs: yes

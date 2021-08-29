@@ -22,7 +22,7 @@
           state: absent
 
     - name: Start minikube
-      shell:  minikube start
+      shell:  minikube start --cpus="max" --memory="max" --disk-size="50gb" --nodes=1
     
     - name: Enable nginx ingress controller
       shell: minikube addons enable ingress
