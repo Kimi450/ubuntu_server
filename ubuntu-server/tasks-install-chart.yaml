@@ -1,0 +1,12 @@
+- name: Install {{ release_name }}
+  block:
+  - name: "Add helm repo {{ repo_name }} {{ repo_link }}"
+    shell: "helm repo add {{ repo_name }} {{ repo_link }}"
+    ignore_errors: True
+
+  - name: Update helm repo
+    shell: helm repo update
+
+  - name: Install chart
+    shell: "helm install -n {{ install_namespace }} {{ release_name }} {{ repo_name }}/kube-prometheus-stack --wait"
+    ignore_errors: True

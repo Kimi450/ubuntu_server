@@ -4,42 +4,49 @@
   gather_facts: true
   remote_user: kimi450
   vars:
-    user_namespace: kimi450
-    release_name: kube-prometheus-stack
-    monitoring_namespace: monitoring
+    namespace_user: kimi450
+    namespace_monitoring: monitoring
     grafana_port: "3000"
     grafana_admin_password: admin
   tasks:
-    - name: Install kube-prometheus-stack
-      # https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
+
+    - name: Create namespaces namespace
+      shell: "kubectl create namespace {{ item }}"
+      ignore_errors: True
+      with_items:
+        - "{{ namespace_monitoring }}"
+        - "{{ namespace_user }}"
+
+    - name: Install grafana
       block:
-      - name: Add helm repo
-        shell:  helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+      - name: Install the chart
+        include_tasks: tasks-install-chart.yaml
+        # https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
+        vars:
+          repo_name: prometheus-community
+          repo_link: https://prometheus-community.github.io/helm-charts
+          install_namespace: monitoring
+          release_name: kube-prometheus-stack
 
-      - name: Update helm repo
-        shell: helm repo update
+      - name: Expose grafana service
+        include_tasks: tasks-kubernetes-expose-service.yaml
+        vars:
+          release_name: kube-prometheus-stack
+          service_name_part: grafana
+          service_file_name: grafana.service
+          service_file_location_base: /etc/systemd/system/
+          service_script_file_location_base: /etc/
+          service_script_file_name: grafana.conf
+          service_namespace: monitoring
+          service_container_port: 80
 
-      - name: Create monitoring namespace
-        shell: "kubectl create namespace {{ item }}"
-        ignore_errors: True
-        with_items:
-          - "{{ monitoring_namespace }}"
-          - "{{ user_namespace }}"
-
-      - name: Install chart
-        shell: "helm install -n {{ monitoring_namespace }} {{ release_name }} prometheus-community/kube-prometheus-stack --wait"
-        ignore_errors: True
-      
       - name: "Reset Grafana admin password to '{{ grafana_admin_password }}'"  
-        shell: "kubectl exec -it -n {{ monitoring_namespace }} $(kubectl get pods -n {{ monitoring_namespace }} | grep grafana | awk '{print $1}') -c grafana -- grafana-cli admin reset-admin-password {{ grafana_admin_password }}"
+        shell: "kubectl exec -it -n {{ namespace_monitoring }} $(kubectl get pods -n {{ namespace_monitoring }} | grep grafana | awk '{print $1}') -c grafana -- grafana-cli admin reset-admin-password {{ grafana_admin_password }}"
       
       - debug:
           msg: "You can log into Grafana at {{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}:{{ grafana_port }} using admin/{{ grafana_admin_password }}"
 
-    - name: Expose grafana on the given port
-      shell: "nohup kubectl port-forward -n monitoring svc/{{ release_name }}-grafana {{ grafana_port }}:80 --address 0.0.0.0 > /dev/null 2>&1 &"
-
-    - include_tasks: allow-ports.yaml
-      vars:
-        ports: 
-          - "{{ grafana_port }}"
+      - include_tasks: tasks-allow-ports.yaml
+        vars:
+          ports: 
+            - "{{ grafana_port }}"

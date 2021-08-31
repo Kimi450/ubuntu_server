@@ -23,6 +23,8 @@
           - python3
           - python3-pip
           - htop
+          - lm-sensors
+          - stress
         state: latest
 
     - name: Create repos directory
@@ -52,8 +54,12 @@
 - import_playbook: install-cn-basics.yaml
 
 - import_playbook: install-and-configure-minikube.yaml
+  vars:
+    api_server_forwarded_port: "6969"
 
 - import_playbook: install-charts.yaml
 
-
 # get kubeconfig setup for remote access
+# - import_playbook: remote-access-minikube.yaml
+#   vars:
+#     api_server_forwarded_port: "6969"
