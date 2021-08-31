@@ -28,6 +28,10 @@
           groups: docker
           append: yes
 
+      - name: Reset ssh connection to allow user changes to affect ansible user
+        meta:
+          reset_connection
+
     - name: Install kubectl
       # https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/
       block:

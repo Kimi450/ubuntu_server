@@ -1,5 +1,8 @@
 all:
   hosts:
-    home:
+    home-main:
       ansible_host: 192.168.178.2
       ansible_user: kimi450
+    # home-throwaway:
+    #   ansible_host: 192.168.178.3
+    #   ansible_user: kimi450

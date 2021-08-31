@@ -4,7 +4,8 @@
   gather_facts: false
   remote_user: kimi450
   vars:
-    host_port: "6969"
+    service_file_location: /etc/systemd/system/minikube.service
+    port_expose_file_location: /etc/minikube-apiserver-port-forward.conf
   tasks:
     - name: Install Minikube
       # https://minikube.sigs.k8s.io/docs/start/
@@ -21,16 +22,67 @@
           path: minikube_latest_amd64.deb
           state: absent
 
-    - name: Start minikube
-      shell:  minikube start --cpus="max" --memory="max" --disk-size="50gb" --nodes=1
-    
+    - name: "Create reverse proxy script to expose the API server on 0.0.0.0:{{ host_post }}"
+      block:
+        - name: "Remove any old reverse proxy script"
+          become: true
+          file:
+            path: "{{ port_expose_file_location }}"
+            state: absent
+
+        - name: "Create new reverse proxy script"
+          become: true
+          lineinfile:
+            path: "{{ port_expose_file_location }}"
+            line: "#!/bin/bash\nnohup kubectl proxy --address='0.0.0.0' --port={{ api_server_forwarded_port }} --accept-hosts='.*' > /dev/null 2>&1 &"
+            mode: "0755"
+            create: yes
+
+    - name: Setup and enable systemd service
+      block:
+        - name: Copy over the service file for systemd
+          become: true
+          copy:
+            src: minikube-config/minikube.service
+            dest: "{{ service_file_location }}"
+
+        - name: "Service file edit: Change start command"
+          become: true  
+          lineinfile: 
+            path: "{{ service_file_location }}"
+            regexp: '^ExecStart=(.*)$' 
+            line: 'ExecStart=/usr/bin/minikube start --cpus="max" --memory="max" --disk-size="50gb" --nodes=1'
+            backrefs: yes
+
+        - name: "Service file edit: Add reverse proxy script"
+          become: true  
+          lineinfile: 
+            path: "{{ service_file_location }}"
+            regexp: '^ExecStartPost=(.*)$' 
+            line: "ExecStartPost={{ port_expose_file_location }}"
+            backrefs: yes
+        
+        - name: Reload to see new unit file
+          become: true
+          shell: systemctl daemon-reload
+
+        - name: Stop the service
+          become: True
+          shell: "systemctl stop minikube.service"
+          ignore_errors: True
+
+        - name: Start the service
+          become: True
+          shell: "systemctl start minikube.service"
+
+        - name: Enable the service
+          become: True
+          shell: "systemctl enable minikube.service"
+        
     - name: Enable nginx ingress controller
       shell: minikube addons enable ingress
     
-    - name: "Run a reverse proxy to expose the API server on 0.0.0.0:{{ host_post }}"
-      shell: "nohup kubectl proxy --address='0.0.0.0' --port={{ host_port }} --accept-hosts='.*' >/dev/null 2>&1 &"
-    
-    - include_tasks: allow-ports.yaml
+    - include_tasks: tasks-allow-ports.yaml
       vars:
         ports: 
-          - "{{ host_port }}"
+          - "{{ api_server_forwarded_port }}"

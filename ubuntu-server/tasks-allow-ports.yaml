@@ -11,4 +11,3 @@
     port: "{{ item }}"
   with_items:
     - "{{ ports }}"
-

@@ -1,0 +1,15 @@
+[Unit]
+Description=minikube
+After=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/minikube start
+ExecStartPost=echo done
+ExecStop=/usr/bin/minikube stop
+Restart=on-failure
+User=kimi450
+
+[Install]
+WantedBy=multi-user.target

@@ -1,6 +1,6 @@
 ---
 - name: Install and configure spotifyd
-  hosts: all
+  hosts: home-main
   gather_facts: false
   remote_user: kimi450
   vars:
@@ -60,9 +60,12 @@
       become: true  
       lineinfile: 
         path: "{{ systemd_file_location }}spotifyd.service"
-        regexp: '^ExecStart(.*)$' 
+        regexp: '^ExecStart=(.*)$' 
         line: 'ExecStart=/usr/bin/spotifyd --no-daemon -u {{ username }} -p {{ password }}'
         backrefs: yes
+
+    - name: Reload to see new unit file
+      shell: systemctl --user daemon-reload
 
     - name: Enable service
       shell: systemctl --user enable spotifyd.service
