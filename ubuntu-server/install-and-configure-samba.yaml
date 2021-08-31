@@ -1,0 +1,56 @@
+---
+- name: Install and configure samba
+  hosts: all
+  gather_facts: True
+  remote_user: kimi450
+  vars:
+    share_directory: /home/kimi450/
+    remote_user: kimi450
+    smb_password: kimi450
+    config_location: /etc/samba/smb.conf
+    share_name: sambashare
+  tasks:
+    # https://ubuntu.com/tutorials/install-and-configure-samba#1-overview
+    - name: Install the package
+      become: True
+      apt:
+        update_cache: yes
+        pkg:
+          - samba 
+        state: latest
+
+    - name: "Create {{ share_directory }} if it does not exist"
+      ansible.builtin.file:
+        path: "{{ share_directory }}"
+        state: directory
+        mode: '0755'
+
+    - name: "Add config to the end of the config file"
+      become: True
+      blockinfile:
+        path: "{{ config_location }}"
+        block: |
+          [{{ share_name }}]
+              comment = Samba on Ubuntu
+              path = {{ share_directory }}
+              read only = no
+              browsable = yes
+
+    - name: Reload to see new unit file
+      become: True
+      shell: service smbd restart
+
+    - include_tasks: tasks-allow-ports.yaml
+      vars:
+        ports: 
+          - "samba"
+
+    - name: Set password
+      become: True
+      shell: "(echo \"{{ smb_password }}\"; echo \"{{ smb_password }}\") | smbpasswd -s -a {{ remote_user }}"
+
+    - debug:
+        msg: >-
+          You can add the file share with server IP
+          "{{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}" and share name "{{ share_name }}", and login using
+          {{ remote_user }}/{{ smb_password }}. More info: https://ubuntu.com/tutorials/install-and-configure-samba#4-setting-up-user-accounts-and-connecting-to-share
