@@ -1,0 +1,32 @@
+- name: Setup and enable systemd service for port forwarding
+  block:
+  - name: "Copy over the skeleton service file for systemd"
+    become: True
+    copy:
+      src: charts-config/skeleton.service
+      dest: "{{ service_file_location_base }}{{ service_file_name }}"
+
+  - name: "Service file edit: Add port forward command"
+    become: True  
+    lineinfile: 
+      path: "{{ service_file_location_base }}{{ service_file_name }}"
+      regexp: '^ExecStart=(.*)$' 
+      line: "ExecStart=kubectl port-forward -n {{ service_namespace }} svc/{{ release_name }}-{{ service_name_part }} {{ grafana_port }}:{{ service_container_port}} --address 0.0.0.0"
+      backrefs: yes
+  
+  - name: Reload to see new unit file
+    become: True
+    shell: systemctl daemon-reload
+
+  - name: "Stop the service {{ service_file_name }}"
+    become: True
+    shell: "systemctl stop {{ service_file_name }}"
+    ignore_errors: True
+
+  - name: "Start the service {{ service_file_name }}"
+    become: True
+    shell: "systemctl start {{ service_file_name }} &"
+
+  - name: "Enable the service {{ service_file_name }}"
+    become: True
+    shell: "systemctl enable {{ service_file_name }}"

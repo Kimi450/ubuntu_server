@@ -29,7 +29,7 @@
           release_name: kube-prometheus-stack
 
       - name: Expose grafana service
-        include_tasks: tasks-kubernetes-expose-service.yaml
+        include_tasks: tasks-kubernetes-port-forward-service.yaml
         vars:
           release_name: kube-prometheus-stack
           service_name_part: grafana

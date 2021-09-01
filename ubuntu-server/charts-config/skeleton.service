@@ -3,9 +3,8 @@ Description=Service port forwarder
 StartLimitInterval=0
 
 [Service]
-Type=oneshot
+Type=simple
 RemainAfterExit=yes
-
 # After= didnt work
 # https://unix.stackexchange.com/questions/213185/restarting-systemd-service-on-dependency-failure
 ExecStartPre=minikube status 
