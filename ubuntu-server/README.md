@@ -13,8 +13,6 @@
      sudo ufw enable
      sudo ufw allow ssh
      ```
-- Disable sleep/suspend
-  -  ```sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target```
 
 ### On the client
 - Enable passwordless ssh access from remote machine to server (required for ansible to work)

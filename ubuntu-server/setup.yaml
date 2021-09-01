@@ -6,6 +6,23 @@
   vars:
     remote_user: kimi450
   tasks:
+    - name: Disable sleep
+      # https://serverfault.com/questions/1045949/how-to-disable-suspend-on-ubuntu-20-04-systemd-via-cli
+      become: True
+      block:
+        - name: Change the logind service config file
+          blockinfile:
+            path: /etc/systemd/logind.conf
+            block: |
+              HandleSuspendKey=ignore
+              HandleHibernateKey=ignore
+              HandleLidSwitch=ignore
+              HandleLidSwitchExternalPower=ignore
+              HandleLidSwitchDocked=ignore
+
+        - name: Restart service
+          shell: systemctl restart systemd-logind
+
     - name: Upgrade the system
       become: true
       apt:
