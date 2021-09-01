@@ -42,6 +42,7 @@
           - htop
           - lm-sensors
           - stress
+          - vlc
         state: latest
 
     - name: Create repos directory
