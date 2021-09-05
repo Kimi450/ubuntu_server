@@ -7,6 +7,7 @@
     remote_user: kimi450
     repo_dir: /home/kimi450/repos/spotifyd
     systemd_file_location: /etc/systemd/system/
+    init_volume: 69
   vars_prompt:
     - name: username
       prompt: What is your Spotify username?
@@ -61,8 +62,13 @@
       lineinfile: 
         path: "{{ systemd_file_location }}spotifyd.service"
         regexp: '^ExecStart=(.*)$' 
-        line: 'ExecStart=/usr/bin/spotifyd --no-daemon -u {{ username }} -p {{ password }}'
+        line: 'ExecStart=/usr/bin/spotifyd --no-daemon -u {{ username }} -p {{ password }} --initial-volume {{ init_volume }}'
         backrefs: yes
+
+    - name: Stop service (ignore error if it doesnt exist)
+      become: true
+      shell: systemctl stop spotifyd.service
+      ignore_errors: true
 
     - name: Reload to see new unit file
       become: true
