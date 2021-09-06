@@ -6,6 +6,7 @@
   vars:
     service_location: /etc/systemd/system/bt-agent.service
     service_name: bt-agent.service
+    bluetooth_service_location: /lib/systemd/system/bluetooth.service
     bluetooth_conf_location: /etc/bluetooth/main.conf
   tasks:
     # https://www.raspberrypi.org/forums/viewtopic.php?t=235519
@@ -28,6 +29,14 @@
     - name: Enable bluetooth visibility
       become: true
       shell: btmgmt discov yes
+
+    - name: "Service file edit: Enable a2dp plugin to control volume"
+      become: true  
+      lineinfile: 
+        path: "{{ bluetooth_service_location }}"
+        regexp: '^ExecStart=(.*)$' 
+        line: 'ExecStart=/usr/lib/bluetooth/bluetoothd --plugin=a2dp'
+        backrefs: yes
 
     - name: Remove file (delete file)
       become: true
