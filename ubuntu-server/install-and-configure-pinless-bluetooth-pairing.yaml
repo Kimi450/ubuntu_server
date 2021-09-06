@@ -5,6 +5,7 @@
   remote_user: kimi450
   vars:
     service_location: /etc/systemd/system/bt-agent.service
+    service_script_location: /usr/local/bin/remove-paired-devices.sh
     service_name: bt-agent.service
     bluetooth_service_location: /lib/systemd/system/bluetooth.service
     bluetooth_conf_location: /etc/bluetooth/main.conf
@@ -45,18 +46,29 @@
           become: true
           shell: "systemctl start bluetooth"
 
-    - name: Remove all paired devices
-      shell: 'for device in $(/usr/bin/bluetoothctl devices  | grep -o "[[:xdigit:]:]\{8,17\}"); do echo "removing bluetooth device: $device | $(/usr/bin/bluetoothctl remove $device)"; done'
-     
+
+    - name: "Remove {{ service_script_location }}"
+      become: true
+      file:
+        path: "{{ service_location }}"
+        state: absent
+
+    - name: "Copy script to {{ service_script_location }}"
+      become: true
+      copy:
+        src: helpers/remove-paired-devices.sh
+        dest: "{{ service_script_location }}"
+        mode: "0755"
+
     - name: "Remove {{ service_location }}"
       become: true
-      ansible.builtin.file:
+      file:
         path: "{{ service_location }}"
         state: absent
 
     - name: "Create {{ service_location }}"
       become: true
-      ansible.builtin.file:
+      file:
         path: "{{ service_location }}"
         state: touch
 
@@ -78,6 +90,7 @@
           ExecStartPre=/usr/bin/bluetoothctl discoverable-timeout 0
           ExecStartPre=/usr/bin/bluetoothctl pairable yes
           ExecStartPre=/usr/bin/amixer set Master 100
+          ExecStartPre={{ service_script_location }}
           ExecStart=/usr/bin/bt-agent -c NoInputNoOutput
           Restart=on-failure
           RestartSec=5
