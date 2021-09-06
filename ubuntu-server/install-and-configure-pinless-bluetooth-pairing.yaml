@@ -21,30 +21,40 @@
     - name: Enable bluetooth
       become: true
       shell: rfkill unblock bluetooth
+           
+    - name: "Change bluetooth service to enable volume control"
+      block:
+        - name: "Service file edit: Dsiable avrcp plugin to control volume"
+          become: true  
+          lineinfile: 
+            path: "{{ bluetooth_service_location }}"
+            regexp: '^ExecStart=(.*)$' 
+            line: 'ExecStart=/usr/lib/bluetooth/bluetoothd --noplugin=avrcp'
+            backrefs: yes
 
-    - name: Enable bluetooth connectivity
-      become: true
-      shell: btmgmt connectable yes ####test
+        - name: Stop service (ignore error if it doesnt exist)
+          become: true
+          shell: "systemctl stop bluetooth"
+          ignore_errors: true
 
-    - name: Enable bluetooth visibility
-      become: true
-      shell: btmgmt discov yes
+        - name: Reload to see new unit file
+          become: true
+          shell: systemctl daemon-reload
 
-    - name: "Service file edit: Enable a2dp plugin to control volume"
-      become: true  
-      lineinfile: 
-        path: "{{ bluetooth_service_location }}"
-        regexp: '^ExecStart=(.*)$' 
-        line: 'ExecStart=/usr/lib/bluetooth/bluetoothd --plugin=a2dp'
-        backrefs: yes
+        - name: Start service
+          become: true
+          shell: "systemctl start bluetooth"
 
-    - name: Remove file (delete file)
+    - name: Remove all paired devices
+      shell: 'for device in $(/usr/bin/bluetoothctl devices  | grep -o "[[:xdigit:]:]\{8,17\}"); do echo "removing bluetooth device: $device | $(/usr/bin/bluetoothctl remove $device)"; done'
+     
+    - name: "Remove {{ service_location }}"
       become: true
       ansible.builtin.file:
         path: "{{ service_location }}"
         state: absent
 
-    - name: Create the file
+    - name: "Create {{ service_location }}"
       become: true
       ansible.builtin.file:
         path: "{{ service_location }}"
@@ -67,6 +77,7 @@
           ExecStartPre=/usr/bin/bluetoothctl discoverable yes
           ExecStartPre=/usr/bin/bluetoothctl discoverable-timeout 0
           ExecStartPre=/usr/bin/bluetoothctl pairable yes
+          ExecStartPre=/usr/bin/amixer set Master 100
           ExecStart=/usr/bin/bt-agent -c NoInputNoOutput
           Restart=on-failure
           RestartSec=5
