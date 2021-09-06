@@ -6,79 +6,78 @@
   vars:
     remote_user: kimi450
   tasks:
-    - name: Disable sleep
-      # https://serverfault.com/questions/1045949/how-to-disable-suspend-on-ubuntu-20-04-systemd-via-cli
-      become: True
-      block:
-        - name: Change the logind service config file
-          blockinfile:
-            path: /etc/systemd/logind.conf
-            block: |
-              HandleSuspendKey=ignore
-              HandleHibernateKey=ignore
-              HandleLidSwitch=ignore
-              HandleLidSwitchExternalPower=ignore
-              HandleLidSwitchDocked=ignore
+#     - name: Disable sleep
+#       # https://serverfault.com/questions/1045949/how-to-disable-suspend-on-ubuntu-20-04-systemd-via-cli
+#       become: True
+#       block:
+#         - name: Change the logind service config file
+#           blockinfile:
+#             path: /etc/systemd/logind.conf
+#             block: |
+#               HandleSuspendKey=ignore
+#               HandleHibernateKey=ignore
+#               HandleLidSwitch=ignore
+#               HandleLidSwitchExternalPower=ignore
+#               HandleLidSwitchDocked=ignore
 
-        - name: Restart service
-          shell: systemctl restart systemd-logind
+#         - name: Restart service
+#           shell: systemctl restart systemd-logind
 
-    - name: Upgrade the system
-      become: true
-      apt:
-        update_cache: yes
-        upgrade: yes
+#     - name: Upgrade the system
+#       become: true
+#       apt:
+#         update_cache: yes
+#         upgrade: yes
 
-    - name: Ensure all basic dependencies are present
-      become: true
-      apt:
-        update_cache: yes
-        pkg:
-          - git
-          - curl
-          - vim
-          - python3
-          - python3-pip
-          - htop
-          - lm-sensors
-          - stress
-          - vlc
-        state: latest
+#     - name: Ensure all basic dependencies are present
+#       become: true
+#       apt:
+#         update_cache: yes
+#         pkg:
+#           - git
+#           - curl
+#           - vim
+#           - python3
+#           - python3-pip
+#           - htop
+#           - lm-sensors
+#           - stress
+#           - vlc
+#         state: latest
 
-    - name: Create repos directory
-      file:
-        path: "/home/{{ remote_user }}/repos"
-        state: directory
-        mode: '0755'
+#     - name: Create repos directory
+#       file:
+#         path: "/home/{{ remote_user }}/repos"
+#         state: directory
+#         mode: '0755'
 
-    - name: Transfer bashrc file
-      copy:
-        src: ../.bashrc
-        dest: "/home/{{ remote_user }}"
+#     - name: Transfer bashrc file
+#       copy:
+#         src: ../.bashrc
+#         dest: "/home/{{ remote_user }}"
 
-    - name: Transfer vim pimping script
-      copy:
-        src: ../vimmer.sh
-        dest: "/home/{{ remote_user }}/repos"
-        mode: "0755"
+#     - name: Transfer vim pimping script
+#       copy:
+#         src: ../vimmer.sh
+#         dest: "/home/{{ remote_user }}/repos"
+#         mode: "0755"
 
-    - name: Run vim pimping script
-      command: "/home/{{ remote_user }}/repos/vimmer.sh"
+#     - name: Run vim pimping script
+#       command: "/home/{{ remote_user }}/repos/vimmer.sh"
 
-- import_playbook: install-tightvnc-and-ssh.yaml
+# - import_playbook: install-tightvnc-and-ssh.yaml
 
-# TODO make spotifyd not use plan text password in command
-- import_playbook: install-and-configure-spotifyd.yaml
+- import_playbook: install-and-configure-pinless-bluetooth-pairing.yaml
 
-- import_playbook: install-cn-basics.yaml
+# - import_playbook: install-cn-basics.yaml
 
-- import_playbook: install-and-configure-minikube.yaml
-  vars:
-    api_server_forwarded_port: "6969"
+# - import_playbook: install-and-configure-minikube.yaml
+#   vars:
+#     api_server_forwarded_port: "6969"
 
-- import_playbook: install-charts.yaml
+# - import_playbook: install-charts.yaml
 
-- import_playbook: install-and-configure-samba.yaml
+# - import_playbook: install-and-configure-samba.yaml
 
 # TODO get kubeconfig setup for remote access
 # - import_playbook: remote-access-minikube.yaml

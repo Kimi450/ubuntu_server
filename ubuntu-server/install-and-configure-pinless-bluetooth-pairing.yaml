@@ -1,0 +1,83 @@
+---
+- name: Install and configure pinless bluetooth pairing
+  hosts: all
+  gather_facts: true
+  remote_user: kimi450
+  vars:
+    service_location: /etc/systemd/system/bt-agent.service
+    service_name: bt-agent.service
+    bluetooth_conf_location: /etc/bluetooth/main.conf
+  tasks:
+    # https://www.raspberrypi.org/forums/viewtopic.php?t=235519
+    - name: Required dependencies
+      become: true
+      apt:
+        update_cache: yes
+        pkg:
+          - bluez-tools 
+        state: latest
+
+    - name: Enable bluetooth
+      become: true
+      shell: rfkill unblock bluetooth
+
+    - name: Enable bluetooth connectivity
+      become: true
+      shell: btmgmt connectable yes ####test
+
+    - name: Enable bluetooth visibility
+      become: true
+      shell: btmgmt discov yes
+
+    - name: Remove file (delete file)
+      become: true
+      ansible.builtin.file:
+        path: "{{ service_location }}"
+        state: absent
+
+    - name: Create the file
+      become: true
+      ansible.builtin.file:
+        path: "{{ service_location }}"
+        state: touch
+
+    - name: "Add config to the end of the config file"
+      become: True
+      blockinfile:
+        path: "{{ service_location }}"
+        block: |
+          [Unit]
+          Description=Bluetooth Auth Agent
+          After=bluetooth.service
+          PartOf=bluetooth.service
+          StartLimitInterval=0
+
+          [Service]
+          Type=simple
+          ExecStartPre=/usr/bin/bluetoothctl power yes
+          ExecStartPre=/usr/bin/bluetoothctl discoverable yes
+          ExecStartPre=/usr/bin/bluetoothctl discoverable-timeout 0
+          ExecStartPre=/usr/bin/bluetoothctl pairable yes
+          ExecStart=/usr/bin/bt-agent -c NoInputNoOutput
+          Restart=on-failure
+          RestartSec=5
+
+          [Install]
+          WantedBy=bluetooth.target
+
+    - name: Stop service (ignore error if it doesnt exist)
+      become: true
+      shell: "systemctl stop {{ service_name }}"
+      ignore_errors: true
+
+    - name: Reload to see new unit file
+      become: true
+      shell: systemctl daemon-reload
+
+    - name: Enable service
+      become: true
+      shell: "systemctl enable {{ service_name }}"
+
+    - name: Start service
+      become: true
+      shell: "systemctl start {{ service_name }}"

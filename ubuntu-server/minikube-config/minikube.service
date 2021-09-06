@@ -1,5 +1,6 @@
 [Unit]
 Description=minikube
+StartLimitInterval=0
 After=docker.service
 
 [Service]
@@ -9,6 +10,7 @@ ExecStart=/usr/bin/minikube start
 ExecStartPost=echo placeholder
 ExecStop=/usr/bin/minikube stop
 Restart=on-failure
+RestartSec=5
 User=kimi450
 
 [Install]
