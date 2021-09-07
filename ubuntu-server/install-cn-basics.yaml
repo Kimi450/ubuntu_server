@@ -99,4 +99,5 @@
             - helm
 
     - name: Unconditionally reboot the machine with all defaults
+      become: true
       reboot:
