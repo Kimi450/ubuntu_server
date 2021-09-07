@@ -65,6 +65,10 @@
     - name: Run vim pimping script
       command: "/home/{{ remote_user }}/repos/vimmer.sh"
 
+    - name: Run vim pimping script for sudo
+      become: true
+      command: "/home/{{ remote_user }}/repos/vimmer.sh"
+
 - import_playbook: install-tightvnc-and-ssh.yaml
 
 - import_playbook: install-and-configure-pinless-bluetooth-pairing.yaml
