@@ -23,6 +23,11 @@
         - name: Restart service
           shell: systemctl restart systemd-logind
 
+        - name: Disable sleep in systemd
+          # https://www.unixtutorial.org/disable-sleep-on-ubuntu-server/
+          become: true
+          shell: systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+
     - name: Upgrade the system
       become: true
       apt:
