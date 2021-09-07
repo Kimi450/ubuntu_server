@@ -4,11 +4,14 @@
   gather_facts: true
   remote_user: kimi450
   vars:
-    service_location: /etc/systemd/system/bt-agent.service
-    service_script_location: /usr/local/bin/remove-paired-devices.sh
-    service_name: bt-agent.service
+    bt_agent_service_location: /etc/systemd/system/bt-agent.service
+    bt_agent_service_script_location: /usr/local/bin/remove-paired-devices.sh
+    bt_agent_service_name: bt-agent.service
     bluetooth_service_location: /lib/systemd/system/bluetooth.service
     bluetooth_conf_location: /etc/bluetooth/main.conf
+    bluetooth_service_name: bluetooth.service
+    remote_user: kimi450
+
   tasks:
     # https://www.raspberrypi.org/forums/viewtopic.php?t=235519
     - name: Required dependencies
@@ -16,7 +19,10 @@
       apt:
         update_cache: yes
         pkg:
+          - bluez
           - bluez-tools 
+          - pulseaudio-module-bluetooth
+          - gnome-bluetooth
         state: latest
 
     - name: Enable bluetooth
@@ -25,7 +31,7 @@
            
     - name: "Change bluetooth service to enable volume control"
       block:
-        - name: "Service file edit: Dsiable avrcp plugin to control volume"
+        - name: "Service file edit: Disable avrcp plugin to control volume"
           become: true  
           lineinfile: 
             path: "{{ bluetooth_service_location }}"
@@ -35,82 +41,97 @@
 
         - name: Stop service (ignore error if it doesnt exist)
           become: true
-          shell: "systemctl stop bluetooth"
+          shell: "systemctl stop {{ bluetooth_service_name }}"
           ignore_errors: true
 
         - name: Reload to see new unit file
           become: true
           shell: systemctl daemon-reload
 
+        - name: Enable service
+          become: true
+          shell: "systemctl enable {{ bluetooth_service_name }}"
+
         - name: Start service
           become: true
-          shell: "systemctl start bluetooth"
+          shell: "systemctl start {{ bluetooth_service_name }}"
 
-
-    - name: "Remove {{ service_script_location }}"
+    - name: "Add {{ remote_user }} to gdm group"
+      # pulseaudio is brought up on startup by user gdm in group gdm, if user
+      # is added to that then user can use the service too without having
+      # a second systemwide instance running
       become: true
-      file:
-        path: "{{ service_location }}"
-        state: absent
+      ansible.builtin.user:
+        name: "{{ remote_user }}"
+        groups: gdm
+        append: yes
 
-    - name: "Copy script to {{ service_script_location }}"
-      become: true
-      copy:
-        src: helpers/remove-paired-devices.sh
-        dest: "{{ service_script_location }}"
-        mode: "0755"
+    - name: Setup NoInputNoOutput bt-agent for pinless pairing
+      block:
+        - name: "Remove {{ bt_agent_service_script_location }}"
+          become: true
+          file:
+            path: "{{ bt_agent_service_location }}"
+            state: absent
 
-    - name: "Remove {{ service_location }}"
-      become: true
-      file:
-        path: "{{ service_location }}"
-        state: absent
+        - name: "Copy script to {{ bt_agent_service_script_location }}"
+          become: true
+          copy:
+            src: helpers/remove-paired-devices.sh
+            dest: "{{ bt_agent_service_script_location }}"
+            mode: "0755"
 
-    - name: "Create {{ service_location }}"
-      become: true
-      file:
-        path: "{{ service_location }}"
-        state: touch
+        - name: "Remove {{ bt_agent_service_location }}"
+          become: true
+          file:
+            path: "{{ bt_agent_service_location }}"
+            state: absent
 
-    - name: "Add config to the end of the config file"
-      become: True
-      blockinfile:
-        path: "{{ service_location }}"
-        block: |
-          [Unit]
-          Description=Bluetooth Auth Agent
-          After=bluetooth.service
-          PartOf=bluetooth.service
-          StartLimitInterval=0
+        - name: "Create {{ bt_agent_service_location }}"
+          become: true
+          file:
+            path: "{{ bt_agent_service_location }}"
+            state: touch
 
-          [Service]
-          Type=simple
-          ExecStartPre=/usr/bin/bluetoothctl power yes
-          ExecStartPre=/usr/bin/bluetoothctl discoverable yes
-          ExecStartPre=/usr/bin/bluetoothctl discoverable-timeout 0
-          ExecStartPre=/usr/bin/bluetoothctl pairable yes
-          ExecStartPre=/usr/bin/amixer set Master 100
-          ExecStartPre={{ service_script_location }}
-          ExecStart=/usr/bin/bt-agent -c NoInputNoOutput
-          Restart=on-failure
-          RestartSec=5
+        - name: "Populate service file"
+          become: True
+          blockinfile:
+            path: "{{ bt_agent_service_location }}"
+            block: |
+              [Unit]
+              Description=Bluetooth Auth Agent
+              After=bluetooth.service
+              PartOf=bluetooth.service
+              StartLimitInterval=0
 
-          [Install]
-          WantedBy=bluetooth.target
+              [Service]
+              Type=simple
+              ExecStartPre=/usr/bin/bluetoothctl power yes
+              ExecStartPre=/usr/bin/bluetoothctl discoverable yes
+              ExecStartPre=/usr/bin/bluetoothctl discoverable-timeout 0
+              ExecStartPre=/usr/bin/bluetoothctl pairable yes
+              ExecStartPre=/usr/bin/amixer set Master 100
+              ExecStartPre={{ bt_agent_service_script_location }}
+              ExecStart=/usr/bin/bt-agent -c NoInputNoOutput
+              Restart=on-failure
+              RestartSec=5
 
-    - name: Stop service (ignore error if it doesnt exist)
-      become: true
-      shell: "systemctl stop {{ service_name }}"
-      ignore_errors: true
+              [Install]
+              WantedBy=bluetooth.target
 
-    - name: Reload to see new unit file
-      become: true
-      shell: systemctl daemon-reload
+        - name: Stop service (ignore error if it doesnt exist)
+          become: true
+          shell: "systemctl stop {{ bt_agent_service_name }}"
+          ignore_errors: true
 
-    - name: Enable service
-      become: true
-      shell: "systemctl enable {{ service_name }}"
+        - name: Reload to see new unit file
+          become: true
+          shell: systemctl daemon-reload
 
-    - name: Start service
-      become: true
-      shell: "systemctl start {{ service_name }}"
+        - name: Enable service
+          become: true
+          shell: "systemctl enable {{ bt_agent_service_name }}"
+
+        - name: Start service
+          become: true
+          shell: "systemctl start {{ bt_agent_service_name }}"
