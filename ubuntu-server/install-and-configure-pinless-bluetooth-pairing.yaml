@@ -10,6 +10,8 @@
     bluetooth_service_location: /lib/systemd/system/bluetooth.service
     bluetooth_conf_location: /etc/bluetooth/main.conf
     bluetooth_service_name: bluetooth.service
+    puleaudio_system_service_location: /etc/systemd/system/pulseaudio.service
+    puleaudio_system_service_name: pulseaudio.service
     remote_user: kimi450
 
   tasks:
@@ -56,15 +58,55 @@
           become: true
           shell: "systemctl start {{ bluetooth_service_name }}"
 
-    - name: "Add {{ remote_user }} to gdm group"
-      # pulseaudio is brought up on startup by user gdm in group gdm, if user
-      # is added to that then user can use the service too without having
-      # a second systemwide instance running
-      become: true
-      ansible.builtin.user:
-        name: "{{ remote_user }}"
-        groups: gdm,audio
-        append: yes
+
+    - name: Setup NoInputNoOutput bt-agent for pinless pairing
+      block:
+        - name: "Remove {{ puleaudio_system_service_location }}"
+          become: true
+          file:
+            path: "{{ puleaudio_system_service_location }}"
+            state: absent
+
+        - name: "Create {{ puleaudio_system_service_location }}"
+          become: true
+          file:
+            path: "{{ puleaudio_system_service_location }}"
+            state: touch
+
+        - name: "Populate {{ puleaudio_system_service_location }} file"
+          become: True
+          blockinfile:
+            path: "{{ puleaudio_system_service_location }}"
+            block: |
+              [Unit]
+              Description=PulseAudio Daemon
+
+              [Service]
+              ExecStart=/usr/bin/pulseaudio --daemonize=no --log-target=journal
+              Restart=on-failure
+              Type=simple
+              User={{ remote_user }}
+
+              [Install]
+              WantedBy=multi-user.target
+
+
+        - name: Stop service (ignore error if it doesnt exist)
+          become: true
+          shell: "systemctl stop {{ puleaudio_system_service_name }}"
+          ignore_errors: true
+
+        - name: Reload to see new unit file
+          become: true
+          shell: systemctl daemon-reload
+
+        - name: Enable service
+          become: true
+          shell: "systemctl enable {{ puleaudio_system_service_name }}"
+
+        - name: Start service
+          become: true
+          shell: "systemctl start {{ puleaudio_system_service_name }}"
 
     - name: Setup NoInputNoOutput bt-agent for pinless pairing
       block:
@@ -93,7 +135,7 @@
             path: "{{ bt_agent_service_location }}"
             state: touch
 
-        - name: "Populate service file"
+        - name: "Populate {{ bt_agent_service_location }} file"
           become: True
           blockinfile:
             path: "{{ bt_agent_service_location }}"
