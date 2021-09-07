@@ -58,6 +58,12 @@
           become: true
           shell: "systemctl start {{ bluetooth_service_name }}"
 
+    - name: "Add {{ remote_user }} to audio group"
+      become: true
+      ansible.builtin.user:
+        name: "{{ remote_user }}"
+        groups: audio
+        append: yes
 
     - name: Setup NoInputNoOutput bt-agent for pinless pairing
       block:
