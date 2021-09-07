@@ -63,7 +63,7 @@
       become: true
       ansible.builtin.user:
         name: "{{ remote_user }}"
-        groups: gdm
+        groups: gdm,audio
         append: yes
 
     - name: Setup NoInputNoOutput bt-agent for pinless pairing
