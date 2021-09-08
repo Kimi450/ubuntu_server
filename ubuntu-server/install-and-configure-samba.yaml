@@ -6,9 +6,11 @@
   vars:
     share_directory: /home/kimi450/
     remote_user: kimi450
-    smb_password: kimi450
     config_location: /etc/samba/smb.conf
     share_name: sambashare
+  vars_prompt:
+    - name: smb_password
+      prompt: Set password for the sambashare
   tasks:
     # https://ubuntu.com/tutorials/install-and-configure-samba#1-overview
     - name: Install the package
