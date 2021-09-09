@@ -11,7 +11,7 @@
     lineinfile: 
       path: "{{ service_file_location_base }}{{ service_file_name }}"
       regexp: '^ExecStart=(.*)$' 
-      line: "ExecStart=kubectl port-forward -n {{ service_namespace }} svc/{{ release_name }}-{{ service_name_part }} {{ host_port }}:{{ service_container_port}} --address 0.0.0.0"
+      line: "ExecStart=kubectl port-forward -n {{ service_namespace }} svc/{{ service_name }} {{ host_port }}:{{ service_container_port}} --address 0.0.0.0"
       backrefs: yes
   
   - name: Reload to see new unit file

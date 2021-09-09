@@ -32,8 +32,7 @@
       - name: Expose grafana service
         include_tasks: tasks-kubernetes-port-forward-service.yaml
         vars:
-          release_name: kube-prometheus-stack
-          service_name_part: grafana
+          service_name: kube-prometheus-stack-grafana
           service_file_name: grafana.service
           service_file_location_base: /etc/systemd/system/
           service_namespace: "{{ namespace_monitoring }}"
@@ -50,3 +49,30 @@
       
       - debug:
           msg: "You can log into Grafana at {{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}:{{ grafana_port }} using admin/{{ grafana_admin_password }}"
+
+    - name: Install jellyfin
+      # https://artifacthub.io/packages/helm/k8s-at-home/jellyfin
+      block:
+      - name: Install the chart
+        include_tasks: tasks-install-chart.yaml
+        vars:
+          repo_name: k8s-at-home
+          repo_link: https://k8s-at-home.com/charts/
+          install_namespace: "{{ namespace_generic_services }}"
+          release_name: jellyfin
+          chart_name: jellyfin
+
+      - name: Expose jellyfin service
+        include_tasks: tasks-kubernetes-port-forward-service.yaml
+        vars:
+          service_name: jellyfin
+          service_file_name: jellyfin.service
+          service_file_location_base: /etc/systemd/system/
+          service_namespace: "{{ namespace_generic_services }}"
+          service_container_port: 8096
+          host_port: 3001
+
+      - include_tasks: tasks-allow-ports.yaml
+        vars:
+          ports: 
+            - "3001"
