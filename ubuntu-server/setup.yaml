@@ -48,6 +48,7 @@
           - lm-sensors
           - stress
           - vlc
+          - speedtest-cli
         state: latest
 
     - name: Create repos directory
