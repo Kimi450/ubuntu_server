@@ -27,7 +27,7 @@
           repo_link: https://prometheus-community.github.io/helm-charts
           install_namespace: monitoring
           release_name: kube-prometheus-stack
-
+          chart_name: kube-prometheus-stack
       - name: Expose grafana service
         include_tasks: tasks-kubernetes-port-forward-service.yaml
         vars:
