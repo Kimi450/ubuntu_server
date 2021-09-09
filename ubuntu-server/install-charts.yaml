@@ -6,7 +6,7 @@
   vars:
     namespace_user: kimi450
     namespace_monitoring: monitoring
-    grafana_port: "3000"
+    namespace_generic_services: generic-services
     grafana_admin_password: admin
   tasks:
 
@@ -16,6 +16,7 @@
       with_items:
         - "{{ namespace_monitoring }}"
         - "{{ namespace_user }}"
+        - "{{ namespace_generic_services }}"
 
     - name: Install grafana
       block:
@@ -25,7 +26,7 @@
         vars:
           repo_name: prometheus-community
           repo_link: https://prometheus-community.github.io/helm-charts
-          install_namespace: monitoring
+          install_namespace: "{{ namespace_monitoring }}"
           release_name: kube-prometheus-stack
           chart_name: kube-prometheus-stack
       - name: Expose grafana service
@@ -35,18 +36,17 @@
           service_name_part: grafana
           service_file_name: grafana.service
           service_file_location_base: /etc/systemd/system/
-          service_script_file_location_base: /etc/
-          service_script_file_name: grafana.conf
-          service_namespace: monitoring
+          service_namespace: "{{ namespace_monitoring }}"
           service_container_port: 80
+          host_port: 3000
 
+      - include_tasks: tasks-allow-ports.yaml
+        vars:
+          ports: 
+            - "3000"
+            
       - name: "Reset Grafana admin password to '{{ grafana_admin_password }}'"  
         shell: "kubectl exec -it -n {{ namespace_monitoring }} $(kubectl get pods -n {{ namespace_monitoring }} | grep grafana | awk '{print $1}') -c grafana -- grafana-cli admin reset-admin-password {{ grafana_admin_password }}"
       
       - debug:
           msg: "You can log into Grafana at {{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}:{{ grafana_port }} using admin/{{ grafana_admin_password }}"
-
-      - include_tasks: tasks-allow-ports.yaml
-        vars:
-          ports: 
-            - "{{ grafana_port }}"
