@@ -3,9 +3,14 @@
   hosts: all
   gather_facts: false
   remote_user: kimi450
-  vars:
-    remote_user: kimi450
   tasks:
+    - name: Set shared facts
+      set_fact:
+        user: kimi450
+        dir_home: /home/kimi450
+        dir_torrents: /home/kimi450/torrents
+        dir_repos: /home/kimi450/repos
+
     - name: Disable sleep
       # https://serverfault.com/questions/1045949/how-to-disable-suspend-on-ubuntu-20-04-systemd-via-cli
       become: True
@@ -51,29 +56,33 @@
           - speedtest-cli
         state: latest
 
-    - name: Create repos directory
+    - name: Create directories
+      become: true
       file:
-        path: "/home/{{ remote_user }}/repos"
+        path: "{{ item }}"
         state: directory
         mode: '0755'
+      with_items:
+        - "{{ dir_torrents }}"
+        - "{{ dir_repos }}"
 
     - name: Transfer bashrc file
       copy:
         src: ../.bashrc
-        dest: "/home/{{ remote_user }}"
+        dest: "{{ dir_home }}"
 
     - name: Transfer vim pimping script
       copy:
         src: ../vimmer.sh
-        dest: "/home/{{ remote_user }}/repos"
+        dest: "{{ dir_repos }}"
         mode: "0755"
 
     - name: Run vim pimping script
-      command: "/home/{{ remote_user }}/repos/vimmer.sh"
+      command: "{{ dir_repos }}/vimmer.sh"
 
     - name: Run vim pimping script for sudo
       become: true
-      command: "/home/{{ remote_user }}/repos/vimmer.sh"
+      command: "{{ dir_repos }}/vimmer.sh"
 
 - import_playbook: install-tightvnc-and-ssh.yaml
 
