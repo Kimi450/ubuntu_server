@@ -6,6 +6,7 @@
   vars:
     service_file_location: /etc/systemd/system/minikube.service
     port_expose_file_location: /etc/minikube-apiserver-port-forward.conf
+    dir_minikube_mount: /minikube-host
   tasks:
     - name: Install Minikube
       # https://minikube.sigs.k8s.io/docs/start/
@@ -51,7 +52,7 @@
           lineinfile: 
             path: "{{ service_file_location }}"
             regexp: '^ExecStart=(.*)$' 
-            line: 'ExecStart=/usr/bin/minikube start --cpus="max" --memory="6000" --disk-size="50gb" --nodes=1'
+            line: 'ExecStart=/usr/bin/minikube start --mount --mount-string "{{ dir_home }}:{{ dir_minikube_mount }}" --cpus="max" --memory="6000" --disk-size="50gb" --nodes=1'
             backrefs: yes
 
         - name: "Service file edit: Add reverse proxy script"
@@ -78,6 +79,10 @@
         - name: Enable the service
           become: True
           shell: "systemctl enable minikube.service"
+
+        - name: Minikube notes
+          debug:
+            msg: "Directory '{{ dir_home }}' mounted on the minikube container at '{{ dir_minikube_mount }}'. More info https://github.com/kubernetes/minikube/pull/8159"
         
     - name: Enable nginx ingress controller
       shell: minikube addons enable ingress
