@@ -6,7 +6,6 @@
   vars:
     service_file_location: /etc/systemd/system/minikube.service
     port_expose_file_location: /etc/minikube-apiserver-port-forward.conf
-    dir_minikube_mount: /minikube-host
   tasks:
     - name: Install Minikube
       # https://minikube.sigs.k8s.io/docs/start/

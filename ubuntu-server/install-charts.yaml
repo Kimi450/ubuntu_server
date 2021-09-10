@@ -50,7 +50,7 @@
         shell: "kubectl exec -it -n {{ namespace_monitoring }} $(kubectl get pods -n {{ namespace_monitoring }} | grep grafana | awk '{print $1}') -c grafana -- grafana-cli admin reset-admin-password {{ grafana_admin_password }}"
       
       - debug:
-          msg: "You can log into Grafana at {{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}:3000 using admin/{{ grafana_admin_password }}"
+          msg: "You can log into Grafana at '{{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}:3000' using admin/{{ grafana_admin_password }}"
 
     - name: Install jellyfin
       # https://artifacthub.io/packages/helm/k8s-at-home/jellyfin
@@ -63,7 +63,15 @@
           install_namespace: "{{ namespace_generic_services }}"
           release_name: jellyfin
           chart_name: jellyfin
-          set_options: "--set controller.type=statefulset"
+          set_options: "--set \
+            controller.type=statefulset,\
+            persistence.config.enabled=yes,\
+            persistence.cache.enabled=true,\
+            persistence.cache.accessMode=ReadWriteOnce,\
+            persistence.cache.size=20G,\
+            persistence.media.enabled=yes,\
+            persistence.media.type=hostPath,\
+            persistence.media.hostPath={{ dir_minikube_mount }}"
 
       - name: Expose jellyfin service
         include_tasks: tasks-kubernetes-port-forward-service.yaml
@@ -79,3 +87,6 @@
         vars:
           ports: 
             - "3001"
+
+      - debug:
+          msg: "You can log into Jellyfin at '{{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}:3001/web/index.html'. '{{ dir_home }}' is available under '/media' and can be used by Jellyfin."
