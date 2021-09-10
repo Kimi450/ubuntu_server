@@ -93,7 +93,7 @@
 
 - import_playbook: install-and-configure-minikube.yaml
   vars:
-    api_server_forwarded_port: "6969"
+    api_server_forwarded_port: "3001"
 
 - import_playbook: install-charts.yaml
 
