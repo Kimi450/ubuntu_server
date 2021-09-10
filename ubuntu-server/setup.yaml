@@ -10,6 +10,7 @@
         dir_home: /home/kimi450
         dir_torrents: /home/kimi450/torrents
         dir_repos: /home/kimi450/repos
+        dir_minikube_mount: /minikube-host
 
     - name: Disable sleep
       # https://serverfault.com/questions/1045949/how-to-disable-suspend-on-ubuntu-20-04-systemd-via-cli

@@ -89,4 +89,4 @@
             - "3001"
 
       - debug:
-          msg: "You can log into Jellyfin at '{{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}:3001/web/index.html'. '{{ dir_home }}' is available under '/media' and can be used by Jellyfin."
+          msg: "You can log into Jellyfin at '{{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}:3001/web/index.html'. '{{ dir_home }}' is available under '/media' and can be used by Jellyfin. If need be, delete any existing server and go to the URL mention above once again to setup a new server."
