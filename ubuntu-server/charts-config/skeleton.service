@@ -1,6 +1,7 @@
 [Unit]
-Description=Service port forwarder
+Description=Setup a secure tunnel
 StartLimitInterval=0
+After=network.target
 
 [Service]
 Type=simple

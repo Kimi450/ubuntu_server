@@ -1,3 +1,14 @@
+- name: "Convert {{ service_name }} to a NodePort service"
+  shell: >-
+    kubectl patch svc -n {{ service_namespace }} {{ service_name }} --type='json' -p '[{"op":"replace","path":"/spec/type","value":"NodePort"}]'
+
+
+- name: Get all ports of type NodePort
+  shell: >-
+    kubectl get svc -n {{ service_namespace }} {{ service_name }} {% raw %} -o go-template='{{if .items}}{{range .items}}{{range.spec.ports}}{{.nodePort}}{{"\n"}}{{end}}{{end}}{{else}}{{range.spec.ports}}{{.nodePort}}{{"\n"}}{{end}}{{end}}' {% endraw %}
+  register: nodeport_port
+
+  # TODO what to do if there are multiple nodeports that need to be port forwarded
 - name: Setup and enable systemd service for port forwarding
   block:
   - name: "Copy over the skeleton service file for systemd"
@@ -6,12 +17,24 @@
       src: charts-config/skeleton.service
       dest: "{{ service_file_location_base }}{{ service_file_name }}"
 
+
+  # TODO what if minikube IP changes, the IP is set at deployment time here
+  # Maybe should be part of the systemd service in a script?
+  - name: Register minikube ssh-key location
+    shell: minikube ssh-key
+    register: dir_minikube_ssh_key
+
+  - name: Register minikube ip
+    shell: minikube ip
+    register: minikube_ip
+
   - name: "Service file edit: Add port forward command"
-    become: True  
+    become: True
+    # https://gist.github.com/drmalex07/c0f9304deea566842490 
     lineinfile: 
       path: "{{ service_file_location_base }}{{ service_file_name }}"
       regexp: '^ExecStart=(.*)$' 
-      line: "ExecStart=kubectl port-forward -n {{ service_namespace }} svc/{{ service_name }} {{ host_port }}:{{ service_container_port}} --address 0.0.0.0"
+      line: "ExecStart=ssh -NT -o ExitOnForwardFailure=yes -o GatewayPorts=true -i {{ dir_minikube_ssh_key.stdout }} docker@{{ minikube_ip.stdout }} -L {{ host_port }}:0.0.0.0:{{ nodeport_port.stdout }}"
       backrefs: yes
   
   - name: Reload to see new unit file

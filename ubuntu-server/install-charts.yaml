@@ -68,7 +68,7 @@
             persistence.config.enabled=yes,\
             persistence.cache.enabled=true,\
             persistence.cache.accessMode=ReadWriteOnce,\
-            persistence.cache.size=20G,\
+            persistence.cache.size=50G,\
             persistence.media.enabled=yes,\
             persistence.media.type=hostPath,\
             persistence.media.hostPath={{ dir_minikube_mount }}"

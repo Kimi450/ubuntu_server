@@ -54,6 +54,8 @@
           - lm-sensors
           - stress
           - vlc
+          - jq
+          - net-tools
           - speedtest-cli
         state: latest
 
