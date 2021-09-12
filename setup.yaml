@@ -8,7 +8,10 @@
       set_fact:
         user: kimi450
         dir_home: /home/kimi450
-        dir_torrents: /home/kimi450/torrents
+        dir_data: /home/kimi450/data
+        dir_data_movies: /home/kimi450/data/movies
+        dir_data_shows: /home/kimi450/data/shows
+        dir_data_games: /home/kimi450/data/games
         dir_repos: /home/kimi450/repos
         dir_minikube_mount: /minikube-host
 
@@ -25,7 +28,7 @@
               HandleLidSwitch=ignore
               HandleLidSwitchExternalPower=ignore
               HandleLidSwitchDocked=ignore
-
+ 
         - name: Restart service
           shell: systemctl restart systemd-logind
 
@@ -66,8 +69,11 @@
         state: directory
         mode: '0755'
       with_items:
-        - "{{ dir_torrents }}"
+        - "{{ dir_data }}"
         - "{{ dir_repos }}"
+        - "{{ dir_data_movies }}"
+        - "{{ dir_data_shows }}"
+        - "{{ dir_data_games }}"
 
     - name: Setup the bashrc file and the vimrc file
       block:
