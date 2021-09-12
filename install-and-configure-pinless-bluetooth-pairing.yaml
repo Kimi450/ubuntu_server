@@ -183,3 +183,42 @@
         - name: Start service
           become: true
           shell: "systemctl start {{ bt_agent_service_name }}"
+
+    - name: "Setup alsa-restore for the {{ remote_user }}"
+      # https://askubuntu.com/questions/132440/headphone-jack-not-working
+      # https://bbs.archlinux.org/viewtopic.php?id=147206
+      # alsa-restore only works on root as its a system service,
+      # to make it work for {{ remote_user }}, a systemd service on the
+      # user level needs to be created. This way a restart will
+      # fix audio issues
+      become: True
+      block:
+        - name: Copy system alsa-restore service
+          copy:
+            remote_src: true
+            src: /lib/systemd/system/alsa-restore.service
+            dest: /etc/systemd/system/alsa-restore.service
+        
+        - name: "Edit service file to run as {{ remote_user }}"
+          lineinfile: 
+            path: "{{ loc_user_service }}"
+            insertafter: '^\[Service\]$'
+            line: "User={{ remote_user }}"
+
+        - name: Reload to see new unit file
+          shell: systemctl daemon-reload
+
+        - name: "Stop the service {{ service_file_name }}"
+          shell: "systemctl stop {{ service_file_name }}"
+          ignore_errors: True
+
+        - name: "Start the service {{ service_file_name }}"
+          shell: "systemctl start {{ service_file_name }} &"
+
+        - name: "Enable the service {{ service_file_name }}"
+          shell: "systemctl enable {{ service_file_name }}"
+
+      vars:
+        loc_original_service: /lib/systemd/system/alsa-restore.service
+        loc_user_service: /etc/systemd/system/alsa-restore.service
+        service_file_name: alsa-restore.service
