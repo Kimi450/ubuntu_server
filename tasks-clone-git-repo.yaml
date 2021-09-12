@@ -1,9 +1,11 @@
 - name: "Delete {{ repo_dir }} directory"
+  become: True
   file:
     path: "{{ repo_dir }}"
     state: absent
 
 - name: "Create {{ repo_dir }} directory"
+  become: True
   file:
     path: "{{ repo_dir }}"
     recurse: True
@@ -11,6 +13,7 @@
     mode: '0755'
 
 - name: Clone repo
+  become: True
   git:
     repo: "{{ repo_link }}"
     dest: "{{ repo_dir }}"
