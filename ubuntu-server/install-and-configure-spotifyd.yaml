@@ -30,21 +30,11 @@
           - pkg-config
         state: latest
 
-    - name: Delete spotifyd directory
-      file:
-        path: "{{ repo_dir }}"
-        state: absent
-
-    - name: Create spotifyd directory
-      file:
-        path: "{{ repo_dir }}"
-        state: directory
-        mode: '0755'
-
-    - name: Clone repo
-      git:
-        repo: https://github.com/Spotifyd/spotifyd.git
-        dest: "{{ repo_dir }}"
+    - name: Clone spotifyd from github
+      include_tasks: tasks_clone_git_repo.yaml
+      vars:
+        repo_dir:  "{{ repo_dir }}"
+        repo_link:  https://github.com/Spotifyd/spotifyd.git
 
     - name: Build the project
       shell: "cd {{ repo_dir }} && cargo build --release"

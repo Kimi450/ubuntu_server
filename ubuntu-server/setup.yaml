@@ -69,23 +69,35 @@
         - "{{ dir_torrents }}"
         - "{{ dir_repos }}"
 
-    - name: Transfer bashrc file
-      copy:
-        src: ../.bashrc
-        dest: "{{ dir_home }}"
+    - name: Setup the bashrc file and the vimrc file
+      block:
+        - name: Clone useful_files from github
+          include_tasks: tasks_clone_git_repo.yaml
+          vars:
+            repo_dir:  "{{ useful_files_repo_dir }}"
+            repo_link:  https://github.com/Kimi450/useful_files.git
 
-    - name: Transfer vim pimping script
-      copy:
-        src: ../vimmer.sh
-        dest: "{{ dir_repos }}"
-        mode: "0755"
+        - name: Transfer bashrc file
+          copy:
+            remote_src: True
+            src: "{{ useful_files_repo_dir }}/.bashrc"
+            dest: "{{ dir_home }}"
 
-    - name: Run vim pimping script
-      command: "{{ dir_repos }}/vimmer.sh"
+        - name: Transfer vimrc edit script
+          copy:
+            remote_src: True
+            src: "{{ useful_files_repo_dir }}/vimmer.sh"
+            dest: "{{ dir_home }}"
+            mode: "0755"
 
-    - name: Run vim pimping script for sudo
-      become: true
-      command: "{{ dir_repos }}/vimmer.sh"
+        - name: Run vimrc edit script
+          command: "{{ useful_files_repo_dir }}/vimmer.sh"
+
+        - name: Run vimrc edit script for sudo
+          become: true
+          command: "{{ useful_files_repo_dir }}/vimmer.sh"
+      vars:
+        useful_files_repo_dir: "{{ dir_repos }}/useful_files"
 
 - import_playbook: install-tightvnc-and-ssh.yaml
 
