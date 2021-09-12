@@ -63,7 +63,6 @@
         state: latest
 
     - name: Create directories
-      become: true
       file:
         path: "{{ item }}"
         state: directory
