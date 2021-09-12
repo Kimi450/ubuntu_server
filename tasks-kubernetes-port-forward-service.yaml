@@ -2,7 +2,6 @@
   shell: >-
     kubectl patch svc -n {{ service_namespace }} {{ service_name }} --type='json' -p '[{"op":"replace","path":"/spec/type","value":"NodePort"}]'
 
-
 - name: Get all ports of type NodePort
   shell: >-
     kubectl get svc -n {{ service_namespace }} {{ service_name }} {% raw %} -o go-template='{{if .items}}{{range .items}}{{range.spec.ports}}{{.nodePort}}{{"\n"}}{{end}}{{end}}{{else}}{{range.spec.ports}}{{.nodePort}}{{"\n"}}{{end}}{{end}}' {% endraw %}
@@ -16,7 +15,6 @@
     copy:
       src: charts-config/skeleton.service
       dest: "{{ service_file_location_base }}{{ service_file_name }}"
-
 
   # TODO what if minikube IP changes, the IP is set at deployment time here
   # Maybe should be part of the systemd service in a script?
@@ -36,20 +34,9 @@
       regexp: '^ExecStart=(.*)$' 
       line: "ExecStart=ssh -NT -o StrictHostKeyChecking=no -o ExitOnForwardFailure=yes -o GatewayPorts=true -i {{ dir_minikube_ssh_key.stdout }} docker@{{ minikube_ip.stdout }} -L {{ host_port }}:0.0.0.0:{{ nodeport_port.stdout }}"
       backrefs: yes
-  
-  - name: Reload to see new unit file
-    become: True
-    shell: systemctl daemon-reload
 
-  - name: "Stop the service {{ service_file_name }}"
-    become: True
-    shell: "systemctl stop {{ service_file_name }}"
-    ignore_errors: True
-
-  - name: "Start the service {{ service_file_name }}"
-    become: True
-    shell: "systemctl start {{ service_file_name }} &"
-
-  - name: "Enable the service {{ service_file_name }}"
-    become: True
-    shell: "systemctl enable {{ service_file_name }}"
+  - name: Reload systemd service
+    include_tasks: tasks-reload-systemd-service.yaml
+    vars:
+      service_name: "{{ service_file_name }}"
+      become: True

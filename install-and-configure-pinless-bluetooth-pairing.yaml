@@ -10,8 +10,8 @@
     bluetooth_service_location: /lib/systemd/system/bluetooth.service
     bluetooth_conf_location: /etc/bluetooth/main.conf
     bluetooth_service_name: bluetooth.service
-    puleaudio_system_service_location: /etc/systemd/system/pulseaudio.service
-    puleaudio_system_service_name: pulseaudio.service
+    pulseaudio_system_service_location: /etc/systemd/system/pulseaudio.service
+    pulseaudio_system_service_name: pulseaudio.service
     remote_user: kimi450
 
   tasks:
@@ -41,22 +41,11 @@
             line: 'ExecStart=/usr/lib/bluetooth/bluetoothd --noplugin=avrcp'
             backrefs: yes
 
-        - name: Stop service (ignore error if it doesnt exist)
-          become: true
-          shell: "systemctl stop {{ bluetooth_service_name }}"
-          ignore_errors: true
-
-        - name: Reload to see new unit file
-          become: true
-          shell: systemctl daemon-reload
-
-        - name: Enable service
-          become: true
-          shell: "systemctl enable {{ bluetooth_service_name }}"
-
-        - name: Start service
-          become: true
-          shell: "systemctl start {{ bluetooth_service_name }}"
+        - name: Reload systemd service
+          include_tasks: tasks-reload-systemd-service.yaml
+          vars:
+            service_name: "{{ bluetooth_service_name }}"
+            become: True
 
     - name: "Add {{ remote_user }} to audio group"
       become: true
@@ -67,22 +56,22 @@
 
     - name: Setup NoInputNoOutput bt-agent for pinless pairing
       block:
-        - name: "Remove {{ puleaudio_system_service_location }}"
+        - name: "Remove {{ pulseaudio_system_service_location }}"
           become: true
           file:
-            path: "{{ puleaudio_system_service_location }}"
+            path: "{{ pulseaudio_system_service_location }}"
             state: absent
 
-        - name: "Create {{ puleaudio_system_service_location }}"
+        - name: "Create {{ pulseaudio_system_service_location }}"
           become: true
           file:
-            path: "{{ puleaudio_system_service_location }}"
+            path: "{{ pulseaudio_system_service_location }}"
             state: touch
 
-        - name: "Populate {{ puleaudio_system_service_location }} file"
+        - name: "Populate {{ pulseaudio_system_service_location }} file"
           become: True
           blockinfile:
-            path: "{{ puleaudio_system_service_location }}"
+            path: "{{ pulseaudio_system_service_location }}"
             block: |
               [Unit]
               Description=PulseAudio Daemon
@@ -96,23 +85,11 @@
               [Install]
               WantedBy=multi-user.target
 
-
-        - name: Stop service (ignore error if it doesnt exist)
-          become: true
-          shell: "systemctl stop {{ puleaudio_system_service_name }}"
-          ignore_errors: true
-
-        - name: Reload to see new unit file
-          become: true
-          shell: systemctl daemon-reload
-
-        - name: Enable service
-          become: true
-          shell: "systemctl enable {{ puleaudio_system_service_name }}"
-
-        - name: Start service
-          become: true
-          shell: "systemctl start {{ puleaudio_system_service_name }}"
+        - name: Reload systemd service
+          include_tasks: tasks-reload-systemd-service.yaml
+          vars:
+            service_name: "{{ pulseaudio_system_service_name }}"
+            become: True
 
     - name: Setup NoInputNoOutput bt-agent for pinless pairing
       block:
@@ -167,22 +144,11 @@
               [Install]
               WantedBy=bluetooth.target
 
-        - name: Stop service (ignore error if it doesnt exist)
-          become: true
-          shell: "systemctl stop {{ bt_agent_service_name }}"
-          ignore_errors: true
-
-        - name: Reload to see new unit file
-          become: true
-          shell: systemctl daemon-reload
-
-        - name: Enable service
-          become: true
-          shell: "systemctl enable {{ bt_agent_service_name }}"
-
-        - name: Start service
-          become: true
-          shell: "systemctl start {{ bt_agent_service_name }}"
+        - name: Reload systemd service
+          include_tasks: tasks-reload-systemd-service.yaml
+          vars:
+            service_name: "{{ bt_agent_service_name }}"
+            become: True
 
     - name: "Setup alsa-restore for the {{ remote_user }}"
       # https://askubuntu.com/questions/132440/headphone-jack-not-working
@@ -205,18 +171,11 @@
             insertafter: '^\[Service\]$'
             line: "User={{ remote_user }}"
 
-        - name: Reload to see new unit file
-          shell: systemctl daemon-reload
-
-        - name: "Stop the service {{ service_file_name }}"
-          shell: "systemctl stop {{ service_file_name }}"
-          ignore_errors: True
-
-        - name: "Start the service {{ service_file_name }}"
-          shell: "systemctl start {{ service_file_name }} &"
-
-        - name: "Enable the service {{ service_file_name }}"
-          shell: "systemctl enable {{ service_file_name }}"
+        - name: Reload systemd service
+          include_tasks: tasks-reload-systemd-service.yaml
+          vars:
+            service_name: "{{ service_file_name }}"
+            become: True
 
       vars:
         loc_original_service: /lib/systemd/system/alsa-restore.service

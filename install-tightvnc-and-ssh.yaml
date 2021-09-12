@@ -43,17 +43,11 @@
         src: tightvnc-config/vncserver@.service
         dest: /etc/systemd/system/vncserver@.service
 
-    - name: Reload to see new unit file
-      become: true
-      shell: systemctl daemon-reload
-
-    - name: Start the service on specified display
-      become: True
-      shell: "systemctl start vncserver@{{ vnc_display }}.service"
-
-    - name: Enable the service on specified display
-      become: True
-      shell: "systemctl enable vncserver@{{ vnc_display }}.service"
+    - name: Reload systemd service
+      include_tasks: tasks-reload-systemd-service.yaml
+      vars:
+        service_name: "vncserver@{{ vnc_display }}.service"
+        become: True
 
     - include_tasks: tasks-allow-ports.yaml # should already work
       vars:

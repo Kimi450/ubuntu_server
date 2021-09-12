@@ -5,6 +5,7 @@
   remote_user: kimi450
   vars:
     service_file_location: /etc/systemd/system/minikube.service
+    service_name_minikube: minikube.service
     port_expose_file_location: /etc/minikube-apiserver-port-forward.conf
   tasks:
     - name: Install Minikube
@@ -43,7 +44,7 @@
         - name: Copy over the service file for systemd
           become: true
           copy:
-            src: minikube-config/minikube.service
+            src: minikube-config/{{ service_name_minikube }}
             dest: "{{ service_file_location }}"
 
         - name: "Service file edit: Change start command"
@@ -62,22 +63,11 @@
             line: "ExecStartPost={{ port_expose_file_location }}"
             backrefs: yes
         
-        - name: Reload to see new unit file
-          become: true
-          shell: systemctl daemon-reload
-
-        - name: Stop the service
-          become: True
-          shell: "systemctl stop minikube.service"
-          ignore_errors: True
-
-        - name: Start the service
-          become: True
-          shell: "systemctl start minikube.service"
-
-        - name: Enable the service
-          become: True
-          shell: "systemctl enable minikube.service"
+        - name: Reload systemd service
+          include_tasks: tasks-reload-systemd-service.yaml
+          vars:
+            service_name: "{{ service_name_minikube }}"
+            become: True
 
         - name: Minikube notes
           debug:
