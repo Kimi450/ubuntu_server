@@ -4,13 +4,13 @@ StartLimitInterval=0
 After=network.target
 
 [Service]
-Type=simple
+Type=notify 
 RemainAfterExit=yes
 # After= didnt work
 # https://unix.stackexchange.com/questions/213185/restarting-systemd-service-on-dependency-failure
 ExecStartPre=minikube status 
 ExecStart=echo placeholder
-Restart=on-failure
+Restart=always
 RestartSec=5
 User=kimi450
 
