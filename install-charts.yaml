@@ -50,7 +50,10 @@
         shell: "kubectl exec -it -n {{ namespace_monitoring }} $(kubectl get pods -n {{ namespace_monitoring }} | grep grafana | awk '{print $1}') -c grafana -- grafana-cli admin reset-admin-password {{ grafana_admin_password }}"
       
       - debug:
-          msg: "You can log into Grafana at '{{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}:3002' using admin/{{ grafana_admin_password }}"
+          msg: >
+            You can log into Grafana at '{{ hostvars[inventory_hostname]
+            ['ansible_env'].SSH_CONNECTION.split(' ')[2] }}:3002' using
+            admin/{{ grafana_admin_password }}"
 
     - name: Install jellyfin
       # https://artifacthub.io/packages/helm/k8s-at-home/jellyfin
@@ -89,4 +92,9 @@
             - "3003"
 
       - debug:
-          msg: "You can log into Jellyfin at '{{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}:3003/web/index.html'. '{{ dir_home }}' is available under '/media' and can be used by Jellyfin. If need be, delete any existing server and go to the URL mention above once again to setup a new server."
+          msg: >
+              You can log into Jellyfin at '{{ hostvars[inventory_hostname]
+              ['ansible_env'].SSH_CONNECTION.split(' ')[2] }}:3003/web/index.html'.
+              '{{ dir_home }}' is available under '/media' and can be used by
+              Jellyfin. If need be, delete any existing server and go to the
+              URL mention above once again to setup a new server.
