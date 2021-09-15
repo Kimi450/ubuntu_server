@@ -98,3 +98,51 @@
               '{{ dir_home }}' is available under '/media' and can be used by
               Jellyfin. If need be, delete any existing server and go to the
               URL mention above once again to setup a new server.
+
+    - name: Install qbittorrent
+      block:
+      - name: Install the chart
+        include_tasks: tasks-install-chart.yaml
+        # https://artifacthub.io/packages/helm/k8s-at-home/qbittorrent
+        vars:
+          repo_name: k8s-at-home
+          repo_link: https://k8s-at-home.com/charts/
+          install_namespace: "{{ namespace_generic_services }}"
+          release_name: qbittorrent
+          chart_name: qbittorrent
+          # runAsUser=1000 gives write access on the pod
+          # 568 is the default user ID, added to the groups cause why not
+          set_options: "--set \
+            controller.type=statefulset,\
+            common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
+            common.podSecurityContext.runAsUser=1000,\
+            common.podSecurityContext.runAsGroup=568,\
+            common.podSecurityContext.fsGroup=568,\
+            persistence.config.enabled=yes,\
+            persistence.media.enabled=yes,\
+            persistence.media.type=hostPath,\
+            persistence.media.hostPath={{ dir_minikube_mount }}"
+  
+      - name: Expose qbittorrent service
+        include_tasks: tasks-kubernetes-port-forward-service.yaml
+        vars:
+          service_name: qbittorrent
+          service_file_name: qbittorrent.service
+          service_file_location_base: /etc/systemd/system/
+          service_namespace: "{{ namespace_generic_services }}"
+          service_container_port: 8080
+          host_port: 3004
+
+      - include_tasks: tasks-allow-ports.yaml
+        vars:
+          ports: 
+            - "3004"
+
+      - debug:
+          msg: >
+            You can log into qBittorrent at '{{ hostvars[inventory_hostname]
+            ['ansible_env'].SSH_CONNECTION.split(' ')[2] }}:3004' using
+            admin/adminadmin as the default creds. Change this after deployment.
+            '{{ dir_home }}' from the host is available under '/media' and
+            can be used by the application to download things. Downloading in
+            the directories under {{ dir_data }} will be picked up by Jellyfin.
