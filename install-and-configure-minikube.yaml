@@ -72,10 +72,14 @@
         - name: Minikube notes
           debug:
             msg: "Directory '{{ dir_home }}' mounted on the minikube container at '{{ dir_minikube_mount }}'. More info https://github.com/kubernetes/minikube/pull/8159"
-        
+
     - name: Enable nginx ingress controller
       shell: minikube addons enable ingress
-    
+      retries: 100000
+      delay: 10
+      register: result
+      until: result.rc == 0
+
     - include_tasks: tasks-allow-ports.yaml
       vars:
         ports: 
