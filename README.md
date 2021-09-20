@@ -55,10 +55,39 @@
         ```
     - Add any other config required.
 
-  - Setup qBittorent
+  - Setup qBittorrent
     - Change the default login details 
     - Set default download location mentioned directories (or make sure to put it in the right directory when downloading for ease)
 
+  - Setup Jackett
+    - Add all the indexers you wish to use.
+    - Make a note of the API key
+
+  - Setup Radarr
+    - Go to `` Settings > Indexers > Add > Torznab > Custom``
+      - Add the URL: ``http://jackett:9117``
+      - Add the API: ``/api/v2.0/indexers/all/results/torznab``
+      - NOTE: Or concatinate both of them
+        - ``http://jackett:9117/api/v2.0/indexers/all/results/torznab``
+    - Go to `` Settings > Indexers > Add > Download Clients > qBittorent``
+      - Add the host: ``qbittorrent``
+      - Add the port: ``8080``
+      - Add the username: ``<qBittorrent_username>``
+      - Add the password: ``<qBittorrent_password>``
+    - Set the base download location to be ``/media/data/movies``
+
+  - Setup Sonarr
+    - Go to `` Settings > Indexers > Add > Torznab > Custom``
+      - Add the URL: ``http://jackett:9117``
+      - Add the API: ``/api/v2.0/indexers/all/results/torznab``
+      - NOTE: Or concatinate both of them
+        - ``http://jackett:9117/api/v2.0/indexers/all/results/torznab``
+    - Go to `` Settings > Indexers > Add > Download Clients > qBittorent``
+      - Add the host: ``qbittorrent``
+      - Add the port: ``8080``
+      - Add the username: ``<qBittorrent_username>``
+      - Add the password: ``<qBittorrent_password>``
+    - Set the base download location to be ``/media/data/shows``
 
 # Exposed services
 You can port forward the following ports on your router to gain external access as well.

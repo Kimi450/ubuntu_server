@@ -38,7 +38,6 @@
           service_file_name: grafana.service
           service_file_location_base: /etc/systemd/system/
           service_namespace: "{{ namespace_monitoring }}"
-          service_container_port: 80
           host_port: 3002
 
       - include_tasks: tasks-allow-ports.yaml
@@ -83,12 +82,11 @@
           service_file_name: jellyfin.service
           service_file_location_base: /etc/systemd/system/
           service_namespace: "{{ namespace_generic_services }}"
-          service_container_port: 8096
           host_port: 3003
 
       - include_tasks: tasks-allow-ports.yaml
         vars:
-          ports: 
+          ports:
             - "3003"
 
       - debug:
@@ -122,7 +120,7 @@
             persistence.media.enabled=yes,\
             persistence.media.type=hostPath,\
             persistence.media.hostPath={{ dir_minikube_mount }}"
-  
+
       - name: Expose qbittorrent service
         include_tasks: tasks-kubernetes-port-forward-service.yaml
         vars:
@@ -130,12 +128,11 @@
           service_file_name: qbittorrent.service
           service_file_location_base: /etc/systemd/system/
           service_namespace: "{{ namespace_generic_services }}"
-          service_container_port: 8080
           host_port: 3004
 
       - include_tasks: tasks-allow-ports.yaml
         vars:
-          ports: 
+          ports:
             - "3004"
 
       - debug:
@@ -143,6 +140,153 @@
             You can log into qBittorrent at '{{ hostvars[inventory_hostname]
             ['ansible_env'].SSH_CONNECTION.split(' ')[2] }}:3004' using
             admin/adminadmin as the default creds. Change this after deployment.
+            '{{ dir_home }}' from the host is available under '/media' and
+            can be used by the application to download things. Downloading in
+            the directories under {{ dir_data }} will be picked up by Jellyfin.
+
+    - name: Install jackett
+      block:
+      - name: Install the chart
+        include_tasks: tasks-install-chart.yaml
+        # https://artifacthub.io/packages/helm/k8s-at-home/jackett
+        vars:
+          repo_name: k8s-at-home
+          repo_link: https://k8s-at-home.com/charts/
+          install_namespace: "{{ namespace_generic_services }}"
+          release_name: jackett
+          chart_name: jackett
+          # runAsUser=1000 gives write access on the pod
+          # 568 is the default user ID, added to the groups cause why not
+          set_options: "--set \
+            controller.type=statefulset,\
+            common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
+            common.podSecurityContext.runAsUser=1000,\
+            common.podSecurityContext.runAsGroup=568,\
+            common.podSecurityContext.fsGroup=568,\
+            persistence.config.enabled=yes,\
+            persistence.media.enabled=yes,\
+            persistence.media.type=hostPath,\
+            persistence.media.hostPath={{ dir_minikube_mount }}"
+
+      - name: Expose jackett service
+        include_tasks: tasks-kubernetes-port-forward-service.yaml
+        vars:
+          service_name: jackett
+          service_file_name: jackett.service
+          service_file_location_base: /etc/systemd/system/
+          service_namespace: "{{ namespace_generic_services }}"
+          host_port: 3005
+
+      - include_tasks: tasks-allow-ports.yaml
+        vars:
+          ports:
+            - "3005"
+
+      - name: Get API Key
+        shell: "kubectl exec -it {{ service_name }}-0 -- cat {{ config_location }} | jq -r '.APIKey'"
+        vars:
+          service_name: jackett
+          config_location: /config/Jackett/ServerConfig.json
+        register: jackett_api_key
+
+      - debug:
+          msg: >
+            You can log into jackett at '{{ hostvars[inventory_hostname]
+            ['ansible_env'].SSH_CONNECTION.split(' ')[2] }}:3005'. Go to this
+            URL and add the indexers you wish to use.
+            '{{ dir_home }}' from the host is available under '/media' and
+            can be used by the application to download things. Downloading in
+            the directories under {{ dir_data }} will be picked up by Jellyfin.
+            The API key is '{{ jackett_api_key.stdout }}'.
+
+    - name: Install radarr
+      block:
+      - name: Install the chart
+        include_tasks: tasks-install-chart.yaml
+        # https://artifacthub.io/packages/helm/k8s-at-home/radarr
+        vars:
+          repo_name: k8s-at-home
+          repo_link: https://k8s-at-home.com/charts/
+          install_namespace: "{{ namespace_generic_services }}"
+          release_name: radarr
+          chart_name: radarr
+          # runAsUser=1000 gives write access on the pod
+          # 568 is the default user ID, added to the groups cause why not
+          set_options: "--set \
+            controller.type=statefulset,\
+            common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
+            common.podSecurityContext.runAsUser=1000,\
+            common.podSecurityContext.runAsGroup=568,\
+            common.podSecurityContext.fsGroup=568,\
+            persistence.config.enabled=yes,\
+            persistence.media.enabled=yes,\
+            persistence.media.type=hostPath,\
+            persistence.media.hostPath={{ dir_minikube_mount }}"
+
+      - name: Expose radarr service
+        include_tasks: tasks-kubernetes-port-forward-service.yaml
+        vars:
+          service_name: radarr
+          service_file_name: radarr.service
+          service_file_location_base: /etc/systemd/system/
+          service_namespace: "{{ namespace_generic_services }}"
+          host_port: 3006
+
+      - include_tasks: tasks-allow-ports.yaml
+        vars:
+          ports:
+            - "3006"
+
+      - debug:
+          msg: >
+            You can log into radarr at '{{ hostvars[inventory_hostname]
+            ['ansible_env'].SSH_CONNECTION.split(' ')[2] }}:3006'.
+            '{{ dir_home }}' from the host is available under '/media' and
+            can be used by the application to download things. Downloading in
+            the directories under {{ dir_data }} will be picked up by Jellyfin.
+
+    - name: Install sonarr
+      block:
+      - name: Install the chart
+        include_tasks: tasks-install-chart.yaml
+        # https://artifacthub.io/packages/helm/k8s-at-home/sonarr
+        vars:
+          repo_name: k8s-at-home
+          repo_link: https://k8s-at-home.com/charts/
+          install_namespace: "{{ namespace_generic_services }}"
+          release_name: sonarr
+          chart_name: sonarr
+          # runAsUser=1000 gives write access on the pod
+          # 568 is the default user ID, added to the groups cause why not
+          set_options: "--set \
+            controller.type=statefulset,\
+            common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
+            common.podSecurityContext.runAsUser=1000,\
+            common.podSecurityContext.runAsGroup=568,\
+            common.podSecurityContext.fsGroup=568,\
+            persistence.config.enabled=yes,\
+            persistence.media.enabled=yes,\
+            persistence.media.type=hostPath,\
+            persistence.media.hostPath={{ dir_minikube_mount }}"
+
+      - name: Expose sonarr service
+        include_tasks: tasks-kubernetes-port-forward-service.yaml
+        vars:
+          service_name: sonarr
+          service_file_name: sonarr.service
+          service_file_location_base: /etc/systemd/system/
+          service_namespace: "{{ namespace_generic_services }}"
+          host_port: 3007
+
+      - include_tasks: tasks-allow-ports.yaml
+        vars:
+          ports:
+            - "3007"
+
+      - debug:
+          msg: >
+            You can log into sonarr at '{{ hostvars[inventory_hostname]
+            ['ansible_env'].SSH_CONNECTION.split(' ')[2] }}:3007'.
             '{{ dir_home }}' from the host is available under '/media' and
             can be used by the application to download things. Downloading in
             the directories under {{ dir_data }} will be picked up by Jellyfin.
