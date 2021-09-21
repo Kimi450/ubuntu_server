@@ -78,6 +78,8 @@
       - Add the port: ``8080``
       - Add the username: ``<qBittorrent_username>``
       - Add the password: ``<qBittorrent_password>``
+      - Uncheck the ``Remove Completed`` option.
+        - When enabled, this seems to delete the downloaded files sometimes. Not sure why.
     - Set the base download location to be one of the following
       - Radarr:``/media/data/movies/``
       - Sonarr:``/media/data/shows/``
