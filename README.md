@@ -68,12 +68,15 @@
     - Make a note of the API key
 
   - Setup Radarr/Sonarr
-    - Go to `` Settings > Indexers > Add > Torznab > Custom``
+    - Go to ``Settings`` and click on ``Show Advanced``
+    - Go to ``Settings > Indexers > Add > Torznab > Custom``
       - Add the URL: ``http://jackett:9117``
-      - Add the API: ``/api/v2.0/indexers/all/results/torznab``
-      - NOTE: Or concatinate both of them
+      - Add the API Path: ``/api/v2.0/indexers/all/results/torznab``
+      - NOTE: Or you may need to concatinate both of them if you dont click on ``Show Advanced``
         - ``http://jackett:9117/api/v2.0/indexers/all/results/torznab``
-    - Go to `` Settings > Indexers > Add > Download Clients > qBittorent``
+      - Set Minimum Seeders to an appropriate value
+        - It is ``1`` by default, you can change it to probably ``5`` but this will have implications, i.e., sometimes not being able to find anything to download.
+    - Go to ``Settings > Download Clients > Add > qBittorent > Custom``
       - Add the host: ``qbittorrent``
       - Add the port: ``8080``
       - Add the username: ``<qBittorrent_username>``
