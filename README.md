@@ -93,8 +93,17 @@ Grafana can be accessed on `<SERVER_IP>:3002` through the client machine on the 
 Jellyfin can be accessed on `<SERVER_IP>:3003/web/index.html` through the client machine on the same LAN.
 
 ### qBittorrent
+qBittorrent can be accessed on `<SERVER_IP>:3004` through the client machine on the same LAN.
 
-Grafana can be accessed on `<SERVER_IP>:3004` through the client machine on the same LAN.
+### Jackett
+Jackett can be accessed on `<SERVER_IP>:3005` through the client machine on the same LAN.
+
+### Radarr
+Radarr can be accessed on `<SERVER_IP>:3006` through the client machine on the same LAN.
+
+### Sonarr
+Sonarr can be accessed on `<SERVER_IP>:3007` through the client machine on the same LAN.
+
 
 # Appendix
 
