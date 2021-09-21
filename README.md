@@ -57,8 +57,12 @@
 
   - Setup qBittorrent
     - Change the default login details 
-    - Set default download location mentioned directories (or make sure to put it in the right directory when downloading for ease)
-
+    - Set default download location to one the mentioned directories (or make sure to put it in the right directory when downloading for ease)
+      - Recommend using ``/media/data/``
+    - Set seeding limits
+      - Recommend seeding limits for when seeding ratio hits "0". It is under ``Options > BitTorrent``
+    - Set torrent download/upload limits
+     - Recommended to keep 6 active torrents/downloads and 0 uploads. It is under ``Options > BitTorrent``
   - Setup Jackett
     - Add all the indexers you wish to use.
     - Make a note of the API key
