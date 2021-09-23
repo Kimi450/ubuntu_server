@@ -3,10 +3,12 @@
 
 - Install Ubuntu
   - https://ubuntu.com/download/desktop
+  
   - Expected user is: `kimi450`
 
 - Enable ssh server (required for ansible to work)
   - https://linuxize.com/post/how-to-enable-ssh-on-ubuntu-18-04/
+  
   -  ```
      sudo apt update
      sudo apt install openssh-server
@@ -43,32 +45,57 @@
 
   - Setup Grafana 
     - Change the default login details 
+    
     - Add the recommended charts
 
   - Setup Jellyfin
     - Setting up a login 
+    
     - Point Jellyfin to use the directories mentioned in the playbooks for shows and movies.
       - By default, on the Jellyfin pod, the directories it will be:
         ```
         /media/data/shows
         /media/data/movies
         ```
+    
     - Add any other config required.
 
   - Setup qBittorrent
     - Change the default login details 
+    
     - Set default download location to one the mentioned directories (or make sure to put it in the right directory when downloading for ease)
       - Recommend using ``/media/data/``
+    
     - Set seeding limits
       - Recommend seeding limits for when seeding ratio hits "0". It is under ``Options > BitTorrent``
+    
     - Set torrent download/upload limits
      - Recommended to keep 6 active torrents/downloads and 0 uploads. It is under ``Options > BitTorrent``
+  
   - Setup Jackett
-    - Add all the indexers you wish to use.
+    - Add all the indexers you wish to use, some good ones listed below
+      - 1337x
+      - ETTV
+      - Isohunt2
+      - iTorrent
+      - kickasstorrents.to
+      - kickasstorrents.ws
+      - LimeTorrents
+      - RARBG
+      - RuTracker.RU
+      - The Pirate Bay
+      - Torlock
+      - TorrentGalaxy
+      - TorrentProject2
+      - YourBittorrent
+      - YTS
+      - Zooqle
+   
     - Make a note of the API key
 
   - Setup Radarr/Sonarr
     - Go to ``Settings`` and click on ``Show Advanced``
+   
     - Go to ``Settings > Indexers > Add > Torznab > Custom``
       - Add the URL: ``http://jackett:9117``
       - Add the API Path: ``/api/v2.0/indexers/all/results/torznab``
@@ -76,6 +103,7 @@
         - ``http://jackett:9117/api/v2.0/indexers/all/results/torznab``
       - Set Minimum Seeders to an appropriate value
         - It is ``1`` by default, you can change it to probably ``5`` but this will have implications, i.e., sometimes not being able to find anything to download.
+    
     - Go to ``Settings > Download Clients > Add > qBittorent > Custom``
       - Add the host: ``qbittorrent``
       - Add the port: ``8080``
@@ -83,6 +111,7 @@
       - Add the password: ``<qBittorrent_password>``
       - Uncheck the ``Remove Completed`` option.
         - When enabled, this seems to delete the downloaded files sometimes. Not sure why.
+   
     - Set the base download location to be one of the following
       - Radarr:``/media/data/movies/``
       - Sonarr:``/media/data/shows/``
