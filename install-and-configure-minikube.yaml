@@ -23,22 +23,6 @@
           path: minikube_latest_amd64.deb
           state: absent
 
-    - name: "Create reverse proxy script to expose the API server on 0.0.0.0:{{ host_post }}"
-      block:
-        - name: "Remove any old reverse proxy script"
-          become: true
-          file:
-            path: "{{ port_expose_file_location }}"
-            state: absent
-
-        - name: "Create new reverse proxy script"
-          become: true
-          lineinfile:
-            path: "{{ port_expose_file_location }}"
-            line: "#!/bin/bash\nnohup kubectl proxy --address='0.0.0.0' --port={{ api_server_forwarded_port }} --accept-hosts='.*' > /dev/null 2>&1 &"
-            mode: "0755"
-            create: yes
-
     - name: Setup and enable systemd service
       block:
         - name: Copy over the service file for systemd
@@ -47,20 +31,20 @@
             src: minikube-config/{{ service_name_minikube }}
             dest: "{{ service_file_location }}"
 
-        - name: "Service file edit: Change start command"
+        - name: "Service file edit: Add command to start minikube"
           become: true  
           lineinfile: 
             path: "{{ service_file_location }}"
-            regexp: '^ExecStart=(.*)$' 
-            line: 'ExecStart=/usr/bin/minikube start --mount --mount-string "{{ dir_home }}:{{ dir_minikube_mount }}" --cpus="max" --memory="6000" --disk-size="50gb" --nodes=1'
+            regexp: '^ExecStartPre=(.*)$' 
+            line: 'ExecStartPre=/usr/bin/minikube start --mount --mount-string "{{ dir_home }}:{{ dir_minikube_mount }}" --cpus="max" --memory="6000" --disk-size="50gb" --nodes=1'
             backrefs: yes
 
         - name: "Service file edit: Add reverse proxy script"
           become: true  
           lineinfile: 
             path: "{{ service_file_location }}"
-            regexp: '^ExecStartPost=(.*)$' 
-            line: "ExecStartPost={{ port_expose_file_location }}"
+            regexp: '^ExecStart=(.*)$' 
+            line: "ExecStart=kubectl proxy --address='0.0.0.0' --port={{ api_server_forwarded_port }} --accept-hosts='.*'"
             backrefs: yes
         
         - name: Reload systemd service

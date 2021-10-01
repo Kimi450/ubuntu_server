@@ -4,14 +4,14 @@ StartLimitInterval=0
 After=docker.service
 
 [Service]
-Type=oneshot
-RemainAfterExit=yes
-ExecStart=/usr/bin/minikube start
-ExecStartPost=echo placeholder
-ExecStop=/usr/bin/minikube stop
-Restart=on-failure
+Type=simple 
+RemainAfterExit=no
+ExecStartPre=/usr/bin/minikube start
+ExecStart=echo placeholder
+Restart=always
 RestartSec=5
 User=kimi450
+TimeoutSec=36000
 
 [Install]
 WantedBy=multi-user.target
