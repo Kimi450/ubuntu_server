@@ -20,7 +20,7 @@
 
     - name: Install grafana
       block:
-      - name: Install the chart
+      - name: Install/Upgrade the grafana chart
         include_tasks: tasks-install-chart.yaml
         # https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
         vars:
@@ -57,7 +57,7 @@
     - name: Install jellyfin
       # https://artifacthub.io/packages/helm/k8s-at-home/jellyfin
       block:
-      - name: Install the chart
+      - name: Install/Upgrade the jellyfin chart
         include_tasks: tasks-install-chart.yaml
         vars:
           repo_name: k8s-at-home
@@ -99,7 +99,7 @@
 
     - name: Install qbittorrent
       block:
-      - name: Install the chart
+      - name: Install/Upgrade the qbittorrent chart
         include_tasks: tasks-install-chart.yaml
         # https://artifacthub.io/packages/helm/k8s-at-home/qbittorrent
         vars:
@@ -146,7 +146,7 @@
 
     - name: Install jackett
       block:
-      - name: Install the chart
+      - name: Install/Upgrade the jackett chart
         include_tasks: tasks-install-chart.yaml
         # https://artifacthub.io/packages/helm/k8s-at-home/jackett
         vars:
@@ -201,7 +201,7 @@
 
     - name: Install radarr
       block:
-      - name: Install the chart
+      - name: Install/Upgrade the radarr chart
         include_tasks: tasks-install-chart.yaml
         # https://artifacthub.io/packages/helm/k8s-at-home/radarr
         vars:
@@ -247,7 +247,7 @@
 
     - name: Install sonarr
       block:
-      - name: Install the chart
+      - name: Install/Upgrade the sonarr chart
         include_tasks: tasks-install-chart.yaml
         # https://artifacthub.io/packages/helm/k8s-at-home/sonarr
         vars:
