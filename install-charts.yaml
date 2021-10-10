@@ -29,7 +29,8 @@
           install_namespace: "{{ namespace_monitoring }}"
           release_name: kube-prometheus-stack
           chart_name: kube-prometheus-stack
-          set_options: ""
+          set_options: "--set \
+            prometheus.prometheusSpec.retention=730d"
 
       - name: Expose grafana service
         include_tasks: tasks-kubernetes-port-forward-service.yaml
