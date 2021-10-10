@@ -38,6 +38,10 @@
     sudo apt install ansible
     ```
 
+- Expose required ports on your router
+  - Expose (port forward) ports for the services you wish to have available externally based on the list [here](#exposed-services).
+  - Maybe need to expose port 80 and/or 53 for the SSL certs?
+
 - Run the ansible runner script
   - `./run.sh`
 
