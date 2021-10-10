@@ -96,7 +96,13 @@
   - Setup Radarr/Sonarr
     - Go to ``Settings`` and click on ``Show Advanced``
    
-    - Go to ``Settings > Indexers > Add > Torznab > Custom``
+    - Enable authentication
+      - Go to ``Settings > General``
+      - Set Authentication to `Forms (Login Page)`
+      - Set username and password for access.
+
+    - Add indexer
+      - Go to ``Settings > Indexers > Add > Torznab > Custom``
       - Add the URL: ``http://jackett:9117``
       - Add the API Path: ``/api/v2.0/indexers/all/results/torznab``
       - NOTE: Or you may need to concatinate both of them if you dont click on ``Show Advanced``
@@ -104,7 +110,8 @@
       - Set Minimum Seeders to an appropriate value
         - It is ``1`` by default, you can change it to probably ``5`` but this will have implications, i.e., sometimes not being able to find anything to download.
     
-    - Go to ``Settings > Download Clients > Add > qBittorent > Custom``
+    - Add torrent client
+      - Go to ``Settings > Download Clients > Add > qBittorent > Custom``
       - Add the host: ``qbittorrent``
       - Add the port: ``8080``
       - Add the username: ``<qBittorrent_username>``
