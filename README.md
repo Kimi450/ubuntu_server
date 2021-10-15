@@ -94,7 +94,8 @@
       - YourBittorrent
       - YTS
       - Zooqle
-   
+      - Nyaa.si
+ 
     - Make a note of the API key
 
   - Setup Radarr/Sonarr
