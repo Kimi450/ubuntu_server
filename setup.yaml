@@ -60,6 +60,7 @@
           - jq
           - net-tools
           - speedtest-cli
+          - w3m
         state: latest
 
     - name: Create directories
