@@ -38,6 +38,11 @@
     sudo apt install ansible
     ```
 
+- You will need the Zone name from cloudflare where your DNS entries are present and an API token that can edit DNS entries and read Zone information.
+  - https://dash.cloudflare.com/profile/api-tokens
+  - If not needed, remove the line below line from `setup.yaml`
+    - `- import_playbook: install-and-configure-cloudflare-dns-updater-service.yaml`
+
 - Expose required ports on your router
   - Expose (port forward) ports for the services you wish to have available externally based on the list [here](#exposed-services).
   - Maybe need to expose port 80 and/or 53 for the SSL certs?

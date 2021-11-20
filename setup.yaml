@@ -119,6 +119,8 @@
 
 - import_playbook: install-and-configure-samba.yaml
 
+- import_playbook: install-and-configure-cloudflare-dns-updater-service.yaml
+
 # TODO get kubeconfig setup for remote access
 # - import_playbook: remote-access-minikube.yaml
 #   vars:

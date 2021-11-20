@@ -1,0 +1,141 @@
+---
+- name: Install and configure Cloudflare DNS record updater service
+  # https://community.cloudflare.com/t/update-dns-records-via-api/132221
+  hosts: all
+  gather_facts: true
+  remote_user: kimi450
+  vars:
+    remote_user: kimi450
+    service_file_name: cloudflare-dns-updater.service
+    service_file_location: /etc/systemd/system/cloudflare-dns-updater.service
+    timer_file_name: cloudflare-dns-updater.timer
+    timer_file_location: /etc/systemd/system/cloudflare-dns-updater.timer
+    service_script_location: /usr/local/bin/cloudflare-dns-record-update.sh
+  vars_prompt:
+    - name: cloudflare_zone_id
+      prompt: What is your Cloudflare Zone ID?
+      private: no
+    - name: cloudflare_auth_key
+      prompt: What is your Cloudflare Bearer token to view the zone and edit DNS records in it?
+      private: yes
+  tasks:
+    - name: Required dependencies
+      become: true
+      apt:
+        update_cache: yes
+        pkg:
+          - jq
+        state: latest
+
+    - name: "Remove {{ item }}"
+      become: true
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - "{{ service_file_location }}"
+        - "{{ timer_file_location }}"
+        - "{{ service_script_location }}"
+
+    - name: "Create {{ item }}"
+      become: true
+      file:
+        path: "{{ item }}"
+        state: touch
+      with_items:
+        - "{{ service_file_location }}"
+        - "{{ timer_file_location }}"
+        - "{{ service_script_location }}"
+
+    - name: "Populate {{ service_file_location }} file"
+      become: True
+      blockinfile:
+        path: "{{ service_file_location }}"
+        block: |
+          [Unit]
+          Description=Cloudflare DNS Record Updater
+
+          [Service]
+          ExecStart=bash {{ service_script_location }}
+          Restart=on-failure
+          Type=oneshot
+          User={{ remote_user }}
+
+          [Install]
+          WantedBy=multi-user.target
+    
+    - name: "Populate {{ timer_file_location }} file"
+      become: True
+      blockinfile:
+        path: "{{ timer_file_location }}"
+        block: |
+          [Unit]
+          Description=Timer to run Cloudflare DNS Record Updater service every 4 hours
+
+          [Timer]
+          OnCalendar=00/4:00
+
+          [Install]
+          WantedBy=timers.target
+ 
+    - name: "Populate {{ service_script_location }} file"
+      become: True
+      blockinfile:
+        path: "{{ service_script_location }}"
+        block: |
+          #! /bin/bash
+
+          # Inspired from this page https://gist.github.com/Tras2/cba88201b17d765ec065ccbedfb16d9a
+
+          # Script to update a Cloudflare DNS record with the current public IP address
+          # of the machine from which this script is run
+
+          # Needs the DNS record pre-creating on Cloudflare
+
+          # Cloudflare zone is the zone which holds the record
+          zone="{{ cloudflare_zone_id }}"
+
+          # Auth details
+          cloudflare_bearer_token="{{ cloudflare_auth_key }}"
+
+          # Get the current external IP address
+          ip=$(curl -s -X GET https://checkip.amazonaws.com)
+          echo "Current IP is ${ip}"
+
+          cloudflare_api_base_url="https://api.cloudflare.com/client/v4"
+
+          # get the zone id for the requested zone
+          zone_id=$(curl -s -X GET "${cloudflare_api_base_url}/zones?name=${zone}&status=active" \
+          -H "Authorization: Bearer ${cloudflare_bearer_token}" \
+            -H "Content-Type: application/json" | jq -r '{"result"}[] | .[0] | .id')
+
+          echo "Zone ID for ${zone} is ${zone_id}"
+
+          dns_records=$(curl -s -X GET "${cloudflare_api_base_url}/zones/${zone_id}/dns_records" \
+            -H "Authorization: Bearer ${cloudflare_bearer_token}" \
+            -H "Content-Type: application/json" | jq -r '{"result"}[]')
+
+          echo "${dns_records[@]}" | jq -c '.[]' | while read dns_record; do
+              dns_record_name=$(echo "${dns_record}" | jq -r '.name')
+              dns_record_id=$(echo "${dns_record}" | jq -r '.id')
+              dns_record_ip=$(echo "${dns_record}" | jq -r '.content')
+              dns_record_type=$(echo "${dns_record}" | jq -r '.type')
+              dns_record_ttl=$(echo "${dns_record}" | jq -r '.ttl')
+              dns_record_proxied=$(echo "${dns_record}" | jq -r '.proxied')
+              echo "DNS Record ${dns_record_name} has ID ${dns_record_id} and IP ${dns_record_ip}"
+              if [ "${ip}" != "${dns_record_ip}" ]; then
+                  echo "Updating ${dns_record_name} to ${ip}"
+                  curl -s -X PUT "${cloudflare_api_base_url}/zones/${zone_id}/dns_records/${dns_record_id}" \
+                    -H "Authorization: Bearer ${cloudflare_bearer_token}" \
+                    -H "Content-Type: application/json" \
+                    --data '{"type":"'${dns_record_type}'","name":"'${dns_record_name}'","content":"'${ip}'","ttl":'${dns_record_ttl}',"proxied":'${dns_record_proxied}'}'
+              else
+                  echo "IP address for ${dns_record_name} is already ${ip}"
+              fi
+          done
+
+    - name: "Reload Systemd timer {{ timer_file_name }}"
+      include_tasks: tasks-reload-systemd-service.yaml
+      vars:
+        become: True
+        service_name: "{{ timer_file_name }}"
