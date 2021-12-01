@@ -62,6 +62,7 @@
           - speedtest-cli
           - w3m
           - fio # for disk tests
+          - mesa-utils # for GPU tests
         state: latest
 
     - name: Create directories
