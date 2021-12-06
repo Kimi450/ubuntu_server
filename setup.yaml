@@ -109,7 +109,8 @@
 
 - import_playbook: install-tightvnc-and-ssh.yaml
 
-- import_playbook: install-and-configure-pinless-bluetooth-pairing.yaml
+# Enable if needed
+# - import_playbook: install-and-configure-pinless-bluetooth-pairing.yaml
 
 - import_playbook: install-cn-basics.yaml
 
