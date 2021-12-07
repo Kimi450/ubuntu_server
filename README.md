@@ -68,6 +68,7 @@
         ```
     
     - Add any other config required.
+      - Recommend setting up the Open Subtitles plugin which requires creating an account on [their website](https://www.opensubtitles.org/en/?).
 
   - Setup qBittorrent
     - Change the default login details 
