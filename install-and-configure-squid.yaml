@@ -1,0 +1,91 @@
+---
+- name: Install and configure squid
+  # https://linuxize.com/post/how-to-install-and-configure-squid-proxy-on-ubuntu-20-04/
+  hosts: all
+  gather_facts: True
+  remote_user: kimi450
+  vars:
+    config_location: /etc/squid/squid.conf
+    squid_port: 3128
+    passwords_loc: /etc/squid/htpasswd
+  vars_prompt:
+    - name: username
+      prompt: Set username for the squid access
+      private: no
+    - name: password
+      prompt: Set password for the squid access
+  tasks:
+    - name: Install the package
+      become: True
+      apt:
+        update_cache: yes
+        pkg:
+          - squid
+        state: latest
+
+    - name: "Backup {{ config_location }}"
+      become: True
+      copy:
+        remote_src: True
+        src: "{{ config_location }}"
+        dest: "{{ config_location }}.bak"
+
+    - name: "Change default port from 3128 to {{ squid_port }}"
+      become: True
+      replace:
+        path: "{{ config_location }}"
+        regexp: '^host_port'
+        replace: "http_port {{ squid_port }}"
+
+    - name: "Generate authentication information" 
+      shell: "echo {{ username }}:$(openssl passwd -crypt {{ password }})\n"
+      register: auth_output
+
+    - name: "Ensure {{ paswords_loc }} exists"
+      become: True
+      file:
+        path: "{{ passwords_loc }}"
+        state: touch
+        mode: 0644
+
+    - name: "Add authentication line to {{ paswords_loc }}"
+      become: True
+      lineinfile:
+        dest: "{{ passwords_loc }}"
+        line: "{{ auth_output.stdout }}"
+
+    - name: "Add ACL config to {{ config_location }}"
+      become: True
+      lineinfile:
+        dest: "{{ config_location }}"
+        insertafter: "include /etc/squid/conf.d/*"
+        line: |
+          auth_param basic program /usr/lib/squid3/basic_ncsa_auth {{ passwords_loc }}
+          auth_param basic realm proxy
+          acl authenticated proxy_auth REQUIRED
+
+    - name: "Add access config to {{ config_location }}"
+      become: True
+      lineinfile:
+        dest: "{{ config_location }}"
+        insertafter: "http_access allow localhost"
+        line: |
+          http_access allow authenticated
+
+    - name: Reload systemd service
+      include_tasks: tasks-reload-systemd-service.yaml
+      vars:
+        service_name: "squid"
+        become: True
+
+    - include_tasks: tasks-allow-ports.yaml
+      vars:
+        ports: 
+          - "{{ squid_port }}"
+
+    - debug:
+        msg: >-
+          You can now use this server as a proxy. The hostname is
+          "{{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}" 
+          and port is "{{ squid_port }}". Please expose this port on your router too for external access.
+          Use the username and password as the auth details.

@@ -25,7 +25,7 @@
     ```
     ssh-keygen -t rsa -b 4096
     file ~/.ssh/id_rsa
-    ssh-copy-id <remote-user>@<server-ip>
+    ssh-copy-id -p <ssh-port> <remote-user>@<server-ip>
     ```
 
 - Update the hosts.yaml file to update the IP of the server
