@@ -134,6 +134,31 @@
       - Radarr:``/media/data/movies/``
       - Sonarr:``/media/data/shows/``
 
+  - Setup Bazarr
+    - This is for subtitles
+    - Enable authentication
+      - Go to ``Settings > General``
+      - Under ``Security`` select ``Form`` as the form of ``Authentication``
+      - Put in a username and password which will be used to access this service
+    - Follow this page
+      - ``https://wiki.bazarr.media/Getting-Started/Setup-Guide/``
+      - Go to ``Settings > Radarr`` and ``Settings > Sonarr``
+        - Fill out the details and save
+          - Get the API tokens from the respective services as well
+        - Fill out the path mappings if the directories in which data is stored is different for both services (same by default)
+      - Go to ``Settings > Languages``
+        - Add a language profile and set defaults for movies and series'
+      - Go to ``Settings > Provider`` and add providers for subtitles
+        - Decent options are:
+          - Opensubtitles.com
+          - TVSubtitles
+          - YIFY Subtitles
+          - Supersubtitles
+      - Go to ``Settings > Subtitles`` and make changes if needed
+      - Manually add the language profile to all the scanned media after first installation
+    - NOTE:
+      - If it doesnt work, manually reinstall this service a few times. It just works, not sure whhy
+
 # Exposed services
 You can port forward the following ports on your router to gain external access as well.
 
