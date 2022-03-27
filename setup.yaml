@@ -63,6 +63,7 @@
           - w3m
           - fio # for disk tests
           - mesa-utils # for GPU tests
+          - cpustat # for CPU logs
         state: latest
 
     - name: Create directories
