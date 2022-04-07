@@ -64,6 +64,7 @@
           - fio # for disk tests
           - mesa-utils # for GPU tests
           - cpustat # for CPU logs
+          - xclip # for clipboard
         state: latest
 
     - name: Create directories
@@ -120,6 +121,8 @@
     api_server_forwarded_port: "3001"
 
 - import_playbook: install-charts.yaml
+  vars:
+    ip: "{{ ansible_host }}"
 
 - import_playbook: install-and-configure-samba.yaml
 
@@ -127,7 +130,7 @@
 
 - import_playbook: install-and-configure-cloudflare-dns-updater-service.yaml
 
-# TODO get kubeconfig setup for remote access
-# - import_playbook: remote-access-minikube.yaml
-#   vars:
-#     api_server_forwarded_port: "6969"
+- import_playbook: remote-access-minikube.yaml
+  vars:
+    api_server_forwarded_port: "3001"
+    ip: "{{ ansible_host }}"

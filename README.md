@@ -159,6 +159,13 @@
     - NOTE:
       - If it doesnt work, manually reinstall this service a few times. It just works, not sure whhy
 
+  - Setup Minikube for remote access
+    - Move the copied `minikube_client.crt` and `minikube_client.crt` file to appropriate locations
+    - Edit the `minikube_config` file copied over to:
+      - Reflect the new locations of the `minikube_client.crt` and `minikube_client.crt` files
+      - Change the server address to something public facing if needed and change protocol if needed
+    - Edit your local `~/.kube/config` and incorporate the information from the `minikube_config` into it
+
 # Exposed services
 You can port forward the following ports on your router to gain external access as well.
 

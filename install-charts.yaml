@@ -51,8 +51,7 @@
       
       - debug:
           msg: >
-            You can log into Grafana at '{{ hostvars[inventory_hostname]
-            ['ansible_env'].SSH_CONNECTION.split(' ')[2] }}:3002' using
+            You can log into Grafana at '{{ ip }}:3002' using
             admin/{{ grafana_admin_password }}"
 
     - name: Install jellyfin
@@ -138,8 +137,7 @@
 
       - debug:
           msg: >
-            You can log into qBittorrent at '{{ hostvars[inventory_hostname]
-            ['ansible_env'].SSH_CONNECTION.split(' ')[2] }}:3004' using
+            You can log into qBittorrent at '{{ ip }}:3004' using
             admin/adminadmin as the default creds. Change this after deployment.
             '{{ dir_home }}' from the host is available under '/media' and
             can be used by the application to download things. Downloading in
@@ -192,8 +190,7 @@
 
       - debug:
           msg: >
-            You can log into jackett at '{{ hostvars[inventory_hostname]
-            ['ansible_env'].SSH_CONNECTION.split(' ')[2] }}:3005'. Go to this
+            You can log into jackett at '{{ ip }}:3005'. Go to this
             URL and add the indexers you wish to use.
             '{{ dir_home }}' from the host is available under '/media' and
             can be used by the application to download things. Downloading in
@@ -240,8 +237,7 @@
 
       - debug:
           msg: >
-            You can log into radarr at '{{ hostvars[inventory_hostname]
-            ['ansible_env'].SSH_CONNECTION.split(' ')[2] }}:3006'.
+            You can log into radarr at '{{ ip }}:3006'.
             '{{ dir_home }}' from the host is available under '/media' and
             can be used by the application to download things. Downloading in
             the directories under {{ dir_data }} will be picked up by Jellyfin.
@@ -286,8 +282,7 @@
 
       - debug:
           msg: >
-            You can log into sonarr at '{{ hostvars[inventory_hostname]
-            ['ansible_env'].SSH_CONNECTION.split(' ')[2] }}:3007'.
+            You can log into sonarr at '{{ ip }}:3007'.
             '{{ dir_home }}' from the host is available under '/media' and
             can be used by the application to download things. Downloading in
             the directories under {{ dir_data }} will be picked up by Jellyfin.
@@ -332,7 +327,6 @@
 
       - debug:
           msg: >
-            You can log into bazarr at '{{ hostvars[inventory_hostname]
-            ['ansible_env'].SSH_CONNECTION.split(' ')[2] }}:3008'.
+            You can log into bazarr at '{{ ip }}:3008'.
             '{{ dir_home }}' from the host is available under '/media' and
             can be used by the application.
