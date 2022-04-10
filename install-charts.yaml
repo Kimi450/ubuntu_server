@@ -30,7 +30,22 @@
           release_name: kube-prometheus-stack
           chart_name: kube-prometheus-stack
           set_options: "--set \
-            prometheus.prometheusSpec.retention=730d"
+            prometheus.prometheusSpec.retention=730d,\
+            grafana.persistence.enabled=true,\
+            prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.accessModes={'ReadWriteOnce'},\
+            prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage='50Gi',\
+            prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false,\
+            prometheus.prometheusSpec.serviceMonitorNamespaceSelector=null,\
+            prometheus.prometheusSpec.serviceMonitorSelector=null,\
+            prometheus.prometheusSpec.ruleSelectorNilUsesHelmValues=false,\
+            prometheus.prometheusSpec.ruleNamespaceSelector=null,\
+            prometheus.prometheusSpec.ruleSelector=null,\
+            prometheus.prometheusSpec.podMonitorSelectorNilUsesHelmValues=false,\
+            prometheus.prometheusSpec.podMonitorNamespaceSelector=null,\
+            prometheus.prometheusSpec.podMonitorSelector=null,\
+            prometheus.prometheusSpec.probeSelectorNilUsesHelmValues=false,\
+            prometheus.prometheusSpec.probeSelectorNamespaceSelector=null,\
+            prometheus.prometheusSpec.probeSelector=null"
 
       - name: Expose grafana service
         include_tasks: tasks-kubernetes-port-forward-service.yaml
