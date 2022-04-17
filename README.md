@@ -82,29 +82,32 @@
     - Set torrent download/upload limits
      - Recommended to keep 6 active torrents/downloads and 0 uploads. It is under ``Options > BitTorrent``
   
-  - Setup Jackett
-    - Add all the indexers you wish to use, some good ones listed below
-      - 1337x
-      - ETTV
-      - Isohunt2
-      - iTorrent
-      - kickasstorrents.to
-      - kickasstorrents.ws
-      - LimeTorrents
-      - RARBG
-      - RuTracker.RU
-      - The Pirate Bay
-      - Torlock
-      - TorrentGalaxy
-      - TorrentProject2
-      - YourBittorrent
-      - YTS
-      - Zooqle
-      - Nyaa.si
- 
-    - Make a note of the API key
+  - Setup Prowlarr
+    - Set username and password for access.
+    - Follow the [official Quick Start Guide](https://wiki.servarr.com/prowlarr/quick-start-guide)
+      - Add all the indexers you wish to use, some good ones listed below. Find more indexers on [Prolarr's Supported Indexers page](https://wiki.servarr.com/prowlarr/supported-indexers).
+        - Standard
+          - ``1337x``
+          - ``Isohunt2``
+          - ``iTorrent``
+          - ``kickasstorrents.ws``
+          - ``LimeTorrents``
+          - ``RuTracker.RU``
+          - ``ThePirateBay``
+          - ``Torlock``
+          - ``TorrentGalaxy``
+          - ``TorrentProject2``
+          - ``YourBittorrent``
+        - Anime
+          - ``AniRena``
+          - ``ACGsou``
+          - ``comicat``
+          - ``sukebei.nyaa.si``
+    - Add Sonarr and Radarr to the ``Settings > Apps > Application`` section using the correct API token and kubernetes service names
+      - By default the services will be ``http://sonarr:8989`` and ``http://radarr:7878``
 
   - Setup Radarr/Sonarr
+    - Radarr is for movies and Sonarr is to TV shows
     - Go to ``Settings`` and click on ``Show Advanced``
    
     - Enable authentication
@@ -112,15 +115,6 @@
       - Set Authentication to `Forms (Login Page)`
       - Set username and password for access.
 
-    - Add indexer
-      - Go to ``Settings > Indexers > Add > Torznab > Custom``
-      - Add the URL: ``http://jackett:9117``
-      - Add the API Path: ``/api/v2.0/indexers/all/results/torznab``
-      - NOTE: Or you may need to concatinate both of them if you dont click on ``Show Advanced``
-        - ``http://jackett:9117/api/v2.0/indexers/all/results/torznab``
-      - Set Minimum Seeders to an appropriate value
-        - It is ``1`` by default, you can change it to probably ``5`` but this will have implications, i.e., sometimes not being able to find anything to download.
-    
     - Add torrent client
       - Go to ``Settings > Download Clients > Add > qBittorent > Custom``
       - Add the host: ``qbittorrent``

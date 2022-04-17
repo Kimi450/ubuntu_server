@@ -158,17 +158,17 @@
             can be used by the application to download things. Downloading in
             the directories under {{ dir_data }} will be picked up by Jellyfin.
 
-    - name: Install jackett
+    - name: Install prowlarr
       block:
-      - name: Install/Upgrade the jackett chart
+      - name: Install/Upgrade the prowlarr chart
         include_tasks: tasks-install-chart.yaml
-        # https://artifacthub.io/packages/helm/k8s-at-home/jackett
+        # https://artifacthub.io/packages/helm/k8s-at-home/prowlarr
         vars:
           repo_name: k8s-at-home
           repo_link: https://k8s-at-home.com/charts/
           install_namespace: "{{ namespace_generic_services }}"
-          release_name: jackett
-          chart_name: jackett
+          release_name: prowlarr
+          chart_name: prowlarr
           # runAsUser=1000 gives write access on the pod
           # 568 is the default user ID, added to the groups cause why not
           set_options: "--set \
@@ -182,11 +182,11 @@
             persistence.media.type=hostPath,\
             persistence.media.hostPath={{ dir_minikube_mount }}"
 
-      - name: Expose jackett service
+      - name: Expose prowlarr service
         include_tasks: tasks-kubernetes-port-forward-service.yaml
         vars:
-          service_name: jackett
-          service_file_name: jackett.service
+          service_name: prowlarr
+          service_file_name: prowlarr.service
           service_file_location_base: /etc/systemd/system/
           service_namespace: "{{ namespace_generic_services }}"
           host_port: 3005
@@ -196,21 +196,13 @@
           ports:
             - "3005"
 
-      - name: Get API Key
-        shell: "kubectl exec -it {{ service_name }}-0 -- cat {{ config_location }} | jq -r '.APIKey'"
-        vars:
-          service_name: jackett
-          config_location: /config/Jackett/ServerConfig.json
-        register: jackett_api_key
-
       - debug:
           msg: >
-            You can log into jackett at '{{ ip }}:3005'. Go to this
+            You can log into prowlarr at '{{ ip }}:3005'. Go to this
             URL and add the indexers you wish to use.
             '{{ dir_home }}' from the host is available under '/media' and
             can be used by the application to download things. Downloading in
             the directories under {{ dir_data }} will be picked up by Jellyfin.
-            The API key is '{{ jackett_api_key.stdout }}'.
 
     - name: Install radarr
       block:
