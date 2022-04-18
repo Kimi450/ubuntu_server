@@ -74,14 +74,70 @@
     - Change the default login details 
     
     - Set default download location to one the mentioned directories (or make sure to put it in the right directory when downloading for ease)
-      - Recommend using ``/media/data/``
+      - Recommend using ``/media/data/downloads``
     
     - Set seeding limits
       - Recommend seeding limits for when seeding ratio hits "0". It is under ``Options > BitTorrent``
     
     - Set torrent download/upload limits
      - Recommended to keep 6 active torrents/downloads and 0 uploads. It is under ``Options > BitTorrent``
-  
+
+  - Setup Calibre
+    - Set it up
+      - Set folder to be ``/media/data/books`` and select ``Yes`` for it to rebuild the library if asked.
+    - Go to ``Preferences > Sharing over the net`` (click on the 3 dots on the top right)
+      - Check the box for ``Require username and password to access the Content server``
+      - Check the box for ``Run the server automatically when calibre starts``
+      - Click on ``Start server``
+      - Go to the ``User accounts tab`` and create a user
+        - Make a note of the credentials for use in ``Readarr`` setup
+      - Restart the app/pod
+
+  - Setup Calibre Web
+    - Set folder to be ``/media/data/books``
+    - Default login is ``admin/admin123``
+      - Change this to something more secure
+    - To enable web reading, click on ``Admin`` on the top right
+      - Click on the user, default is ``admin``
+      - Click on ``Allow ebook viewer``
+
+  - Setup Radarr/Sonarr/Readarr
+    - Categories
+      |Radarr  |Sonarr    |Readarr|
+      |--------|----------|-------|
+      | Movies | TV Shows | Books |
+    - Go to ``Settings`` and click on ``Show Advanced``
+
+    - Enable authentication
+      - Go to ``Settings > General``
+      - Set Authentication to `Forms (Login Page)`
+      - Set username and password for access
+
+    - Add torrent client
+      - Go to ``Settings > Download Clients > Add > qBittorent > Custom``
+      - Add the host: ``qbittorrent``
+      - Add the port: ``8080``
+      - Add the username: ``<qBittorrent_username>``
+      - Add the password: ``<qBittorrent_password>``
+      - Uncheck the ``Remove Completed`` option.
+        - When enabled, this seems to delete the downloaded files sometimes. Not sure why.
+
+    - Set the root directories to be the following
+      - Radarr: ``/media/data/movies/``
+      - Sonarr: ``/media/data/shows/``
+      - Readarr: ``/media/data/books/``
+
+    - Readarr specific config
+      - Go to ``Settings > Media Management``
+        - Add root folder
+          - Set the path to be ``/media/data/books/``
+          - Enable ``Use Calibre`` options the the following defaults
+            - Calibre host: ``calibre-webserver``
+            - Calibre port: ``8081``
+            - Calibre Username: ``<calibre_username>``
+            - Calibre Password: ``<calibre_password>``
+        - Enabled ``Rename Books`` and use the defaults
+
   - Setup Prowlarr
     - Set username and password for access.
     - Follow the [official Quick Start Guide](https://wiki.servarr.com/prowlarr/quick-start-guide)
@@ -104,29 +160,7 @@
           - ``comicat``
           - ``sukebei.nyaa.si``
     - Add Sonarr and Radarr to the ``Settings > Apps > Application`` section using the correct API token and kubernetes service names
-      - By default the services will be ``http://sonarr:8989`` and ``http://radarr:7878``
-
-  - Setup Radarr/Sonarr
-    - Radarr is for movies and Sonarr is to TV shows
-    - Go to ``Settings`` and click on ``Show Advanced``
-   
-    - Enable authentication
-      - Go to ``Settings > General``
-      - Set Authentication to `Forms (Login Page)`
-      - Set username and password for access.
-
-    - Add torrent client
-      - Go to ``Settings > Download Clients > Add > qBittorent > Custom``
-      - Add the host: ``qbittorrent``
-      - Add the port: ``8080``
-      - Add the username: ``<qBittorrent_username>``
-      - Add the password: ``<qBittorrent_password>``
-      - Uncheck the ``Remove Completed`` option.
-        - When enabled, this seems to delete the downloaded files sometimes. Not sure why.
-   
-    - Set the base download location to be one of the following
-      - Radarr:``/media/data/movies/``
-      - Sonarr:``/media/data/shows/``
+      - By default the services will be ``http://sonarr:8989``, ``http://radarr:7878`` and ``http://readarr:8787``
 
   - Setup Bazarr
     - This is for subtitles

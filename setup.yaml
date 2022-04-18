@@ -12,8 +12,11 @@
         dir_data_movies: /home/kimi450/data/movies
         dir_data_shows: /home/kimi450/data/shows
         dir_data_games: /home/kimi450/data/games
+        dir_data_books: /home/kimi450/data/books
+        dir_data_downloads: /home/kimi450/data/downloads
         dir_repos: /home/kimi450/repos
         dir_minikube_mount: /minikube-host
+        dir_mount_path: /media
 
     - name: Disable sleep
       # https://serverfault.com/questions/1045949/how-to-disable-suspend-on-ubuntu-20-04-systemd-via-cli
@@ -78,6 +81,8 @@
         - "{{ dir_data_movies }}"
         - "{{ dir_data_shows }}"
         - "{{ dir_data_games }}"
+        - "{{ dir_data_books }}"
+        - "{{ dir_data_downloads }}"
 
     - name: Setup the bashrc file and the vimrc file
       block:
@@ -111,9 +116,6 @@
 
 - import_playbook: install-tightvnc-and-ssh.yaml
 
-# Enable if needed
-# - import_playbook: install-and-configure-pinless-bluetooth-pairing.yaml
-
 - import_playbook: install-cn-basics.yaml
 
 - import_playbook: install-and-configure-minikube.yaml
@@ -130,7 +132,11 @@
 
 - import_playbook: install-and-configure-cloudflare-dns-updater-service.yaml
 
-- import_playbook: remote-access-minikube.yaml
-  vars:
-    api_server_forwarded_port: "3001"
-    ip: "{{ ansible_host }}"
+# Enable if needed
+#
+# - import_playbook: install-and-configure-pinless-bluetooth-pairing.yaml
+#
+# - import_playbook: remote-access-minikube.yaml
+#   vars:
+#     api_server_forwarded_port: "3001"
+#     ip: "{{ ansible_host }}"

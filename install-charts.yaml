@@ -88,6 +88,7 @@
             persistence.cache.size=50G,\
             persistence.media.enabled=yes,\
             persistence.media.type=hostPath,\
+            persistence.media.mountPath={{ dir_mount_path }},\
             persistence.media.hostPath={{ dir_minikube_mount }}"
 
       - name: Expose jellyfin service
@@ -134,6 +135,7 @@
             persistence.config.enabled=yes,\
             persistence.media.enabled=yes,\
             persistence.media.type=hostPath,\
+            persistence.media.mountPath={{ dir_mount_path }},\
             persistence.media.hostPath={{ dir_minikube_mount }}"
 
       - name: Expose qbittorrent service
@@ -180,6 +182,7 @@
             persistence.config.enabled=yes,\
             persistence.media.enabled=yes,\
             persistence.media.type=hostPath,\
+            persistence.media.mountPath={{ dir_mount_path }},\
             persistence.media.hostPath={{ dir_minikube_mount }}"
 
       - name: Expose prowlarr service
@@ -226,6 +229,7 @@
             persistence.config.enabled=yes,\
             persistence.media.enabled=yes,\
             persistence.media.type=hostPath,\
+            persistence.media.mountPath={{ dir_mount_path }},\
             persistence.media.hostPath={{ dir_minikube_mount }}"
 
       - name: Expose radarr service
@@ -271,6 +275,7 @@
             persistence.config.enabled=yes,\
             persistence.media.enabled=yes,\
             persistence.media.type=hostPath,\
+            persistence.media.mountPath={{ dir_mount_path }},\
             persistence.media.hostPath={{ dir_minikube_mount }}"
 
       - name: Expose sonarr service
@@ -316,6 +321,7 @@
             persistence.config.enabled=yes,\
             persistence.media.enabled=yes,\
             persistence.media.type=hostPath,\
+            persistence.media.mountPath={{ dir_mount_path }},\
             persistence.media.hostPath={{ dir_minikube_mount }}"
 
       - name: Expose bazarr service
@@ -335,5 +341,140 @@
       - debug:
           msg: >
             You can log into bazarr at '{{ ip }}:3008'.
+            '{{ dir_home }}' from the host is available under '/media' and
+            can be used by the application.
+
+    - name: Install readarr
+      block:
+      - name: Install/Upgrade the readarr chart
+        include_tasks: tasks-install-chart.yaml
+        # https://artifacthub.io/packages/helm/k8s-at-home/readarr
+        vars:
+          repo_name: k8s-at-home
+          repo_link: https://k8s-at-home.com/charts/
+          install_namespace: "{{ namespace_generic_services }}"
+          release_name: readarr
+          chart_name: readarr
+          # runAsUser=1000 gives write access on the pod
+          # 568 is the default user ID, added to the groups cause why not
+          set_options: "--set \
+            controller.type=statefulset,\
+            common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
+            common.podSecurityContext.runAsUser=1000,\
+            common.podSecurityContext.runAsGroup=568,\
+            common.podSecurityContext.fsGroup=568,\
+            persistence.config.enabled=yes,\
+            persistence.media.enabled=yes,\
+            persistence.media.type=hostPath,\
+            persistence.media.mountPath={{ dir_mount_path }},\
+            persistence.media.hostPath={{ dir_minikube_mount }}"
+
+      - name: Expose readarr service
+        include_tasks: tasks-kubernetes-port-forward-service.yaml
+        vars:
+          service_name: readarr
+          service_file_name: readarr.service
+          service_file_location_base: /etc/systemd/system/
+          service_namespace: "{{ namespace_generic_services }}"
+          host_port: 3009
+
+      - include_tasks: tasks-allow-ports.yaml
+        vars:
+          ports:
+            - "3009"
+
+      - debug:
+          msg: >
+            You can log into readarr at '{{ ip }}:3009'.
+            '{{ dir_home }}' from the host is available under '/media' and
+            can be used by the application.
+
+    - name: Install calibre
+      block:
+      - name: Install/Upgrade the calibre chart
+        include_tasks: tasks-install-chart.yaml
+        # https://artifacthub.io/packages/helm/k8s-at-home/calibre
+        vars:
+          repo_name: k8s-at-home
+          repo_link: https://k8s-at-home.com/charts/
+          install_namespace: "{{ namespace_generic_services }}"
+          release_name: calibre
+          chart_name: calibre
+          # runAsUser=1000 gives write access on the pod
+          # 568 is the default user ID, added to the groups cause why not
+          set_options: "--set \
+            controller.type=statefulset,\
+            common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
+            env.PUID=1000,\
+            env.PGID=568,\
+            persistence.config.enabled=yes,\
+            persistence.media.enabled=yes,\
+            persistence.media.type=hostPath,\
+            persistence.media.mountPath={{ dir_mount_path }},\
+            persistence.media.hostPath={{ dir_minikube_mount }},\
+            service.webserver.enabled=true"
+
+      - name: Expose calibre service
+        include_tasks: tasks-kubernetes-port-forward-service.yaml
+        vars:
+          service_name: calibre
+          service_file_name: calibre.service
+          service_file_location_base: /etc/systemd/system/
+          service_namespace: "{{ namespace_generic_services }}"
+          host_port: 3010
+
+      - include_tasks: tasks-allow-ports.yaml
+        vars:
+          ports:
+            - "3010"
+
+      - debug:
+          msg: >
+            You can log into calibre at '{{ ip }}:3010'.
+            '{{ dir_home }}' from the host is available under '/media' and
+            can be used by the application.
+
+
+    - name: Install calibre-web
+      block:
+      - name: Install/Upgrade the calibre-web chart
+        include_tasks: tasks-install-chart.yaml
+        # https://artifacthub.io/packages/helm/k8s-at-home/calibre-web
+        vars:
+          repo_name: k8s-at-home
+          repo_link: https://k8s-at-home.com/charts/
+          install_namespace: "{{ namespace_generic_services }}"
+          release_name: calibre-web
+          chart_name: calibre-web
+          # runAsUser=1000 gives write access on the pod
+          # 568 is the default user ID, added to the groups cause why not
+          set_options: "--set \
+            controller.type=statefulset,\
+            common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
+            env.PUID=1000,\
+            env.PGID=568,\
+            persistence.config.enabled=yes,\
+            persistence.media.enabled=yes,\
+            persistence.media.type=hostPath,\
+            persistence.media.mountPath={{ dir_mount_path }},\
+            persistence.media.hostPath={{ dir_minikube_mount }}"
+
+      - name: Expose calibre-web service
+        include_tasks: tasks-kubernetes-port-forward-service.yaml
+        vars:
+          service_name: calibre-web
+          service_file_name: calibre-web.service
+          service_file_location_base: /etc/systemd/system/
+          service_namespace: "{{ namespace_generic_services }}"
+          host_port: 3011
+
+      - include_tasks: tasks-allow-ports.yaml
+        vars:
+          ports:
+            - "3011"
+
+      - debug:
+          msg: >
+            You can log into calibre-web at '{{ ip }}:3011'.
             '{{ dir_home }}' from the host is available under '/media' and
             can be used by the application.
