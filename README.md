@@ -144,21 +144,22 @@
       - Add all the indexers you wish to use, some good ones listed below. Find more indexers on [Prolarr's Supported Indexers page](https://wiki.servarr.com/prowlarr/supported-indexers).
         - Standard
           - ``1337x``
-          - ``Isohunt2``
-          - ``iTorrent``
-          - ``kickasstorrents.ws``
           - ``LimeTorrents``
-          - ``RuTracker.RU``
-          - ``ThePirateBay``
           - ``Torlock``
           - ``TorrentGalaxy``
           - ``TorrentProject2``
           - ``YourBittorrent``
+          - ``Internet Archive``
+          - ``MovieTorrent``
+          - ``Zooqle``
         - Anime
           - ``AniRena``
-          - ``ACGsou``
+          - ``Bangumi Moe``
+          - ``AniSource``
+          - ``AnimeClipse``
           - ``comicat``
-          - ``sukebei.nyaa.si``
+          - ``Nyaa.si``
+          - ``Tokyo Toshokan``
     - Add Sonarr and Radarr to the ``Settings > Apps > Application`` section using the correct API token and kubernetes service names
       - By default the services will be ``http://sonarr:8989``, ``http://radarr:7878`` and ``http://readarr:8787``
 
