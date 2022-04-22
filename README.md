@@ -44,7 +44,7 @@ Highly opinionated setup catered to my needs
   `- import_playbook: install-and-configure-cloudflare-dns-updater-service.yaml`
 
 - #### Expose required ports on your router
-  - Expose (port forward on your router) ports for the services you wish to have available externally based on the list [here](#services).
+  - Expose (port forward on your router) ports for the services you wish to have available externally based on the list [here](#exposed-services).
 
 - #### Run the ansible runner script
   - `./run.sh`
@@ -201,7 +201,11 @@ Highly opinionated setup catered to my needs
       - Change the server address to something public facing if needed and change protocol if needed
     - Edit your local `~/.kube/config` and incorporate the information from the `minikube_config` into it
 
-  - ##### Expose Services
+  - ##### Use Squid
+    - Use the username and password passed in during installation to use this as a proxy server
+    - The address would be ``<PUBLIC_IP>:3128`` or ``<DOMAIN_NAME>:3128`` or ``<LAN_IP>:3128``
+
+  - ##### Exposed Services
     - You can port forward the following ports on your router to gain external.
     - You need to create DNS entries to access the Ingress services. The following entries are recommended:
       - ``*.<DOMAIN_NAME>``
@@ -220,6 +224,7 @@ Highly opinionated setup catered to my needs
       | readarr     | Ingress        | ``readarr.<DOMAIN_NAME>``          |  80                              |
       | calibre-web | Ingress        | ``calibre-web.<DOMAIN_NAME>``      |  80                              |
       | calibre     | LAN            | ``<LAN_IP>:3002``                  | 3002                             |
+      | squid       | LAN            | ``<LAN_IP>:3128``                  | 3128                             |
 
       NOTE: Security is an unkown when exposing a service to the internet.
 
