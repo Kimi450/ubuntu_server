@@ -133,9 +133,9 @@
 - import_playbook: install-and-configure-cloudflare-dns-updater-service.yaml
 
 # Enable if needed
-#
+
 # - import_playbook: install-and-configure-pinless-bluetooth-pairing.yaml
-#
+
 # - import_playbook: remote-access-minikube.yaml
 #   vars:
 #     api_server_forwarded_port: "3001"

@@ -1,11 +1,13 @@
-- name: "Convert {{ service_name }} to a NodePort service"
-  shell: >-
-    kubectl patch svc -n {{ service_namespace }} {{ service_name }} --type='json' -p '[{"op":"replace","path":"/spec/type","value":"NodePort"}]'
-
-- name: Get all ports of type NodePort
-  shell: >-
-    kubectl get svc -n {{ service_namespace }} {{ service_name }} {% raw %} -o go-template='{{if .items}}{{range .items}}{{range.spec.ports}}{{.nodePort}}{{"\n"}}{{end}}{{end}}{{else}}{{range.spec.ports}}{{.nodePort}}{{"\n"}}{{end}}{{end}}' {% endraw %}
-  register: nodeport_port
+- name: Get service port for local access
+  block:
+  - name: "Convert {{ service_name }} to a NodePort service"
+    shell: >-
+      kubectl patch svc -n {{ service_namespace }} {{ service_name }} --type='json' -p '[{"op":"replace","path":"/spec/type","value":"NodePort"}]'
+  - name: Get all ports of type NodePort
+    shell: >-
+      kubectl get svc -n {{ service_namespace }} {{ service_name }} {% raw %} -o go-template='{{if .items}}{{range .items}}{{range.spec.ports}}{{.nodePort}}{{"\n"}}{{end}}{{end}}{{else}}{{range.spec.ports}}{{.nodePort}}{{"\n"}}{{end}}{{end}}' {% endraw %}
+    register: service_port
+  when: service_name != "SKIP"
 
   # TODO what to do if there are multiple nodeports that need to be port forwarded
 - name: Setup and enable systemd service for port forwarding
@@ -26,14 +28,25 @@
     shell: minikube ip
     register: minikube_ip
 
-  - name: "Service file edit: Add port forward command"
+  - name: "Service file edit: Add port forward command for local access"
     become: True
-    # https://gist.github.com/drmalex07/c0f9304deea566842490 
-    lineinfile: 
+    # https://gist.github.com/drmalex07/c0f9304deea566842490
+    lineinfile:
       path: "{{ service_file_location_base }}{{ service_file_name }}"
       regexp: '^ExecStart=(.*)$' 
-      line: "ExecStart=ssh -NT -o StrictHostKeyChecking=no -o ExitOnForwardFailure=yes -o GatewayPorts=true -i {{ dir_minikube_ssh_key.stdout }} docker@{{ minikube_ip.stdout }} -L {{ host_port }}:0.0.0.0:{{ nodeport_port.stdout }}"
+      line: "ExecStart=ssh -NT -o StrictHostKeyChecking=no -o ExitOnForwardFailure=yes -o GatewayPorts=true -i {{ dir_minikube_ssh_key.stdout }} docker@{{ minikube_ip.stdout }} -L {{ host_port }}:0.0.0.0:{{ service_port.stdout }}"
       backrefs: yes
+    when: service_name != "SKIP"
+
+  - name: "Service file edit: Add port forward command for domain access"
+    become: True
+    # https://gist.github.com/drmalex07/c0f9304deea566842490
+    lineinfile:
+      path: "{{ service_file_location_base }}{{ service_file_name }}"
+      regexp: '^ExecStart=(.*)$'
+      line: "ExecStart=ssh -NT -o StrictHostKeyChecking=no -o ExitOnForwardFailure=yes -o GatewayPorts=true -i {{ dir_minikube_ssh_key.stdout }} docker@{{ minikube_ip.stdout }} -L {{ host_port }}:0.0.0.0:{{ service_port }}"
+      backrefs: yes
+    when: service_name == "SKIP"
 
   - name: Reload systemd service
     include_tasks: tasks-reload-systemd-service.yaml

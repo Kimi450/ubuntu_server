@@ -1,89 +1,86 @@
-# Setup
-### On the server
+# Ubuntu Server
+Highly opinionated setup catered to my needs
 
-- Install Ubuntu
-  - https://ubuntu.com/download/desktop
-  
-  - Expected user is: `kimi450`
+## On the server
 
-- Enable ssh server (required for ansible to work)
-  - https://linuxize.com/post/how-to-enable-ssh-on-ubuntu-18-04/
-  
-  -  ```
-     sudo apt update
-     sudo apt install openssh-server
-     sudo systemctl enable ssh
-     sudo systemctl start ssh
-     sudo ufw enable
-     sudo ufw allow ssh
-     ```
+- #### Install Ubuntu
+  https://ubuntu.com/download/desktop
+  Expected user is: `kimi450`
 
-### On the client
+- #### Enable ssh server (required for ansible to work)
+  https://linuxize.com/post/how-to-enable-ssh-on-ubuntu-18-04/
+  ```
+  sudo apt update
+  sudo apt install openssh-server
+  sudo systemctl enable ssh
+  sudo systemctl start ssh
+  sudo ufw enable
+  sudo ufw allow ssh
+  ```
 
-- Enable passwordless ssh access from remote machine to server (required for ansible to work)
-    https://www.linuxbabe.com/linux-server/setup-passwordless-ssh-login
-    ```
-    ssh-keygen -t rsa -b 4096
-    file ~/.ssh/id_rsa
-    ssh-copy-id -p <ssh-port> <remote-user>@<server-ip>
-    ```
+## On the client
 
-- Update the hosts.yaml file to update the IP of the server
+- #### Enable passwordless ssh access from remote machine to server (required for ansible to work)
+  https://www.linuxbabe.com/linux-server/setup-passwordless-ssh-login
+  ```
+  ssh-keygen -t rsa -b 4096
+  file ~/.ssh/id_rsa
+  ssh-copy-id -p <ssh-port> <remote-user>@<server-ip>
+  ```
 
-- Install ansible
-  - ```
-    sudo apt update
-    sudo apt install software-properties-common
-    sudo add-apt-repository --yes --update ppa:ansible/ansible
-    sudo apt install ansible
-    ```
+- #### Update the hosts.yaml file to update the IP of the server
 
-- You will need the Zone name from cloudflare where your DNS entries are present and an API token that can edit DNS entries and read Zone information.
+- #### Install ansible
+  ```
+  sudo apt update
+  sudo apt install software-properties-common
+  sudo add-apt-repository --yes --update ppa:ansible/ansible
+  sudo apt install ansible
+  ```
+
+- #### Get the ``Zone`` name from Cloudflare where your DNS entries are present and an API token that can edit DNS entries and read Zone information [OPTIONAL]
   - https://dash.cloudflare.com/profile/api-tokens
   - If not needed, remove the line below line from `setup.yaml`
-    - `- import_playbook: install-and-configure-cloudflare-dns-updater-service.yaml`
+  `- import_playbook: install-and-configure-cloudflare-dns-updater-service.yaml`
 
-- Expose required ports on your router
-  - Expose (port forward) ports for the services you wish to have available externally based on the list [here](#exposed-services).
-  - Maybe need to expose port 80 and/or 53 for the SSL certs?
+- #### Expose required ports on your router
+  - Expose (port forward on your router) ports for the services you wish to have available externally based on the list [here](#services).
 
-- Run the ansible runner script
+- #### Run the ansible runner script
   - `./run.sh`
 
-- After the installation
-
-  - Setup Grafana 
+- #### After the installation
+  - ##### Setup Grafana
     - Change the default login details 
-    
-    - Add the recommended charts
+    - Add the recommended dashboards
+      - [Node Exporter Full](https://grafana.com/grafana/dashboards/1860)
+      - [Pods (Aggregated view)](https://grafana.com/grafana/dashboards/8860)
+      - [Monitor Pod CPU and Memory usage](https://grafana.com/grafana/dashboards/15055)
+      - [Node Exporter for Prometheus Dashboard EN v20201010](https://grafana.com/grafana/dashboards/11074)
 
-  - Setup Jellyfin
-    - Setting up a login 
-    
+  - ##### Setup Jellyfin
+    - Setting up a login
     - Point Jellyfin to use the directories mentioned in the playbooks for shows and movies.
       - By default, on the Jellyfin pod, the directories it will be:
         ```
         /media/data/shows
         /media/data/movies
         ```
-    
     - Add any other config required.
       - Recommend setting up the Open Subtitles plugin which requires creating an account on [their website](https://www.opensubtitles.org/en/?).
 
-  - Setup qBittorrent
-    - Change the default login details 
-    
+  - ##### Setup qBittorrent
+    - Change the default login details
+      - Go to ``Tools > Options > Web UI > Authentication``
     - Set default download location to one the mentioned directories (or make sure to put it in the right directory when downloading for ease)
       - Recommend using ``/media/data/downloads``
-    
     - Set seeding limits
-      - Recommend seeding limits for when seeding ratio hits "0". It is under ``Options > BitTorrent``
-    
+      - Recommend seeding limits for when seeding ratio hits "0". It is under ``Tools > Options > BitTorrent > Seeding Limits``
     - Set torrent download/upload limits
-     - Recommended to keep 6 active torrents/downloads and 0 uploads. It is under ``Options > BitTorrent``
+      - Recommended to keep 6 active torrents/downloads and 0 uploads. It is under ``Tools > Options > BitTorrent > Torrent Queueing``
 
-  - Setup Calibre
-    - Set it up
+  - ##### Setup Calibre
+    - Do base setup
       - Set folder to be ``/media/data/books`` and select ``Yes`` for it to rebuild the library if asked.
     - Go to ``Preferences > Sharing over the net`` (click on the 3 dots on the top right)
       - Check the box for ``Require username and password to access the Content server``
@@ -93,26 +90,24 @@
         - Make a note of the credentials for use in ``Readarr`` setup
       - Restart the app/pod
 
-  - Setup Calibre Web
+  - ##### Setup Calibre Web
     - Set folder to be ``/media/data/books``
     - Default login is ``admin/admin123``
-      - Change this to something more secure
     - To enable web reading, click on ``Admin`` on the top right
       - Click on the user, default is ``admin``
       - Click on ``Allow ebook viewer``
+      - Change password to something more secure
 
-  - Setup Radarr/Sonarr/Readarr
+  - ##### Setup Radarr/Sonarr/Readarr
     - Categories
       |Radarr  |Sonarr    |Readarr|
       |--------|----------|-------|
       | Movies | TV Shows | Books |
     - Go to ``Settings`` and click on ``Show Advanced``
-
     - Enable authentication
       - Go to ``Settings > General``
       - Set Authentication to `Forms (Login Page)`
       - Set username and password for access
-
     - Add torrent client
       - Go to ``Settings > Download Clients > Add > qBittorent > Custom``
       - Add the host: ``qbittorrent``
@@ -121,12 +116,10 @@
       - Add the password: ``<qBittorrent_password>``
       - Uncheck the ``Remove Completed`` option.
         - When enabled, this seems to delete the downloaded files sometimes. Not sure why.
-
     - Set the root directories to be the following
       - Radarr: ``/media/data/movies/``
       - Sonarr: ``/media/data/shows/``
       - Readarr: ``/media/data/books/``
-
     - Readarr specific config
       - Go to ``Settings > Media Management``
         - Add root folder
@@ -138,42 +131,55 @@
             - Calibre Password: ``<calibre_password>``
         - Enabled ``Rename Books`` and use the defaults
 
-  - Setup Prowlarr
-    - Set username and password for access.
+  - ##### Setup Prowlarr
+    - Enable authentication
+      - Go to ``Settings > General``
+      - Set Authentication to `Forms (Login Page)`
+      - Set username and password for access
     - Follow the [official Quick Start Guide](https://wiki.servarr.com/prowlarr/quick-start-guide)
       - Add all the indexers you wish to use, some good ones listed below. Find more indexers on [Prolarr's Supported Indexers page](https://wiki.servarr.com/prowlarr/supported-indexers).
         - Standard
-          - ``1337x``
-          - ``LimeTorrents``
-          - ``Torlock``
-          - ``TorrentGalaxy``
-          - ``TorrentProject2``
-          - ``YourBittorrent``
-          - ``Internet Archive``
-          - ``MovieTorrent``
-          - ``Zooqle``
+          ```
+          1337x
+          LimeTorrents
+          Torlock
+          TorrentGalaxy
+          TorrentProject2
+          YourBittorrent
+          Internet Archive
+          MovieTorrent
+          Zooqle
+          ```
         - Anime
-          - ``AniRena``
-          - ``Bangumi Moe``
-          - ``AniSource``
-          - ``AnimeClipse``
-          - ``comicat``
-          - ``Nyaa.si``
-          - ``Tokyo Toshokan``
-    - Add Sonarr and Radarr to the ``Settings > Apps > Application`` section using the correct API token and kubernetes service names
+          ```
+          AniRena
+          Bangumi Moe
+          AniSource
+          AnimeClipse
+          comicat
+          Nyaa.si
+          Tokyo Toshokan
+          ```
+    - Add Sonarr, Radarr and Readarr to the ``Settings > Apps > Application`` section using the correct API token and kubernetes service names
       - By default the services will be ``http://sonarr:8989``, ``http://radarr:7878`` and ``http://readarr:8787``
 
-  - Setup Bazarr
-    - This is for subtitles
+  - ##### Setup Bazarr
     - Enable authentication
       - Go to ``Settings > General``
       - Under ``Security`` select ``Form`` as the form of ``Authentication``
-      - Put in a username and password which will be used to access this service
+      - Set username and password for access
     - Follow this page
       - ``https://wiki.bazarr.media/Getting-Started/Setup-Guide/``
       - Go to ``Settings > Radarr`` and ``Settings > Sonarr``
         - Fill out the details and save
-          - Get the API tokens from the respective services as well
+          - Use the API tokens from the respective services, found under ``Settings > General > Security > API Key``
+          - Use the kubernetes service name and port
+
+            | Service Name | Port |
+            |--------------|------|
+            | radarr       | 7878 |
+            | sonarr       | 8989 |
+
         - Fill out the path mappings if the directories in which data is stored is different for both services (same by default)
       - Go to ``Settings > Languages``
         - Add a language profile and set defaults for movies and series'
@@ -188,42 +194,32 @@
     - NOTE:
       - If it doesnt work, manually reinstall this service a few times. It just works, not sure whhy
 
-  - Setup Minikube for remote access
+  - ##### Setup Minikube for remote access
     - Move the copied `minikube_client.crt` and `minikube_client.crt` file to appropriate locations
     - Edit the `minikube_config` file copied over to:
       - Reflect the new locations of the `minikube_client.crt` and `minikube_client.crt` files
       - Change the server address to something public facing if needed and change protocol if needed
     - Edit your local `~/.kube/config` and incorporate the information from the `minikube_config` into it
 
-# Exposed services
-You can port forward the following ports on your router to gain external access as well.
+  - ##### Expose Services
+    - You can port forward the following ports on your router to gain external.
+    - You need to create DNS entries to access the Ingress services. The following entries are recommended:
+      - ``*.<DOMAIN_NAME>``
+      - ``<DOMAIN_NAME>``
 
-NOTE: Security is an unkown when exposing a service to the internet.
+      | Service     | Default access | Where                              | Port to be forwarded from server |
+      |-------------|----------------|------------------------------------|----------------------------------|
+      | ssh         | ssh            | ``<LAN_IP>`` or ``<DOMAIN_NAME>``  |  22                              |
+      | minikube    | api-access     | ``<LAN_IP>`` or ``<DOMAIN_NAME>``  |  3001                            |
+      | grafana     | Ingress        | ``grafana.<DOMAIN_NAME>``          |  80                              |
+      | jellyfin    | Ingress        | ``jellyin.<DOMAIN_NAME>``          |  80                              |
+      | prowlarr    | Ingress        | ``prowlarr.<DOMAIN_NAME>``         |  80                              |
+      | bazarr      | Ingress        | ``bazarr.<DOMAIN_NAME>``           |  80                              |
+      | radarr      | Ingress        | ``radarr.<DOMAIN_NAME>``           |  80                              |
+      | sonarr      | Ingress        | ``sonarr.<DOMAIN_NAME>``           |  80                              |
+      | readarr     | Ingress        | ``readarr.<DOMAIN_NAME>``          |  80                              |
+      | calibre-web | Ingress        | ``calibre-web.<DOMAIN_NAME>``      |  80                              |
+      | calibre     | LAN            | ``<LAN_IP>:3002``                  | 3002                             |
 
-### Kubernetes API server
-The kubernetes API server is accessible on `<SERVER_IP>:3001` through the client on the same LAN.
+      NOTE: Security is an unkown when exposing a service to the internet.
 
-### Grafana
-Grafana can be accessed on `<SERVER_IP>:3002` through the client machine on the same LAN.
-
-### Jellyfin
-Jellyfin can be accessed on `<SERVER_IP>:3003/web/index.html` through the client machine on the same LAN.
-
-### qBittorrent
-qBittorrent can be accessed on `<SERVER_IP>:3004` through the client machine on the same LAN.
-
-### Jackett
-Jackett can be accessed on `<SERVER_IP>:3005` through the client machine on the same LAN.
-
-### Radarr
-Radarr can be accessed on `<SERVER_IP>:3006` through the client machine on the same LAN.
-
-### Sonarr
-Sonarr can be accessed on `<SERVER_IP>:3007` through the client machine on the same LAN.
-
-
-# Appendix
-
-### Good dashboards
-- [Node Exporter Full](https://grafana.com/grafana/dashboards/1860)
-- [Node Exporter for Prometheus Dashboard EN v20201010](https://grafana.com/grafana/dashboards/11074)

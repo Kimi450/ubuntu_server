@@ -8,8 +8,11 @@
     namespace_monitoring: monitoring
     namespace_generic_services: generic-services
     grafana_admin_password: admin
+  vars_prompt:
+    - name: domain_name
+      prompt: Domain name to be used
+      private: no
   tasks:
-
     - name: Create namespaces namespace
       shell: "kubectl create namespace {{ item }}"
       ignore_errors: True
@@ -17,6 +20,33 @@
         - "{{ namespace_monitoring }}"
         - "{{ namespace_user }}"
         - "{{ namespace_generic_services }}"
+
+    - include_tasks: tasks-allow-ports.yaml
+      vars:
+        ports:
+          - "8080"
+          - "8081"
+    
+    - name: Expose nginx ingress controller
+      include_tasks: tasks-kubernetes-port-forward-service.yaml
+      vars:
+        service_name: SKIP
+        service_file_name: nginx-ingress-controller.service
+        service_file_location_base: /etc/systemd/system/
+        host_port: 8080
+        service_port: 80
+    
+    - name: Expose nginx ingress controller for SSL
+      include_tasks: tasks-kubernetes-port-forward-service.yaml
+      vars:
+        service_name: SKIP
+        service_file_name: nginx-ingress-controller-ssl.service
+        service_file_location_base: /etc/systemd/system/
+        host_port: 8081
+        service_port: 443
+
+    - debug:
+        msg: You can access the ingress controller at port '8080' and '8081' for HTTP and HTTPS.
 
     - name: Install grafana
       block:
@@ -45,28 +75,18 @@
             prometheus.prometheusSpec.podMonitorSelector=null,\
             prometheus.prometheusSpec.probeSelectorNilUsesHelmValues=false,\
             prometheus.prometheusSpec.probeSelectorNamespaceSelector=null,\
-            prometheus.prometheusSpec.probeSelector=null"
-
-      - name: Expose grafana service
-        include_tasks: tasks-kubernetes-port-forward-service.yaml
-        vars:
-          service_name: kube-prometheus-stack-grafana
-          service_file_name: grafana.service
-          service_file_location_base: /etc/systemd/system/
-          service_namespace: "{{ namespace_monitoring }}"
-          host_port: 3002
-
-      - include_tasks: tasks-allow-ports.yaml
-        vars:
-          ports: 
-            - "3002"
+            prometheus.prometheusSpec.probeSelector=null,\
+            grafana.ingress.enabled=true,\
+            grafana.ingress.ingressClassName=nginx,\
+            grafana.ingress.hosts={grafana.{{ domain_name }}},\
+            grafana.ingress.enabled=true"
             
       - name: "Reset Grafana admin password to '{{ grafana_admin_password }}'"  
         shell: "kubectl exec -it -n {{ namespace_monitoring }} $(kubectl get pods -n {{ namespace_monitoring }} | grep grafana | awk '{print $1}') -c grafana -- grafana-cli admin reset-admin-password {{ grafana_admin_password }}"
       
       - debug:
           msg: >
-            You can log into Grafana at '{{ ip }}:3002' using
+            You can log into Grafana at 'grafana.{{ domain_name }}' using
             admin/{{ grafana_admin_password }}"
 
     - name: Install jellyfin
@@ -89,26 +109,19 @@
             persistence.media.enabled=yes,\
             persistence.media.type=hostPath,\
             persistence.media.mountPath={{ dir_mount_path }},\
-            persistence.media.hostPath={{ dir_minikube_mount }}"
-
-      - name: Expose jellyfin service
-        include_tasks: tasks-kubernetes-port-forward-service.yaml
-        vars:
-          service_name: jellyfin
-          service_file_name: jellyfin.service
-          service_file_location_base: /etc/systemd/system/
-          service_namespace: "{{ namespace_generic_services }}"
-          host_port: 3003
-
-      - include_tasks: tasks-allow-ports.yaml
-        vars:
-          ports:
-            - "3003"
+            persistence.media.hostPath={{ dir_minikube_mount }},\
+            ingress.main.enabled=true,\
+            ingress.main.primary=false,\
+            ingress.main.ingressClassName=nginx,\
+            ingress.main.hosts[0].host='jellyfin.{{ domain_name }}',\
+            ingress.main.hosts[0].paths[0].path='/',\
+            ingress.main.hosts[0].paths[0].pathType='Prefix',\
+            ingress.main.hosts[0].paths[0].service.name=jellyfin,\
+            ingress.main.hosts[0].paths[0].service.port=8096"
 
       - debug:
           msg: >
-              You can log into Jellyfin at '{{ hostvars[inventory_hostname]
-              ['ansible_env'].SSH_CONNECTION.split(' ')[2] }}:3003/web/index.html'.
+              You can log into Jellyfin at 'jellyfin.{{ domain_name }}'.
               '{{ dir_home }}' is available under '/media' and can be used by
               Jellyfin. If need be, delete any existing server and go to the
               URL mention above once again to setup a new server.
@@ -136,25 +149,19 @@
             persistence.media.enabled=yes,\
             persistence.media.type=hostPath,\
             persistence.media.mountPath={{ dir_mount_path }},\
-            persistence.media.hostPath={{ dir_minikube_mount }}"
-
-      - name: Expose qbittorrent service
-        include_tasks: tasks-kubernetes-port-forward-service.yaml
-        vars:
-          service_name: qbittorrent
-          service_file_name: qbittorrent.service
-          service_file_location_base: /etc/systemd/system/
-          service_namespace: "{{ namespace_generic_services }}"
-          host_port: 3004
-
-      - include_tasks: tasks-allow-ports.yaml
-        vars:
-          ports:
-            - "3004"
+            persistence.media.hostPath={{ dir_minikube_mount }},\
+            ingress.main.enabled=true,\
+            ingress.main.primary=false,\
+            ingress.main.ingressClassName=nginx,\
+            ingress.main.hosts[0].host='qbittorrent.{{ domain_name }}',\
+            ingress.main.hosts[0].paths[0].path='/',\
+            ingress.main.hosts[0].paths[0].pathType='Prefix',\
+            ingress.main.hosts[0].paths[0].service.name=qbittorrent,\
+            ingress.main.hosts[0].paths[0].service.port=8080"
 
       - debug:
           msg: >
-            You can log into qBittorrent at '{{ ip }}:3004' using
+            You can log into qBittorrent at 'qbittorrent.{{ domain_name }}' using
             admin/adminadmin as the default creds. Change this after deployment.
             '{{ dir_home }}' from the host is available under '/media' and
             can be used by the application to download things. Downloading in
@@ -183,25 +190,19 @@
             persistence.media.enabled=yes,\
             persistence.media.type=hostPath,\
             persistence.media.mountPath={{ dir_mount_path }},\
-            persistence.media.hostPath={{ dir_minikube_mount }}"
-
-      - name: Expose prowlarr service
-        include_tasks: tasks-kubernetes-port-forward-service.yaml
-        vars:
-          service_name: prowlarr
-          service_file_name: prowlarr.service
-          service_file_location_base: /etc/systemd/system/
-          service_namespace: "{{ namespace_generic_services }}"
-          host_port: 3005
-
-      - include_tasks: tasks-allow-ports.yaml
-        vars:
-          ports:
-            - "3005"
+            persistence.media.hostPath={{ dir_minikube_mount }},\
+            ingress.main.enabled=true,\
+            ingress.main.primary=false,\
+            ingress.main.ingressClassName=nginx,\
+            ingress.main.hosts[0].host='prowlarr.{{ domain_name }}',\
+            ingress.main.hosts[0].paths[0].path='/',\
+            ingress.main.hosts[0].paths[0].pathType='Prefix',\
+            ingress.main.hosts[0].paths[0].service.name=prowlarr,\
+            ingress.main.hosts[0].paths[0].service.port=9696"
 
       - debug:
           msg: >
-            You can log into prowlarr at '{{ ip }}:3005'. Go to this
+            You can log into prowlarr at 'prowlarr.{{ domain_name }}'. Go to this
             URL and add the indexers you wish to use.
             '{{ dir_home }}' from the host is available under '/media' and
             can be used by the application to download things. Downloading in
@@ -230,25 +231,19 @@
             persistence.media.enabled=yes,\
             persistence.media.type=hostPath,\
             persistence.media.mountPath={{ dir_mount_path }},\
-            persistence.media.hostPath={{ dir_minikube_mount }}"
-
-      - name: Expose radarr service
-        include_tasks: tasks-kubernetes-port-forward-service.yaml
-        vars:
-          service_name: radarr
-          service_file_name: radarr.service
-          service_file_location_base: /etc/systemd/system/
-          service_namespace: "{{ namespace_generic_services }}"
-          host_port: 3006
-
-      - include_tasks: tasks-allow-ports.yaml
-        vars:
-          ports:
-            - "3006"
+            persistence.media.hostPath={{ dir_minikube_mount }},\
+            ingress.main.enabled=true,\
+            ingress.main.primary=false,\
+            ingress.main.ingressClassName=nginx,\
+            ingress.main.hosts[0].host='radarr.{{ domain_name }}',\
+            ingress.main.hosts[0].paths[0].path='/',\
+            ingress.main.hosts[0].paths[0].pathType='Prefix',\
+            ingress.main.hosts[0].paths[0].service.name=radarr,\
+            ingress.main.hosts[0].paths[0].service.port=7878"
 
       - debug:
           msg: >
-            You can log into radarr at '{{ ip }}:3006'.
+            You can log into radarr at 'radarr.{{ domain_name }}'.
             '{{ dir_home }}' from the host is available under '/media' and
             can be used by the application to download things. Downloading in
             the directories under {{ dir_data }} will be picked up by Jellyfin.
@@ -276,25 +271,19 @@
             persistence.media.enabled=yes,\
             persistence.media.type=hostPath,\
             persistence.media.mountPath={{ dir_mount_path }},\
-            persistence.media.hostPath={{ dir_minikube_mount }}"
-
-      - name: Expose sonarr service
-        include_tasks: tasks-kubernetes-port-forward-service.yaml
-        vars:
-          service_name: sonarr
-          service_file_name: sonarr.service
-          service_file_location_base: /etc/systemd/system/
-          service_namespace: "{{ namespace_generic_services }}"
-          host_port: 3007
-
-      - include_tasks: tasks-allow-ports.yaml
-        vars:
-          ports:
-            - "3007"
+            persistence.media.hostPath={{ dir_minikube_mount }},\
+            ingress.main.enabled=true,\
+            ingress.main.primary=false,\
+            ingress.main.ingressClassName=nginx,\
+            ingress.main.hosts[0].host='sonarr.{{ domain_name }}',\
+            ingress.main.hosts[0].paths[0].path='/',\
+            ingress.main.hosts[0].paths[0].pathType='Prefix',\
+            ingress.main.hosts[0].paths[0].service.name=sonarr,\
+            ingress.main.hosts[0].paths[0].service.port=8989"
 
       - debug:
           msg: >
-            You can log into sonarr at '{{ ip }}:3007'.
+            You can log into sonarr at 'sonarr.{{ domain_name }}'.
             '{{ dir_home }}' from the host is available under '/media' and
             can be used by the application to download things. Downloading in
             the directories under {{ dir_data }} will be picked up by Jellyfin.
@@ -322,25 +311,19 @@
             persistence.media.enabled=yes,\
             persistence.media.type=hostPath,\
             persistence.media.mountPath={{ dir_mount_path }},\
-            persistence.media.hostPath={{ dir_minikube_mount }}"
-
-      - name: Expose bazarr service
-        include_tasks: tasks-kubernetes-port-forward-service.yaml
-        vars:
-          service_name: bazarr
-          service_file_name: bazarr.service
-          service_file_location_base: /etc/systemd/system/
-          service_namespace: "{{ namespace_generic_services }}"
-          host_port: 3008
-
-      - include_tasks: tasks-allow-ports.yaml
-        vars:
-          ports:
-            - "3008"
+            persistence.media.hostPath={{ dir_minikube_mount }},\
+            ingress.main.enabled=true,\
+            ingress.main.primary=false,\
+            ingress.main.ingressClassName=nginx,\
+            ingress.main.hosts[0].host='bazarr.{{ domain_name }}',\
+            ingress.main.hosts[0].paths[0].path='/',\
+            ingress.main.hosts[0].paths[0].pathType='Prefix',\
+            ingress.main.hosts[0].paths[0].service.name=bazarr,\
+            ingress.main.hosts[0].paths[0].service.port=6767"
 
       - debug:
           msg: >
-            You can log into bazarr at '{{ ip }}:3008'.
+            You can log into bazarr at 'bazarr.{{ domain_name }}'.
             '{{ dir_home }}' from the host is available under '/media' and
             can be used by the application.
 
@@ -367,25 +350,57 @@
             persistence.media.enabled=yes,\
             persistence.media.type=hostPath,\
             persistence.media.mountPath={{ dir_mount_path }},\
-            persistence.media.hostPath={{ dir_minikube_mount }}"
-
-      - name: Expose readarr service
-        include_tasks: tasks-kubernetes-port-forward-service.yaml
-        vars:
-          service_name: readarr
-          service_file_name: readarr.service
-          service_file_location_base: /etc/systemd/system/
-          service_namespace: "{{ namespace_generic_services }}"
-          host_port: 3009
-
-      - include_tasks: tasks-allow-ports.yaml
-        vars:
-          ports:
-            - "3009"
+            persistence.media.hostPath={{ dir_minikube_mount }},\
+            ingress.main.enabled=true,\
+            ingress.main.primary=false,\
+            ingress.main.ingressClassName=nginx,\
+            ingress.main.hosts[0].host='readarr.{{ domain_name }}',\
+            ingress.main.hosts[0].paths[0].path='/',\
+            ingress.main.hosts[0].paths[0].pathType='Prefix',\
+            ingress.main.hosts[0].paths[0].service.name=readarr,\
+            ingress.main.hosts[0].paths[0].service.port=8787"
 
       - debug:
           msg: >
-            You can log into readarr at '{{ ip }}:3009'.
+            You can log into readarr at 'readarr.{{ domain_name }}'.
+            '{{ dir_home }}' from the host is available under '/media' and
+            can be used by the application.
+
+    - name: Install calibre-web
+      block:
+      - name: Install/Upgrade the calibre-web chart
+        include_tasks: tasks-install-chart.yaml
+        # https://artifacthub.io/packages/helm/k8s-at-home/calibre-web
+        vars:
+          repo_name: k8s-at-home
+          repo_link: https://k8s-at-home.com/charts/
+          install_namespace: "{{ namespace_generic_services }}"
+          release_name: calibre-web
+          chart_name: calibre-web
+          # runAsUser=1000 gives write access on the pod
+          # 568 is the default user ID, added to the groups cause why not
+          set_options: "--set \
+            controller.type=statefulset,\
+            common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
+            env.PUID=1000,\
+            env.PGID=568,\
+            persistence.config.enabled=yes,\
+            persistence.media.enabled=yes,\
+            persistence.media.type=hostPath,\
+            persistence.media.mountPath={{ dir_mount_path }},\
+            persistence.media.hostPath={{ dir_minikube_mount }},\
+            ingress.main.enabled=true,\
+            ingress.main.primary=false,\
+            ingress.main.ingressClassName=nginx,\
+            ingress.main.hosts[0].host='calibre-web.{{ domain_name }}',\
+            ingress.main.hosts[0].paths[0].path='/',\
+            ingress.main.hosts[0].paths[0].pathType='Prefix',\
+            ingress.main.hosts[0].paths[0].service.name=calibre-web,\
+            ingress.main.hosts[0].paths[0].service.port=8083"
+
+      - debug:
+          msg: >
+            You can log into calibre-web at 'calibre-web.{{ domain_name }}'.
             '{{ dir_home }}' from the host is available under '/media' and
             can be used by the application.
 
@@ -421,60 +436,15 @@
           service_file_name: calibre.service
           service_file_location_base: /etc/systemd/system/
           service_namespace: "{{ namespace_generic_services }}"
-          host_port: 3010
+          host_port: 3002
 
       - include_tasks: tasks-allow-ports.yaml
         vars:
           ports:
-            - "3010"
+            - "3002"
 
       - debug:
           msg: >
-            You can log into calibre at '{{ ip }}:3010'.
-            '{{ dir_home }}' from the host is available under '/media' and
-            can be used by the application.
-
-
-    - name: Install calibre-web
-      block:
-      - name: Install/Upgrade the calibre-web chart
-        include_tasks: tasks-install-chart.yaml
-        # https://artifacthub.io/packages/helm/k8s-at-home/calibre-web
-        vars:
-          repo_name: k8s-at-home
-          repo_link: https://k8s-at-home.com/charts/
-          install_namespace: "{{ namespace_generic_services }}"
-          release_name: calibre-web
-          chart_name: calibre-web
-          # runAsUser=1000 gives write access on the pod
-          # 568 is the default user ID, added to the groups cause why not
-          set_options: "--set \
-            controller.type=statefulset,\
-            common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
-            env.PUID=1000,\
-            env.PGID=568,\
-            persistence.config.enabled=yes,\
-            persistence.media.enabled=yes,\
-            persistence.media.type=hostPath,\
-            persistence.media.mountPath={{ dir_mount_path }},\
-            persistence.media.hostPath={{ dir_minikube_mount }}"
-
-      - name: Expose calibre-web service
-        include_tasks: tasks-kubernetes-port-forward-service.yaml
-        vars:
-          service_name: calibre-web
-          service_file_name: calibre-web.service
-          service_file_location_base: /etc/systemd/system/
-          service_namespace: "{{ namespace_generic_services }}"
-          host_port: 3011
-
-      - include_tasks: tasks-allow-ports.yaml
-        vars:
-          ports:
-            - "3011"
-
-      - debug:
-          msg: >
-            You can log into calibre-web at '{{ ip }}:3011'.
+            You can log into calibre at '{{ ip }}:3002'.
             '{{ dir_home }}' from the host is available under '/media' and
             can be used by the application.
