@@ -98,11 +98,14 @@ Highly opinionated setup catered to my needs
       - Click on ``Allow ebook viewer``
       - Change password to something more secure
 
-  - ##### Setup Radarr/Sonarr/Readarr
-    - Categories
-      |Radarr  |Sonarr    |Readarr|
-      |--------|----------|-------|
-      | Movies | TV Shows | Books |
+  - ##### Setup Radarr/Sonarr/Readarr/Lidarr
+    - Service function
+      | Service | Purpose  |
+      |---------|----------|
+      | Readarr | Books    |
+      | Sonarr  | TV Shows |
+      | Radarr  | Movies   |
+      | Lidarr  | Music    |
     - Go to ``Settings`` and click on ``Show Advanced``
     - Enable authentication
       - Go to ``Settings > General``
@@ -117,9 +120,12 @@ Highly opinionated setup catered to my needs
       - Uncheck the ``Remove Completed`` option.
         - When enabled, this seems to delete the downloaded files sometimes. Not sure why.
     - Set the root directories to be the following
-      - Radarr: ``/media/data/movies/``
-      - Sonarr: ``/media/data/shows/``
-      - Readarr: ``/media/data/books/``
+      | Service | Root Directory          |
+      |---------|-------------------------|
+      | Readarr | ``/media/data/books/``  |
+      | Sonarr  | ``/media/data/shows/``  |
+      | Radarr  | ``/media/data/movies/`` |
+      | Lidarr  | ``/media/data/music/``  |
     - Readarr specific config
       - Go to ``Settings > Media Management``
         - Add root folder
@@ -149,6 +155,11 @@ Highly opinionated setup catered to my needs
           Internet Archive
           MovieTorrent
           Zooqle
+          BT.etree
+          MixtapeTorrent
+          Nipponsei
+          NoNaMe Club
+          Underverse
           ```
         - Anime
           ```
@@ -222,6 +233,7 @@ Highly opinionated setup catered to my needs
       | radarr      | Ingress        | ``radarr.<DOMAIN_NAME>``           |  80                              |
       | sonarr      | Ingress        | ``sonarr.<DOMAIN_NAME>``           |  80                              |
       | readarr     | Ingress        | ``readarr.<DOMAIN_NAME>``          |  80                              |
+      | lidarr      | Ingress        | ``lidarr.<DOMAIN_NAME>``           |  80                              |
       | calibre-web | Ingress        | ``calibre-web.<DOMAIN_NAME>``      |  80                              |
       | calibre     | LAN            | ``<LAN_IP>:3002``                  | 3002                             |
       | squid       | LAN            | ``<LAN_IP>:3128``                  | 3128                             |

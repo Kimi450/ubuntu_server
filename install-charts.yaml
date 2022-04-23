@@ -366,6 +366,45 @@
             '{{ dir_home }}' from the host is available under '/media' and
             can be used by the application.
 
+    - name: Install lidarr
+      block:
+      - name: Install/Upgrade the lidarr chart
+        include_tasks: tasks-install-chart.yaml
+        # https://artifacthub.io/packages/helm/k8s-at-home/lidarr
+        vars:
+          repo_name: k8s-at-home
+          repo_link: https://k8s-at-home.com/charts/
+          install_namespace: "{{ namespace_generic_services }}"
+          release_name: lidarr
+          chart_name: lidarr
+          # runAsUser=1000 gives write access on the pod
+          # 568 is the default user ID, added to the groups cause why not
+          set_options: "--set \
+            controller.type=statefulset,\
+            common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
+            common.podSecurityContext.runAsUser=1000,\
+            common.podSecurityContext.runAsGroup=568,\
+            common.podSecurityContext.fsGroup=568,\
+            persistence.config.enabled=yes,\
+            persistence.media.enabled=yes,\
+            persistence.media.type=hostPath,\
+            persistence.media.mountPath={{ dir_mount_path }},\
+            persistence.media.hostPath={{ dir_minikube_mount }},\
+            ingress.main.enabled=true,\
+            ingress.main.primary=false,\
+            ingress.main.ingressClassName=nginx,\
+            ingress.main.hosts[0].host='lidarr.{{ domain_name }}',\
+            ingress.main.hosts[0].paths[0].path='/',\
+            ingress.main.hosts[0].paths[0].pathType='Prefix',\
+            ingress.main.hosts[0].paths[0].service.name=lidarr,\
+            ingress.main.hosts[0].paths[0].service.port=8686"
+
+      - debug:
+          msg: >
+            You can log into lidarr at 'lidarr.{{ domain_name }}'.
+            '{{ dir_home }}' from the host is available under '/media' and
+            can be used by the application.
+
     - name: Install calibre-web
       block:
       - name: Install/Upgrade the calibre-web chart

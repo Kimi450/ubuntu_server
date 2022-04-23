@@ -13,6 +13,7 @@
         dir_data_shows: /home/kimi450/data/shows
         dir_data_games: /home/kimi450/data/games
         dir_data_books: /home/kimi450/data/books
+        dir_data_music: /home/kimi450/data/music
         dir_data_downloads: /home/kimi450/data/downloads
         dir_repos: /home/kimi450/repos
         dir_minikube_mount: /minikube-host
@@ -82,6 +83,7 @@
         - "{{ dir_data_shows }}"
         - "{{ dir_data_games }}"
         - "{{ dir_data_books }}"
+        - "{{ dir_data_music }}"
         - "{{ dir_data_downloads }}"
 
     - name: Setup the bashrc file and the vimrc file
