@@ -226,22 +226,22 @@ Highly opinionated setup catered to my needs
       - ``*.<DOMAIN_NAME>``
       - ``<DOMAIN_NAME>``
 
-      | Service     | Default access | Where                              | Port to be forwarded from server |
-      |-------------|----------------|------------------------------------|----------------------------------|
-      | ssh         | ssh            | ``<LAN_IP>`` or ``<DOMAIN_NAME>``  |  22                              |
-      | minikube    | api-access     | ``<LAN_IP>`` or ``<DOMAIN_NAME>``  |  3001                            |
-      | grafana     | Ingress        | ``grafana.<DOMAIN_NAME>``          |  80                              |
-      | jellyfin    | Ingress        | ``jellyin.<DOMAIN_NAME>``          |  80                              |
-      | prowlarr    | Ingress        | ``prowlarr.<DOMAIN_NAME>``         |  80                              |
-      | bazarr      | Ingress        | ``bazarr.<DOMAIN_NAME>``           |  80                              |
-      | radarr      | Ingress        | ``radarr.<DOMAIN_NAME>``           |  80                              |
-      | sonarr      | Ingress        | ``sonarr.<DOMAIN_NAME>``           |  80                              |
-      | readarr     | Ingress        | ``readarr.<DOMAIN_NAME>``          |  80                              |
-      | lidarr      | Ingress        | ``lidarr.<DOMAIN_NAME>``           |  80                              |
-      | librespeed  | Ingress        | ``librespeed.<DOMAIN_NAME>``       |  80                              |
-      | calibre-web | Ingress        | ``calibre-web.<DOMAIN_NAME>``      |  80                              |
-      | calibre     | LAN            | ``<LAN_IP>:3002``                  | 3002                             |
-      | squid       | LAN            | ``<LAN_IP>:3128``                  | 3128                             |
+      | Service     | Default access | Where                                       | Port to be forwarded from server |
+      |-------------|----------------|---------------------------------------------|----------------------------------|
+      | ssh         | ssh            | ``<LAN_IP>`` or ``<DOMAIN_NAME>``           |  22                              |
+      | minikube    | api-access     | ``<LAN_IP>`` or ``<DOMAIN_NAME>``           |  3001                            |
+      | squid       | proxy          | ``<LAN_IP>:3128`` or ``<DOMAIN_NAME>:3128`` | 3128                             |
+      | grafana     | Ingress        | ``grafana.<DOMAIN_NAME>``                   |  80                              |
+      | jellyfin    | Ingress        | ``jellyin.<DOMAIN_NAME>``                   |  80                              |
+      | prowlarr    | Ingress        | ``prowlarr.<DOMAIN_NAME>``                  |  80                              |
+      | bazarr      | Ingress        | ``bazarr.<DOMAIN_NAME>``                    |  80                              |
+      | radarr      | Ingress        | ``radarr.<DOMAIN_NAME>``                    |  80                              |
+      | sonarr      | Ingress        | ``sonarr.<DOMAIN_NAME>``                    |  80                              |
+      | readarr     | Ingress        | ``readarr.<DOMAIN_NAME>``                   |  80                              |
+      | lidarr      | Ingress        | ``lidarr.<DOMAIN_NAME>``                    |  80                              |
+      | librespeed  | Ingress        | ``librespeed.<DOMAIN_NAME>``                |  80                              |
+      | calibre-web | Ingress        | ``calibre-web.<DOMAIN_NAME>``               |  80                              |
+      | calibre     | LAN            | ``<LAN_IP>:3002``                           | 3002                             |
 
       NOTE: Security is an unkown when exposing a service to the internet.
 
