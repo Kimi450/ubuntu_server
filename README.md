@@ -159,15 +159,11 @@ Highly opinionated setup catered to my needs
           Internet Archive
           MovieTorrent
           Zooqle
-          BT.etree
-          MixtapeTorrent
-          Nipponsei
           NoNaMe Club
           Underverse
           ```
         - Anime
           ```
-          AniRena
           Bangumi Moe
           AniSource
           AnimeClipse
