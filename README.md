@@ -59,15 +59,18 @@ Highly opinionated setup catered to my needs
       - [Node Exporter for Prometheus Dashboard EN v20201010](https://grafana.com/grafana/dashboards/11074)
 
   - ##### Setup Jellyfin
-    - Setting up a login
-    - Point Jellyfin to use the directories mentioned in the playbooks for shows and movies.
+    - Initial setup is just following on-screen instructions.
+      - If asked to select server, delete it and refresh the page.
+    - Point Jellyfin to use the directories mentioned in the playbooks for shows, movies and music.
       - By default, on the Jellyfin pod, the directories it will be:
         ```
         /media/data/shows
         /media/data/movies
+        /media/data/music
         ```
     - Add any other config required.
       - Recommend setting up the Open Subtitles plugin which requires creating an account on [their website](https://www.opensubtitles.org/en/?).
+      - If you can figure out hardware acceleration, let me know.
 
   - ##### Setup qBittorrent
     - Change the default login details
