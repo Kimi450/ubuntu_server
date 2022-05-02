@@ -69,6 +69,7 @@
           - mesa-utils # for GPU tests
           - cpustat # for CPU logs
           - xclip # for clipboard
+          - intel-gpu-tools # for intel GPU usage
         state: latest
 
     - name: Create directories
