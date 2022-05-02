@@ -13,6 +13,7 @@
       prompt: Domain name to be used
       private: no
   tasks:
+    # NOTE: fsgroup is not supported for hostpaths, but it is still present here
     - name: Create namespaces namespace
       shell: "kubectl create namespace {{ item }}"
       ignore_errors: True
@@ -100,8 +101,12 @@
           install_namespace: "{{ namespace_generic_services }}"
           release_name: jellyfin
           chart_name: jellyfin
+          # "common.securityContext.privileged=true" is to allow the pod
+          # to be able to use the dev mount to access /dev/dri/renderD128 for
+          # hwa
           set_options: "--set \
             controller.type=statefulset,\
+            common.securityContext.privileged=true,\
             persistence.config.enabled=yes,\
             persistence.cache.enabled=true,\
             persistence.cache.accessMode=ReadWriteOnce,\
@@ -110,6 +115,10 @@
             persistence.media.type=hostPath,\
             persistence.media.mountPath={{ dir_mount_path }},\
             persistence.media.hostPath={{ dir_minikube_mount }},\
+            persistence.dev.enabled=yes,\
+            persistence.dev.type=hostPath,\
+            persistence.dev.mountPath=/dev,\
+            persistence.dev.hostPath=/dev,\
             ingress.main.enabled=true,\
             ingress.main.primary=false,\
             ingress.main.ingressClassName=nginx,\

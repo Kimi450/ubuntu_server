@@ -70,8 +70,15 @@ Highly opinionated setup catered to my needs
         ```
     - Add any other config required.
       - Recommend setting up the Open Subtitles plugin which requires creating an account on [their website](https://www.opensubtitles.org/en/?).
-      - If you can figure out hardware acceleration, let me know.
-
+      - For Hardware acceleration go to ``Admin > Dashboard > Playback``
+          - Enable ``Hardware acceleration``
+          - Select ``Video Acceleration API (VAAPI)`` which is setup already to use the **integrated Intel GPU**. Not tested with anything else (like a dedicated AMD/Nvidea GPU)
+            - You should see CPU usage drop and GPU usage go up, disable it if you dont or troubleshoot.
+            - You can use the ``intel-gpu-tools`` package to monitor at least the intel GPU by running the command below on the host:
+              ``sudo intel_gpu_top``
+          - Select all (recommended) or only some of the formats for which hardware acceleration should be enabled
+          - Defaults to CPU/software encoding if hardware acceleration does not work for a file, I think.
+          - More infomarmation on their [Jellyfin's page for Hardware Acceleration](https://jellyfin.org/docs/general/administration/hardware-acceleration.html)
   - ##### Setup qBittorrent
     - Change the default login details
       - Go to ``Tools > Options > Web UI > Authentication``
