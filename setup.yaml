@@ -70,6 +70,7 @@
           - cpustat # for CPU logs
           - xclip # for clipboard
           - intel-gpu-tools # for intel GPU usage
+          - nethogs # for network usage
         state: latest
 
     - name: Create directories
