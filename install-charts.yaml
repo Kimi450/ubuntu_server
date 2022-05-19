@@ -414,6 +414,36 @@
             '{{ dir_home }}' from the host is available under '/media' and
             can be used by the application.
 
+    - name: Install ombi
+      # https://artifacthub.io/packages/helm/k8s-at-home/ombi
+      block:
+      - name: Install/Upgrade the ombi chart
+        include_tasks: tasks-install-chart.yaml
+        vars:
+          repo_name: k8s-at-home
+          repo_link: https://k8s-at-home.com/charts/
+          install_namespace: "{{ namespace_generic_services }}"
+          release_name: ombi
+          chart_name: ombi
+          set_options: "--set \
+            controller.type=statefulset,\
+            persistence.config.enabled=yes,\
+            ingress.main.enabled=true,\
+            ingress.main.primary=false,\
+            ingress.main.ingressClassName=nginx,\
+            ingress.main.hosts[0].host='ombi.{{ domain_name }}',\
+            ingress.main.hosts[0].paths[0].path='/',\
+            ingress.main.hosts[0].paths[0].pathType='Prefix',\
+            ingress.main.hosts[0].paths[0].service.name=ombi,\
+            ingress.main.hosts[0].paths[0].service.port=3579"
+
+      - debug:
+          msg: >
+              You can log into ombi at 'ombi.{{ domain_name }}'.
+              '{{ dir_home }}' is available under '/media' and can be used by
+              ombi. If need be, delete any existing server and go to the
+              URL mention above once again to setup a new server.
+
     - name: Install librespeed
       block:
       - name: Install/Upgrade the librespeed chart

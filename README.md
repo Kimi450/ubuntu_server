@@ -151,13 +151,50 @@ Highly opinionated setup catered to my needs
             - Calibre Password: ``<calibre_password>``
         - Enabled ``Rename Books`` and use the defaults
 
+  - ##### Setup Ombi
+    - One stop shop for Sonarr/Radarr/Lidarr requests
+    - Get the API keys for Jellyfin, Sonarr and Radarr
+      - Jellyfin
+        - Go to ``Admin > Dashboard > API Keys``
+        - Generate a new API key with an appropriate name
+      - Sonarr/Radarr/Lidarr
+        - Use the API tokens from the respective services, found under ``Settings > General > Security > API Key`` 
+    - Use the API key for Jellyfin at the first time setup, dont use SSL.
+      | Service Name | Port |
+      |--------------|------|
+      | jellyfin     | 8096 |
+
+    - Set credentials for login
+    - Go to ``Settings``
+      - Use the correct API keys, hostnames and ports for the services
+          | Service Name | Port |
+          |--------------|------|
+          | sonarr       | 8989 |
+          | radarr       | 7878 |
+          | lidarr       | 8686 |
+      - Click on the ``Load Profiles`` and ``Load Root Folders`` buttons and use the appropriate defaults as used in the services seen [here](#setup-radarrsonarrreadarrlidarr).
+      - Setup ``Movies`` using ``Radarr``
+      - Setup  ``TV`` using ``Sonarr``
+        - Enable the ``Enable season folders`` option
+        - Enable the ``V3`` option
+      - Setup  ``Music`` using ``Lidarr``
+      - Dont forget to click on ``Enable`` for each of those setups as well
+    - Go to ``Users``
+      - Setup additional users
+      - Give the following roles to *trusted* users for convinience
+        ```
+        AutoApproveMovie
+        AutoApproveMusic
+        AutoApproveTv
+        ```
+
   - ##### Setup Prowlarr
     - Enable authentication
       - Go to ``Settings > General``
       - Set Authentication to `Forms (Login Page)`
       - Set username and password for access
     - Follow the [official Quick Start Guide](https://wiki.servarr.com/prowlarr/quick-start-guide)
-      - Add all the indexers you wish to use, some good ones listed below. Find more indexers on [Prolarr's Supported Indexers page](https://wiki.servarr.com/prowlarr/supported-indexers).
+      - Add all the indexers you wish to use, some good ones listed below. Find more indexers on [Prowlarr's Supported Indexers page](https://wiki.servarr.com/prowlarr/supported-indexers).
         - Standard
           ```
           1337x
@@ -239,6 +276,7 @@ Highly opinionated setup catered to my needs
       | squid       | proxy          | ``<LAN_IP>:3128`` or ``<DOMAIN_NAME>:3128`` | 3128                             |
       | grafana     | Ingress        | ``grafana.<DOMAIN_NAME>``                   |  80                              |
       | jellyfin    | Ingress        | ``jellyin.<DOMAIN_NAME>``                   |  80                              |
+      | ombi        | Ingress        | ``ombi.<DOMAIN_NAME>``                      |  80                              |
       | prowlarr    | Ingress        | ``prowlarr.<DOMAIN_NAME>``                  |  80                              |
       | bazarr      | Ingress        | ``bazarr.<DOMAIN_NAME>``                    |  80                              |
       | radarr      | Ingress        | ``radarr.<DOMAIN_NAME>``                    |  80                              |
