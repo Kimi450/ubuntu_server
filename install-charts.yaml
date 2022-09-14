@@ -490,8 +490,8 @@
           set_options: "--set \
             controller.type=statefulset,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
-            env.PUID=1000,\
-            env.PGID=568,\
+            env.PUID=\"1000\",\
+            env.PGID=\"568\",\
             persistence.config.enabled=yes,\
             persistence.media.enabled=yes,\
             persistence.media.type=hostPath,\
@@ -528,8 +528,8 @@
           set_options: "--set \
             controller.type=statefulset,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
-            env.PUID=1000,\
-            env.PGID=568,\
+            env.PUID=\"1000\",\
+            env.PGID=\"568\",\
             persistence.config.enabled=yes,\
             persistence.media.enabled=yes,\
             persistence.media.type=hostPath,\

@@ -36,7 +36,7 @@
           lineinfile: 
             path: "{{ service_file_location }}"
             regexp: '^ExecStartPre=(.*)$' 
-            line: 'ExecStartPre=/usr/bin/minikube start --mount --mount-string "{{ dir_home }}:{{ dir_minikube_mount }}" --cpus="max" --memory="6000" --disk-size="50gb" --nodes=1'
+            line: 'ExecStartPre=/usr/bin/minikube start --mount --mount-string "{{ dir_home }}:{{ dir_minikube_mount }}" --cpus="max" --memory="6000" --disk-size="50gb" --nodes=1 --cert-expiration=87660h0m0s'
             backrefs: yes
 
         - name: "Service file edit: Add reverse proxy script"
