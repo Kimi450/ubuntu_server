@@ -74,12 +74,14 @@ Highly opinionated setup catered to my needs
           - Enable ``Hardware acceleration``
           - Select ``Video Acceleration API (VAAPI)`` which is setup already to use the **integrated Intel GPU**. Not tested with anything else (like a dedicated AMD/Nvidea GPU)
             - You should see CPU usage drop and GPU usage go up, disable it if you dont or troubleshoot.
-            - You can use the ``intel-gpu-tools`` package to monitor at least the intel GPU by running the command below on the host:
+            - You can use the ``intel-gpu-tools`` package to monitor (notice GPU usage when hardware encoding is enabled, and no GPU usage when it is disabled) at least the intel GPU by running the command below on the host:
               ``sudo intel_gpu_top``
-          - Select all (recommended) or only some of the formats for which hardware acceleration should be enabled
+          - Select the formats for which hardware acceleration should be enabled
+            - Recommend not selecting ```HEVC 10bit``` because for some reason that breaks it
           - Defaults to CPU/software encoding if hardware acceleration does not work for a file, I think.
           - More infomarmation on their [Jellyfin's page for Hardware Acceleration](https://jellyfin.org/docs/general/administration/hardware-acceleration.html)
   - ##### Setup qBittorrent
+    - Default login credentials are admin/adminadmin
     - Change the default login details
       - Go to ``Tools > Options > Web UI > Authentication``
     - Set default download location to one the mentioned directories (or make sure to put it in the right directory when downloading for ease)
@@ -132,13 +134,15 @@ Highly opinionated setup catered to my needs
       - Uncheck the ``Remove Completed`` option.
         - When enabled, this seems to delete the downloaded files sometimes. Not sure why.
     - Set the root directories to be the following
+      - Go to ``Settings > Media Management``
 
-      | Service | Root Directory          |
-      |---------|-------------------------|
-      | Readarr | ``/media/data/books/``  |
-      | Sonarr  | ``/media/data/shows/``  |
-      | Radarr  | ``/media/data/movies/`` |
-      | Lidarr  | ``/media/data/music/``  |
+        | Service | Root Directory          |
+        |---------|-------------------------|
+        | Readarr | ``/media/data/books/``  |
+        | Sonarr  | ``/media/data/shows/``  |
+        | Radarr  | ``/media/data/movies/`` |
+        | Lidarr  | ``/media/data/music/``  |
+      - Enable renaming
 
     - Readarr specific config
       - Go to ``Settings > Media Management``
@@ -205,14 +209,10 @@ Highly opinionated setup catered to my needs
           YourBittorrent
           Internet Archive
           MovieTorrent
-          Zooqle
-          NoNaMe Club
-          Underverse
           ```
         - Anime
           ```
           Bangumi Moe
-          AniSource
           AnimeClipse
           comicat
           Nyaa.si
