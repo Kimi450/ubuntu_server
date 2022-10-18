@@ -202,21 +202,13 @@ Highly opinionated setup catered to my needs
         - Standard
           ```
           1337x
+          Rarbg
+          showRSS
           LimeTorrents
-          Torlock
-          TorrentGalaxy
-          TorrentProject2
-          YourBittorrent
-          Internet Archive
-          MovieTorrent
           ```
         - Anime
           ```
-          Bangumi Moe
-          AnimeClipse
-          comicat
           Nyaa.si
-          Tokyo Toshokan
           ```
     - Add Sonarr, Radarr and Readarr to the ``Settings > Apps > Application`` section using the correct API token and kubernetes service names
       - By default the services will be ``http://sonarr:8989``, ``http://radarr:7878`` and ``http://readarr:8787``
