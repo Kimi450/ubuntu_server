@@ -21,10 +21,9 @@ Highly opinionated setup catered to my needs
 ## On the client
 
 - #### Enable passwordless ssh access from remote machine to server (required for ansible to work)
-  https://www.linuxbabe.com/linux-server/setup-passwordless-ssh-login
   ```
-  ssh-keygen -t rsa -b 4096
-  file ~/.ssh/id_rsa
+  ssh-keygen -t ed25519 -C "primary-key"
+  file ~/.ssh/id_ed25519.pub
   ssh-copy-id -p <ssh-port> <remote-user>@<server-ip>
   ```
 
