@@ -2,9 +2,6 @@
 - name: Install docker, kubectl and helm
   hosts: all
   gather_facts: false
-  remote_user: kimi450
-  vars:
-    remote_user: kimi450
   tasks:
     - name: Install docker
       # https://docs.docker.com/engine/install/ubuntu/
@@ -21,10 +18,10 @@
           path: get-docker.sh
           state: absent
 
-      - name: Adding existing user "{{ remote_user }}" to group docker
+      - name: Adding existing user "{{ ansible_user }}" to group docker
         become: true
         user:
-          name: "{{ remote_user }}"
+          name: "{{ ansible_user }}"
           groups: docker
           append: yes
       

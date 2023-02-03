@@ -2,10 +2,8 @@
 - name: Install and configure samba
   hosts: all
   gather_facts: True
-  remote_user: kimi450
   vars:
     share_directory: /home/kimi450/
-    remote_user: kimi450
     config_location: /etc/samba/smb.conf
     share_name: sambashare
   vars_prompt:
@@ -49,10 +47,10 @@
 
     - name: Set password
       become: True
-      shell: "(echo \"{{ smb_password }}\"; echo \"{{ smb_password }}\") | smbpasswd -s -a {{ remote_user }}"
+      shell: "(echo \"{{ smb_password }}\"; echo \"{{ smb_password }}\") | smbpasswd -s -a {{ ansible_user }}"
 
     - debug:
         msg: >-
           You can add the file share with server IP
           "{{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}" and share name "{{ share_name }}", and login using
-          {{ remote_user }}/{{ smb_password }}. More info: https://ubuntu.com/tutorials/install-and-configure-samba#4-setting-up-user-accounts-and-connecting-to-share
+          {{ ansible_user }}/{{ smb_password }}. More info: https://ubuntu.com/tutorials/install-and-configure-samba#4-setting-up-user-accounts-and-connecting-to-share

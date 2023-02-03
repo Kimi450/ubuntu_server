@@ -3,9 +3,7 @@
   # https://community.cloudflare.com/t/update-dns-records-via-api/132221
   hosts: all
   gather_facts: true
-  remote_user: kimi450
   vars:
-    remote_user: kimi450
     service_file_name: cloudflare-dns-updater.service
     service_file_location: /etc/systemd/system/cloudflare-dns-updater.service
     timer_file_name: cloudflare-dns-updater.timer
@@ -59,7 +57,7 @@
           ExecStart=bash {{ service_script_location }}
           Restart=on-failure
           Type=oneshot
-          User={{ remote_user }}
+          User={{ ansible_user }}
 
           [Install]
           WantedBy=multi-user.target

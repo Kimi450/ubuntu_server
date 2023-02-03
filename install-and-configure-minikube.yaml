@@ -2,7 +2,6 @@
 - name: Install and configure Minikube
   hosts: all
   gather_facts: false
-  remote_user: kimi450
   vars:
     service_file_location: /etc/systemd/system/minikube.service
     service_name_minikube: minikube.service

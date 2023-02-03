@@ -2,9 +2,7 @@
 - name: Setup SSL for HTTPS using letsencrypt and certbot
   hosts: all
   gather_facts: false
-  remote_user: kimi450
   vars:
-    remote_user: kimi450
     dir_cloudfare_config_ini: "{{ dir_home }}/.secrets/certbot/"
     name_cloudfare_config_ini: cloudfare.ini
     domain_name: "*.kimi450.com"

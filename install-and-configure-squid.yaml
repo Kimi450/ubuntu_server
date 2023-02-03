@@ -3,7 +3,6 @@
   # https://linuxize.com/post/how-to-install-and-configure-squid-proxy-on-ubuntu-20-04/
   hosts: all
   gather_facts: True
-  remote_user: kimi450
   vars:
     config_location: /etc/squid/squid.conf
     squid_port: 3128

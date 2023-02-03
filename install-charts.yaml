@@ -2,7 +2,6 @@
 - name: Install basic charts
   hosts: all
   gather_facts: true
-  remote_user: kimi450
   vars:
     namespace_user: kimi450
     namespace_monitoring: monitoring

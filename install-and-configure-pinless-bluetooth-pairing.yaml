@@ -2,7 +2,6 @@
 - name: Install and configure pinless bluetooth pairing
   hosts: all
   gather_facts: true
-  remote_user: kimi450
   vars:
     bt_agent_service_location: /etc/systemd/system/bt-agent.service
     bt_agent_service_script_location: /usr/local/bin/remove-paired-devices.sh
@@ -12,8 +11,6 @@
     bluetooth_service_name: bluetooth.service
     pulseaudio_system_service_location: /etc/systemd/system/pulseaudio.service
     pulseaudio_system_service_name: pulseaudio.service
-    remote_user: kimi450
-
   tasks:
     # https://www.raspberrypi.org/forums/viewtopic.php?t=235519
     - name: Required dependencies
@@ -47,10 +44,10 @@
             service_name: "{{ bluetooth_service_name }}"
             become: True
 
-    - name: "Add {{ remote_user }} to audio group"
+    - name: "Add {{ ansible_user }} to audio group"
       become: true
       ansible.builtin.user:
-        name: "{{ remote_user }}"
+        name: "{{ ansible_user }}"
         groups: audio
         append: yes
 
@@ -80,7 +77,7 @@
               ExecStart=/usr/bin/pulseaudio --daemonize=no --log-target=journal
               Restart=on-failure
               Type=simple
-              User={{ remote_user }}
+              User={{ ansible_user }}
 
               [Install]
               WantedBy=multi-user.target
@@ -150,11 +147,11 @@
             service_name: "{{ bt_agent_service_name }}"
             become: True
 
-    - name: "Setup alsa-restore for the {{ remote_user }}"
+    - name: "Setup alsa-restore for the {{ ansible_user }}"
       # https://askubuntu.com/questions/132440/headphone-jack-not-working
       # https://bbs.archlinux.org/viewtopic.php?id=147206
       # alsa-restore only works on root as its a system service,
-      # to make it work for {{ remote_user }}, a systemd service on the
+      # to make it work for {{ ansible_user }}, a systemd service on the
       # user level needs to be created. This way a restart will
       # fix audio issues
       become: True
@@ -165,11 +162,11 @@
             src: /lib/systemd/system/alsa-restore.service
             dest: /etc/systemd/system/alsa-restore.service
         
-        - name: "Edit service file to run as {{ remote_user }}"
+        - name: "Edit service file to run as {{ ansible_user }}"
           lineinfile: 
             path: "{{ loc_user_service }}"
             insertafter: '^\[Service\]$'
-            line: "User={{ remote_user }}"
+            line: "User={{ ansible_user }}"
 
         - name: Reload systemd service
           include_tasks: tasks-reload-systemd-service.yaml

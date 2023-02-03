@@ -2,9 +2,7 @@
 - name: Setup home server
   hosts: all
   gather_facts: false
-  remote_user: kimi450
   vars:
-    remote_user: kimi450
     vnc_password: kimi450
     vnc_display: 4
   tasks:
@@ -20,7 +18,7 @@
           - xfce4-goodies
 
     - name: Backup old config
-      command: mv /home/{{ remote_user }}/.vnc/xstartup /home/{{ remote_user }}/.vnc/xstartup.bak
+      command: mv /home/{{ ansible_user }}/.vnc/xstartup /home/{{ ansible_user }}/.vnc/xstartup.bak
       ignore_errors: True
 
     - name: Setup password
@@ -34,7 +32,7 @@
     - name: Copy over the new config
       copy:
         src: tightvnc-config/xstartup
-        dest: /home/{{ remote_user }}/.vnc/xstartup
+        dest: /home/{{ ansible_user }}/.vnc/xstartup
         mode: "755"
 
     - name: Copy over the service file for systemd

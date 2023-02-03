@@ -2,14 +2,12 @@
 - name: Remote access for minikube
   hosts: all
   gather_facts: true
-  remote_user: kimi450
   vars:
-    remote_user: kimi450
     temp_file_loc: /tmp/kubeconfig
   tasks:
     - name: Copy kubeconfig for edits
       copy:
-        src: "/home/{{ remote_user }}/.kube/config"
+        src: "/home/{{ ansible_user }}/.kube/config"
         dest: "{{ temp_file_loc }}"
         remote_src: true
 

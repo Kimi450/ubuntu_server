@@ -2,9 +2,7 @@
 - name: Install and configure spotifyd
   hosts: home-main
   gather_facts: false
-  remote_user: kimi450
   vars:
-    remote_user: kimi450
     repo_dir: /home/kimi450/repos/spotifyd
     systemd_file_location: /etc/systemd/system/
     init_volume: 69
@@ -74,4 +72,4 @@
 
     - name: Give user audio permissions
       become: true
-      shell: "adduser {{ remote_user }} audio"
+      shell: "adduser {{ ansible_user }} audio"
