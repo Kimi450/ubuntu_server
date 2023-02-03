@@ -1,1 +1,1 @@
-ansible-playbook setup.yaml --ask-become-pass -i hosts.yaml $@
+ansible-playbook setup.yaml -i hosts.yaml $@
