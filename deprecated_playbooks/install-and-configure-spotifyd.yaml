@@ -3,7 +3,7 @@
   hosts: home-main
   gather_facts: false
   vars:
-    repo_dir: /home/kimi450/repos/spotifyd
+    repo_dir: "{{ dir_repos }}/spotifyd"
     systemd_file_location: /etc/systemd/system/
     init_volume: 69
   vars_prompt:

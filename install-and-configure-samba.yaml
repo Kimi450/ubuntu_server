@@ -3,7 +3,7 @@
   hosts: all
   gather_facts: True
   vars:
-    share_directory: /home/kimi450/
+    share_directory: "{{ dir_home }}"
     config_location: /etc/samba/smb.conf
     share_name: sambashare
   tasks:
@@ -12,8 +12,7 @@
       become: True
       apt:
         update_cache: yes
-        pkg:
-          - samba 
+        pkg: samba
         state: latest
 
     - name: "Create {{ share_directory }} if it does not exist"

@@ -5,7 +5,6 @@ Highly opinionated setup catered to my needs
 
 - #### Install Ubuntu
   https://ubuntu.com/download/desktop
-  Expected user is: `kimi450`
 
 - #### Enable ssh server (required for ansible to work)
   https://linuxize.com/post/how-to-enable-ssh-on-ubuntu-18-04/

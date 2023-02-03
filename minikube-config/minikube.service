@@ -7,10 +7,10 @@ After=docker.service
 Type=simple 
 RemainAfterExit=no
 ExecStartPre=/usr/bin/minikube start
-ExecStart=echo placeholder
+ExecStart=PLACEHOLDER
 Restart=always
 RestartSec=5
-User=kimi450
+User=PLACEHOLDER
 TimeoutSec=36000
 
 [Install]

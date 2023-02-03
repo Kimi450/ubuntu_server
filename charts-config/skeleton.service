@@ -9,10 +9,10 @@ RemainAfterExit=no
 # After= didnt work
 # https://unix.stackexchange.com/questions/213185/restarting-systemd-service-on-dependency-failure
 ExecStartPre=minikube status 
-ExecStart=echo placeholder
+ExecStart=PLACEHOLDER
 Restart=always
 RestartSec=5
-User=kimi450
+User=PLACEHOLDER
 
 [Install]
 WantedBy=multi-user.target
