@@ -20,10 +20,6 @@
       command: mv /home/{{ ansible_user }}/.vnc/xstartup /home/{{ ansible_user }}/.vnc/xstartup.bak
       ignore_errors: True
 
-    - name: Generate password
-      shell: echo -n "$(date)" | sha256sum | cut -d " " -f 1
-      register: vnc_password
-
     - name: Setup password
       expect:
         command: vncpasswd
@@ -31,10 +27,6 @@
           Password: "{{ vnc_password }}"
           Verify: "{{ vnc_password }}"
           "Would you like to enter a view-only password (y/n)?": n
-
-    - name: Echo password to user
-      debug:
-        msg: "Your password to access VNC is '{{ vnc_password }}'"
 
     - name: Copy over the new config
       copy:
