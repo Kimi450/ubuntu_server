@@ -27,6 +27,12 @@ Highly opinionated setup catered to my needs
   ssh-copy-id -p <ssh-port> <remote-user>@<server-ip>
   ```
 
+  If youre using a machine that only allows for publickey auth, then you can upload your key that you just generated with the following command
+
+  ```
+  ssh-copy-id -i ~/.ssh/id_ed25519.pub -o 'IdentityFile ~/.ssh/<your-existing-private-key-for-access>.key' -p <ssh-port> <remote-user>@<server-ip>
+  ```
+
 - #### Update the hosts.yaml file to update the IP of the server
 
 - #### Install ansible
