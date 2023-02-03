@@ -7,19 +7,27 @@
     service_name_minikube: minikube.service
     port_expose_file_location: /etc/minikube-apiserver-port-forward.conf
   tasks:
+    - name: Get architecture
+      command: dpkg --print-architecture
+      register: architecture
+
+    - name: Generate minikube file name
+      command: "echo -n minikube_latest_{{ architecture.stdout }}.deb"
+      register: minikube_file_name
+
     - name: Install Minikube
       # https://minikube.sigs.k8s.io/docs/start/
       block:
       - name: Download minikube package
-        shell:  curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube_latest_amd64.deb
+        shell: "curl -LO https://storage.googleapis.com/minikube/releases/latest/{{ minikube_file_name.stdout }}"
 
       - name: Install minikube
         become: true
-        shell:  dpkg -i minikube_latest_amd64.deb
+        shell: "dpkg -i {{ minikube_file_name.stdout }}"
       
       - name: Delete minikube package
         file:
-          path: minikube_latest_amd64.deb
+          path: "{{ minikube_file_name.stdout }}"
           state: absent
 
     - name: Setup and enable systemd service
