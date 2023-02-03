@@ -55,28 +55,31 @@
     - name: Ensure all basic dependencies are present
       become: true
       apt:
-        update_cache: yes
-        pkg:
-          - git
-          - curl
-          - vim
-          - python3
-          - python3-pip
-          - htop
-          - lm-sensors
-          - stress
-          - vlc
-          - jq
-          - net-tools
-          - speedtest-cli
-          - w3m
-          - fio # for disk tests
-          - mesa-utils # for GPU tests
-          - cpustat # for CPU logs
-          - xclip # for clipboard
-          - intel-gpu-tools # for intel GPU usage
-          - nethogs # for network usage
+        pkg: "{{ item }}"
         state: latest
+      ignore_errors: yes
+      loop:
+        - git
+        - curl
+        - vim
+        - python3
+        - python3-pip
+        - htop
+        - lm-sensors
+        - stress
+        - vlc
+        - jq
+        - net-tools
+        - speedtest-cli
+        - w3m
+        - fio # for disk tests
+        - mesa-utils # for GPU tests
+        - cpustat # for CPU logs
+        - xclip # for clipboard
+        - nethogs # for network usage
+        - fzf # fuzzy find, to get a list of things to select from
+        - kubectx # MIGHT NOT BE FOUND
+        - intel-gpu-tools # for intel GPU usage, MIGHT NOT BE FOUND
 
     - name: Create directories
       file:
