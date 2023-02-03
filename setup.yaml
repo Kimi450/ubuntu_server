@@ -2,24 +2,23 @@
 - name: Setup home server
   hosts: all
   gather_facts: false
-  remote_user: kimi450
   vars:
     ssh_port: 22
   tasks:
     - name: Set shared facts
       set_fact:
-        user: kimi450
-        dir_home: /home/kimi450
-        dir_data: /home/kimi450/data
-        dir_data_movies: /home/kimi450/data/movies
-        dir_data_shows: /home/kimi450/data/shows
-        dir_data_games: /home/kimi450/data/games
-        dir_data_books: /home/kimi450/data/books
-        dir_data_music: /home/kimi450/data/music
-        dir_data_downloads: /home/kimi450/data/downloads
-        dir_repos: /home/kimi450/repos
-        dir_minikube_mount: /minikube-host
-        dir_mount_path: /media
+        user: "{{ ansible_user }}"
+        dir_home: "/home/{{ ansible_user }}"
+        dir_data: "/home/{{ ansible_user }}/data"
+        dir_data_movies: "/home/{{ ansible_user }}/data/movies"
+        dir_data_shows: "/home/{{ ansible_user }}/data/shows"
+        dir_data_games: "/home/{{ ansible_user }}/data/games"
+        dir_data_books: "/home/{{ ansible_user }}/data/books"
+        dir_data_music: "/home/{{ ansible_user }}/data/music"
+        dir_data_downloads: "/home/{{ ansible_user }}/data/downloads"
+        dir_repos: "/home/{{ ansible_user }}/repos"
+        dir_minikube_mount: "/minikube-host"
+        dir_mount_path: "/media"
 
     - name: "Change ssh port to {{ ssh_port }}"
       set_fact:
