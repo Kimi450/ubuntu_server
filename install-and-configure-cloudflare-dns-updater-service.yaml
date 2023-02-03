@@ -9,13 +9,6 @@
     timer_file_name: cloudflare-dns-updater.timer
     timer_file_location: /etc/systemd/system/cloudflare-dns-updater.timer
     service_script_location: /usr/local/bin/cloudflare-dns-record-update.sh
-  vars_prompt:
-    - name: cloudflare_zone_id
-      prompt: What is your Cloudflare Zone ID?
-      private: no
-    - name: cloudflare_auth_key
-      prompt: What is your Cloudflare Bearer token to view the zone and edit DNS records in it?
-      private: yes
   tasks:
     - name: Required dependencies
       become: true

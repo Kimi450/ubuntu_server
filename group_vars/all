@@ -1,0 +1,29 @@
+---
+# file: group_vars/all
+
+# Domain name to be used
+domain_name: 
+
+# Set you Cloudfare API token for editing zone DNS
+api_token: 
+
+# Set your Cloudflare Zone ID
+cloudflare_zone_id: 
+
+# Set your Cloudflare Bearer token to view the zone and edit DNS records in it
+cloudflare_auth_key: 
+
+# Set username for the squid access
+squid_username:
+
+# Set password for the squid access
+squid_password:
+
+# Set password for the sambashare
+smb_password: 
+
+# Set your Spotify username
+spotify_username:
+
+# Set your Spotify password
+spotify_password:

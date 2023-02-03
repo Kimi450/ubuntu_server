@@ -7,10 +7,6 @@
     namespace_monitoring: monitoring
     namespace_generic_services: generic-services
     grafana_admin_password: admin
-  vars_prompt:
-    - name: domain_name
-      prompt: Domain name to be used
-      private: no
   tasks:
     # NOTE: fsgroup is not supported for hostpaths, but it is still present here
     - name: Create namespaces namespace
