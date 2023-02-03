@@ -3,10 +3,10 @@
   hosts: all
   gather_facts: true
   vars:
-    namespace_user: kimi450
+    namespace_user: "{{ ansible_user }}"
     namespace_monitoring: monitoring
     namespace_generic_services: generic-services
-    grafana_admin_password: admin
+    default_grafana_admin_password: "{{ ansible_user }}"
   tasks:
     # NOTE: fsgroup is not supported for hostpaths, but it is still present here
     - name: Create namespaces namespace
@@ -77,13 +77,13 @@
             grafana.ingress.hosts={grafana.{{ domain_name }}},\
             grafana.ingress.enabled=true"
             
-      - name: "Reset Grafana admin password to '{{ grafana_admin_password }}'"  
-        shell: "kubectl exec -it -n {{ namespace_monitoring }} $(kubectl get pods -n {{ namespace_monitoring }} | grep grafana | awk '{print $1}') -c grafana -- grafana-cli admin reset-admin-password {{ grafana_admin_password }}"
+      default_- name: "Reset Grafana admin password to '{{ grafana_admin_password }}'"  
+        default_shell: "kubectl exec -it -n {{ namespace_monitoring }} $(kubectl get pods -n {{ namespace_monitoring }} | grep grafana | awk '{print $1}') -c grafana -- grafana-cli admin reset-admin-password {{ grafana_admin_password }}"
       
       - debug:
           msg: >
             You can log into Grafana at 'grafana.{{ domain_name }}' using
-            admin/{{ grafana_admin_password }}"
+            default_admin/{{ grafana_admin_password }}"
 
     - name: Install jellyfin
       # https://artifacthub.io/packages/helm/k8s-at-home/jellyfin
