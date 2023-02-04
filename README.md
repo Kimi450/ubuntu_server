@@ -1,5 +1,5 @@
 # Ubuntu Server
-Highly opinionated setup catered to my needs
+Highly opinionated server setup to cater to my needs
 
 ## On the server
 
@@ -32,8 +32,6 @@ Highly opinionated setup catered to my needs
   ssh-copy-id -i ~/.ssh/id_ed25519.pub -o 'IdentityFile ~/.ssh/<your-existing-private-key-for-access>.key' -p <ssh-port> <remote-user>@<server-ip>
   ```
 
-- #### Update the hosts.yaml file to update the IP of the server
-
 - #### Install ansible
   ```
   sudo apt update
@@ -42,16 +40,21 @@ Highly opinionated setup catered to my needs
   sudo apt install ansible
   ```
 
-- #### Get the ``Zone`` name from Cloudflare where your DNS entries are present and an API token that can edit DNS entries and read Zone information [OPTIONAL]
-  - https://dash.cloudflare.com/profile/api-tokens
-  - If not needed, remove the line below line from `setup.yaml`
-  `- import_playbook: install-and-configure-cloudflare-dns-updater-service.yaml`
+- #### Update the `hosts.yaml` file to fill out the template
+
+- #### Update the `group_vars/all` file to fill out the required information there
+
+  - ##### Get the `Zone` name from Cloudflare where your DNS entries are present and an API token that can edit DNS entries and read `Zone` information [OPTIONAL]
+    - https://dash.cloudflare.com/profile/api-tokens
+    - If not needed, remove the line below line from `setup.yaml`
+    `- import_playbook: install-and-configure-cloudflare-dns-updater-service.yaml`
 
 - #### Expose required ports on your router
   - Expose (port forward on your router) ports for the services you wish to have available externally based on the list [here](#exposed-services).
 
 - #### Run the ansible runner script
   - `./run.sh`
+  - You can add `-vvvv` to get more verbose output
 
 - #### After the installation
   - ##### Setup Grafana
