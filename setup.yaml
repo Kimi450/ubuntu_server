@@ -2,8 +2,6 @@
 - name: Setup home server
   hosts: all
   gather_facts: false
-  vars:
-    ssh_port: 22
   tasks:
     - name: Set shared facts
       set_fact:
@@ -19,10 +17,6 @@
         dir_repos: "/home/{{ ansible_user }}/repos"
         dir_minikube_mount: "/minikube-host"
         dir_mount_path: "/media"
-
-    - name: "Change ssh port to {{ ssh_port }}"
-      set_fact:
-        ansible_port: "{{ ssh_port }}"
 
     - name: Disable sleep
       # https://serverfault.com/questions/1045949/how-to-disable-suspend-on-ubuntu-20-04-systemd-via-cli
