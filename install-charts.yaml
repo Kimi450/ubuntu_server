@@ -10,8 +10,7 @@
   tasks:
     # NOTE: fsgroup is not supported for hostpaths, but it is still present here
     - name: Create namespaces namespace
-      shell: "kubectl create namespace {{ item }}"
-      ignore_errors: True
+      shell: "kubectl create namespace {{ item }} --dry-run=client -o yaml | kubectl apply -f -"
       with_items:
         - "{{ namespace_monitoring }}"
         - "{{ namespace_user }}"
@@ -45,6 +44,7 @@
         msg: You can access the ingress controller at port '8080' and '8081' for HTTP and HTTPS.
 
     - name: Install grafana
+      ignore_errors: yes
       block:
       - name: Install/Upgrade the grafana chart
         include_tasks: tasks-install-chart.yaml
@@ -87,6 +87,7 @@
 
     - name: Install jellyfin
       # https://artifacthub.io/packages/helm/k8s-at-home/jellyfin
+      ignore_errors: yes
       block:
       - name: Install/Upgrade the jellyfin chart
         include_tasks: tasks-install-chart.yaml
@@ -131,6 +132,7 @@
               URL mention above once again to setup a new server.
 
     - name: Install qbittorrent
+      ignore_errors: yes
       block:
       - name: Install/Upgrade the qbittorrent chart
         include_tasks: tasks-install-chart.yaml
@@ -172,6 +174,7 @@
             the directories under {{ dir_data }} will be picked up by Jellyfin.
 
     - name: Install prowlarr
+      ignore_errors: yes
       block:
       - name: Install/Upgrade the prowlarr chart
         include_tasks: tasks-install-chart.yaml
@@ -213,6 +216,7 @@
             the directories under {{ dir_data }} will be picked up by Jellyfin.
 
     - name: Install radarr
+      ignore_errors: yes
       block:
       - name: Install/Upgrade the radarr chart
         include_tasks: tasks-install-chart.yaml
@@ -253,6 +257,7 @@
             the directories under {{ dir_data }} will be picked up by Jellyfin.
 
     - name: Install sonarr
+      ignore_errors: yes
       block:
       - name: Install/Upgrade the sonarr chart
         include_tasks: tasks-install-chart.yaml
@@ -293,6 +298,7 @@
             the directories under {{ dir_data }} will be picked up by Jellyfin.
 
     - name: Install bazarr
+      ignore_errors: yes
       block:
       - name: Install/Upgrade the bazarr chart
         include_tasks: tasks-install-chart.yaml
@@ -332,6 +338,7 @@
             can be used by the application.
 
     - name: Install readarr
+      ignore_errors: yes
       block:
       - name: Install/Upgrade the readarr chart
         include_tasks: tasks-install-chart.yaml
@@ -371,6 +378,7 @@
             can be used by the application.
 
     - name: Install lidarr
+      ignore_errors: yes
       block:
       - name: Install/Upgrade the lidarr chart
         include_tasks: tasks-install-chart.yaml
@@ -411,6 +419,7 @@
 
     - name: Install ombi
       # https://artifacthub.io/packages/helm/k8s-at-home/ombi
+      ignore_errors: yes
       block:
       - name: Install/Upgrade the ombi chart
         include_tasks: tasks-install-chart.yaml
@@ -440,6 +449,7 @@
               URL mention above once again to setup a new server.
 
     - name: Install librespeed
+      ignore_errors: yes
       block:
       - name: Install/Upgrade the librespeed chart
         include_tasks: tasks-install-chart.yaml
@@ -470,6 +480,7 @@
             You can log into librespeed at 'librespeed.{{ domain_name }}'.
 
     - name: Install calibre-web
+      ignore_errors: yes
       block:
       - name: Install/Upgrade the calibre-web chart
         include_tasks: tasks-install-chart.yaml
@@ -508,6 +519,7 @@
             can be used by the application.
 
     - name: Install calibre
+      ignore_errors: yes
       block:
       - name: Install/Upgrade the calibre chart
         include_tasks: tasks-install-chart.yaml
