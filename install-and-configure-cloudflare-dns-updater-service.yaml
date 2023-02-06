@@ -103,21 +103,28 @@
 
           echo "${dns_records[@]}" | jq -c '.[]' | while read dns_record; do
               dns_record_name=$(echo "${dns_record}" | jq -r '.name')
-              dns_record_id=$(echo "${dns_record}" | jq -r '.id')
+              if [ "${dns_record_name}" != "*.{{ domain_name }}" ]; then
+                  echo "Skipping '${dns_record_name}' cause it doesnt match '*.{{ domain_name }}'"
+                  continue
+              fi
+
               dns_record_ip=$(echo "${dns_record}" | jq -r '.content')
+              if [ "${ip}" == "${dns_record_ip}" ]; then
+                  echo "IP address for ${dns_record_name} is already ${ip}"
+                  continue
+              fi
+              dns_record_id=$(echo "${dns_record}" | jq -r '.id')
               dns_record_type=$(echo "${dns_record}" | jq -r '.type')
               dns_record_ttl=$(echo "${dns_record}" | jq -r '.ttl')
               dns_record_proxied=$(echo "${dns_record}" | jq -r '.proxied')
+
               echo "DNS Record ${dns_record_name} has ID ${dns_record_id} and IP ${dns_record_ip}"
-              if [ "${ip}" != "${dns_record_ip}" ]; then
-                  echo "Updating ${dns_record_name} to ${ip}"
-                  curl -s -X PUT "${cloudflare_api_base_url}/zones/${zone_id}/dns_records/${dns_record_id}" \
-                    -H "Authorization: Bearer ${cloudflare_bearer_token}" \
-                    -H "Content-Type: application/json" \
-                    --data '{"type":"'${dns_record_type}'","name":"'${dns_record_name}'","content":"'${ip}'","ttl":'${dns_record_ttl}',"proxied":'${dns_record_proxied}'}'
-              else
-                  echo "IP address for ${dns_record_name} is already ${ip}"
-              fi
+
+              echo "Updating ${dns_record_name} to ${ip}"
+              curl -s -X PUT "${cloudflare_api_base_url}/zones/${zone_id}/dns_records/${dns_record_id}" \
+                -H "Authorization: Bearer ${cloudflare_bearer_token}" \
+                -H "Content-Type: application/json" \
+                --data '{"type":"'${dns_record_type}'","name":"'${dns_record_name}'","content":"'${ip}'","ttl":'${dns_record_ttl}',"proxied":'${dns_record_proxied}'}'
           done
 
     - name: "Reload Systemd timer {{ timer_file_name }}"

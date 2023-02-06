@@ -61,11 +61,13 @@ Use your own server
         - Proxy status: `<DNS only>`
         - TTL: `<Auto>`
     - Get the `Zone ID` from Cloudflare where your DNS entries are present
-      - This can be gotten from the `Zone ID` section (right side) on the `Overview` page for the relevant `Zone`/website
-      - You get this page when you click on the specific "`Zone`"/`website` in the `Websites` section in the left menu on your main page
+      - Go to the main CloudFlare page
+      - Then `Websites`
+      - Then select the relevant `Zone` (basically the website you used in the `group_vals/all` file)
+      - In the `Overview` page on the right size you can see the `Zone ID`
         - Has the link to the API token stuff here too
       - Put this in the `group_vars/all` file
-    - Create a Custom API token from [this](https://dash.cloudflare.com/profile/api-tokens) page with the following permissions and include the specific `Zone` from `Zone Resources` section
+    - Create a Custom API token from [this](https://dash.cloudflare.com/profile/api-tokens) page with the following permissions and include the specific `Zone` (or website) from `Zone Resources` section
       - To edit DNS entries
         - `Zone:DNS:Edit`
       - To read `Zone` information
