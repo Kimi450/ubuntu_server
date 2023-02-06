@@ -1,7 +1,13 @@
 # Ubuntu Server
 Highly opinionated server setup to cater to my needs
 
-## On the server
+## Server Setup
+
+### Cloud
+Probably get a VM from [Oracle Always Free Tier](https://www.oracle.com/ie/cloud/free/) stuff.
+
+### On-Prem
+Use your own server
 
 - #### Install Ubuntu
   https://ubuntu.com/download/desktop
@@ -17,7 +23,7 @@ Highly opinionated server setup to cater to my needs
   sudo ufw allow ssh
   ```
 
-## On the client
+## Client Setup
 
 - #### Enable passwordless ssh access from remote machine to server (required for ansible to work)
   ```
