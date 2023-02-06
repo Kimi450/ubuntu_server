@@ -50,8 +50,27 @@ Use your own server
 
 - #### Update the `group_vars/all` file to fill out the required information there
 
-  - ##### Get the `Zone` name from Cloudflare where your DNS entries are present and an API token that can edit DNS entries and read `Zone` information [OPTIONAL]
-    - https://dash.cloudflare.com/profile/api-tokens
+  - ##### Get CloudFlare information [OPTIONAL]
+    - Register your domain name on CloudFlare
+    - Put in entries for your specific zone
+      - Go to your `website` page from the `Overview` section
+      - Add a record with the following settings
+        - Type: `A`
+        - Name: `*.<YOUR_DOMAIN_NAME_FROM_GROUP_VARS_FILE>`
+        - Content: `<YOUR_PUBLIC_IP>`
+        - Proxy status: `<DNS only>`
+        - TTL: `<Auto>`
+    - Get the `Zone ID` from Cloudflare where your DNS entries are present
+      - This can be gotten from the `Zone ID` section (right side) on the `Overview` page for the relevant `Zone`/website
+      - You get this page when you click on the specific "`Zone`"/`website` in the `Websites` section in the left menu on your main page
+        - Has the link to the API token stuff here too
+      - Put this in the `group_vars/all` file
+    - Create a Custom API token from [this](https://dash.cloudflare.com/profile/api-tokens) page with the following permissions and include the specific `Zone` from `Zone Resources` section
+      - To edit DNS entries
+        - `Zone:DNS:Edit`
+      - To read `Zone` information
+        - `Zone:Zone:Read`
+      - Put this token/key in the `group_vars/all` file
     - If not needed, remove the line below line from `setup.yaml`
     `- import_playbook: install-and-configure-cloudflare-dns-updater-service.yaml`
 

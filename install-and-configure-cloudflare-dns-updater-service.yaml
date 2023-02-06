@@ -83,8 +83,8 @@
 
           # Needs the DNS record pre-creating on Cloudflare
 
-          # Cloudflare zone is the zone which holds the record
-          zone="{{ cloudflare_zone_id }}"
+          # Cloudflare zone ID is the zone ID for the Zone which holds the record
+          zone_id="{{ cloudflare_zone_id }}"
 
           # Auth details
           cloudflare_bearer_token="{{ cloudflare_auth_key }}"
@@ -95,12 +95,7 @@
 
           cloudflare_api_base_url="https://api.cloudflare.com/client/v4"
 
-          # get the zone id for the requested zone
-          zone_id=$(curl -s -X GET "${cloudflare_api_base_url}/zones?name=${zone}&status=active" \
-          -H "Authorization: Bearer ${cloudflare_bearer_token}" \
-            -H "Content-Type: application/json" | jq -r '{"result"}[] | .[0] | .id')
-
-          echo "Zone ID for ${zone} is ${zone_id}"
+          echo "Zone ID is ${zone_id}"
 
           dns_records=$(curl -s -X GET "${cloudflare_api_base_url}/zones/${zone_id}/dns_records" \
             -H "Authorization: Bearer ${cloudflare_bearer_token}" \
