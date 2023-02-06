@@ -2,28 +2,30 @@
 # file: group_vars/all
 
 # Domain name to be used
-domain_name: 
+domain_name:
 
 # Set a password for VNC
-vnc_password: 
+vnc_password:
 
 # Set a username for the squid access
 squid_username:
 
 # Set a password for the squid access
-squid_password:
+squid_password: 
 
 # Set a password for the sambashare
-smb_password: 
+smb_password:
+
+# Set your Cloudflare Zone ID
+cloudflare_zone_id:
+
+# Set your Cloudflare Bearer token to view the zone and edit DNS records in it
+cloudflare_auth_key:
+
+# ==== For the Work in Progress playbooks ====
 
 # Set your Cloudfare API token for editing zone DNS
 api_token: 
-
-# Set your Cloudflare Zone ID
-cloudflare_zone_id: 
-
-# Set your Cloudflare Bearer token to view the zone and edit DNS records in it
-cloudflare_auth_key: 
 
 # ==== For the Archived playbooks ====
 
