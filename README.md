@@ -51,15 +51,18 @@ Use your own server
 - #### Update the `group_vars/all` file to fill out the required information there
 
   - ##### Get CloudFlare information [OPTIONAL]
+    - This is if you use CloudFlare for your domain name and want the public IP updated automatically every set amount of time incase it is changed on the server.
+    - **NOTE:** Make sure the services installed in this dont overlap with any existing implied DNS entries you may have (keep this in mind if you see any weird behaviour, im not an expert here and im too tired to think about this at the moment)
     - Register your domain name on CloudFlare
     - Put in entries for your specific zone
       - Go to your `website` page from the `Overview` section
-      - Add a record with the following settings
-        - Type: `A`
-        - Name: `*.<YOUR_DOMAIN_NAME_FROM_GROUP_VARS_FILE>`
-        - Content: `<YOUR_PUBLIC_IP>`
-        - Proxy status: `<DNS only>`
-        - TTL: `<Auto>`
+      - Add the following records:
+
+        | Type | Name                   | Content           | Proxy Status | TTL    |
+        |------|------------------------|-------------------|--------------|--------|
+        | `A`  | `<YOUR_DOMAIN_NAME>`   | `<YOUR_PUBLIC_IP` | `DNS only`   | `Auto` |
+        | `A`  | `*.<YOUR_DOMAIN_NAME>` | `<YOUR_PUBLIC_IP` | `DNS only`   | `Auto` |
+
     - Get the `Zone ID` from Cloudflare where your DNS entries are present
       - Go to the main CloudFlare page
       - Then `Websites`

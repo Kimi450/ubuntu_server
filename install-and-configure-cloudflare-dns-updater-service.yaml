@@ -89,6 +89,9 @@
           # Auth details
           cloudflare_bearer_token="{{ cloudflare_auth_key }}"
 
+          # Domain name
+          domain_name="{{ domain_name }}"
+
           # Get the current external IP address
           ip=$(curl -s -X GET https://checkip.amazonaws.com)
           echo "Current IP is ${ip}"
@@ -103,8 +106,8 @@
 
           echo "${dns_records[@]}" | jq -c '.[]' | while read dns_record; do
               dns_record_name=$(echo "${dns_record}" | jq -r '.name')
-              if [ "${dns_record_name}" != "*.{{ domain_name }}" ]; then
-                  echo "Skipping '${dns_record_name}' cause it doesnt match '*.{{ domain_name }}'"
+              if [[ "${dns_record_name}" != "*.${domain_name}" && "${dns_record_name}" != "${domain_name}" ]]; then
+                  echo "Skipping '${dns_record_name}' cause it doesnt match '${domain_name}' and '*.${domain_name}'"
                   continue
               fi
 
