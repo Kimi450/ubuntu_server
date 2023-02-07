@@ -143,12 +143,12 @@
           install_namespace: "{{ namespace_generic_services }}"
           release_name: qbittorrent
           chart_name: qbittorrent
-          # runAsUser=1000 gives write access on the pod
+          # runAsUser={{ uid }} gives write access on the pod
           # 568 is the default user ID, added to the groups cause why not
           set_options: "--set \
             controller.type=statefulset,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
-            common.podSecurityContext.runAsUser=1000,\
+            common.podSecurityContext.runAsUser={{ uid }},\
             common.podSecurityContext.runAsGroup=568,\
             common.podSecurityContext.fsGroup=568,\
             persistence.config.enabled=yes,\
@@ -185,12 +185,12 @@
           install_namespace: "{{ namespace_generic_services }}"
           release_name: prowlarr
           chart_name: prowlarr
-          # runAsUser=1000 gives write access on the pod
+          # runAsUser={{ uid }} gives write access on the pod
           # 568 is the default user ID, added to the groups cause why not
           set_options: "--set \
             controller.type=statefulset,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
-            common.podSecurityContext.runAsUser=1000,\
+            common.podSecurityContext.runAsUser={{ uid }},\
             common.podSecurityContext.runAsGroup=568,\
             common.podSecurityContext.fsGroup=568,\
             persistence.config.enabled=yes,\
@@ -227,12 +227,12 @@
           install_namespace: "{{ namespace_generic_services }}"
           release_name: radarr
           chart_name: radarr
-          # runAsUser=1000 gives write access on the pod
+          # runAsUser={{ uid }} gives write access on the pod
           # 568 is the default user ID, added to the groups cause why not
           set_options: "--set \
             controller.type=statefulset,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
-            common.podSecurityContext.runAsUser=1000,\
+            common.podSecurityContext.runAsUser={{ uid }},\
             common.podSecurityContext.runAsGroup=568,\
             common.podSecurityContext.fsGroup=568,\
             persistence.config.enabled=yes,\
@@ -268,12 +268,12 @@
           install_namespace: "{{ namespace_generic_services }}"
           release_name: sonarr
           chart_name: sonarr
-          # runAsUser=1000 gives write access on the pod
+          # runAsUser={{ uid }} gives write access on the pod
           # 568 is the default user ID, added to the groups cause why not
           set_options: "--set \
             controller.type=statefulset,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
-            common.podSecurityContext.runAsUser=1000,\
+            common.podSecurityContext.runAsUser={{ uid }},\
             common.podSecurityContext.runAsGroup=568,\
             common.podSecurityContext.fsGroup=568,\
             persistence.config.enabled=yes,\
@@ -309,12 +309,12 @@
           install_namespace: "{{ namespace_generic_services }}"
           release_name: bazarr
           chart_name: bazarr
-          # runAsUser=1000 gives write access on the pod
+          # runAsUser={{ uid }} gives write access on the pod
           # 568 is the default user ID, added to the groups cause why not
           set_options: "--set \
             controller.type=statefulset,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
-            common.podSecurityContext.runAsUser=1000,\
+            common.podSecurityContext.runAsUser={{ uid }},\
             common.podSecurityContext.runAsGroup=568,\
             common.podSecurityContext.fsGroup=568,\
             persistence.config.enabled=yes,\
@@ -349,12 +349,12 @@
           install_namespace: "{{ namespace_generic_services }}"
           release_name: readarr
           chart_name: readarr
-          # runAsUser=1000 gives write access on the pod
+          # runAsUser={{ uid }} gives write access on the pod
           # 568 is the default user ID, added to the groups cause why not
           set_options: "--set \
             controller.type=statefulset,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
-            common.podSecurityContext.runAsUser=1000,\
+            common.podSecurityContext.runAsUser={{ uid }},\
             common.podSecurityContext.runAsGroup=568,\
             common.podSecurityContext.fsGroup=568,\
             persistence.config.enabled=yes,\
@@ -389,12 +389,12 @@
           install_namespace: "{{ namespace_generic_services }}"
           release_name: lidarr
           chart_name: lidarr
-          # runAsUser=1000 gives write access on the pod
+          # runAsUser={{ uid }} gives write access on the pod
           # 568 is the default user ID, added to the groups cause why not
           set_options: "--set \
             controller.type=statefulset,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
-            common.podSecurityContext.runAsUser=1000,\
+            common.podSecurityContext.runAsUser={{ uid }},\
             common.podSecurityContext.runAsGroup=568,\
             common.podSecurityContext.fsGroup=568,\
             persistence.config.enabled=yes,\
@@ -460,8 +460,6 @@
           install_namespace: "{{ namespace_generic_services }}"
           release_name: librespeed
           chart_name: librespeed
-          # runAsUser=1000 gives write access on the pod
-          # 568 is the default user ID, added to the groups cause why not
           set_options: "--set \
             controller.type=statefulset,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
@@ -491,12 +489,12 @@
           install_namespace: "{{ namespace_generic_services }}"
           release_name: calibre-web
           chart_name: calibre-web
-          # runAsUser=1000 gives write access on the pod
+          # PUID={{ uid }} gives write access on the pod
           # 568 is the default user ID, added to the groups cause why not
           set_options: "--set \
             controller.type=statefulset,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
-            env.PUID=\"1000\",\
+            env.PUID=\"{{ uid }}\",\
             env.PGID=\"568\",\
             persistence.config.enabled=yes,\
             persistence.media.enabled=yes,\
@@ -530,12 +528,12 @@
           install_namespace: "{{ namespace_generic_services }}"
           release_name: calibre
           chart_name: calibre
-          # runAsUser=1000 gives write access on the pod
+          # PUID={{ uid }} gives write access on the pod
           # 568 is the default user ID, added to the groups cause why not
           set_options: "--set \
             controller.type=statefulset,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
-            env.PUID=\"1000\",\
+            env.PUID=\"{{ uid }}\",\
             env.PGID=\"568\",\
             persistence.config.enabled=yes,\
             persistence.media.enabled=yes,\

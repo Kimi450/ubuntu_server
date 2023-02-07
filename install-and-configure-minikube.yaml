@@ -71,7 +71,7 @@
 
         - name: Minikube notes
           debug:
-            msg: "Directory '{{ dir_home }}' mounted on the minikube container at '{{ dir_minikube_mount }}'. More info https://github.com/kubernetes/minikube/pull/8159"
+            msg: "Directory '{{ dir_home }}' mounted on the minikube container at '{{ dir_minikube_mount }}' with UID '{{ uid }}''. More info https://github.com/kubernetes/minikube/pull/8159"
 
     - name: Enable nginx ingress controller
       shell: minikube addons enable ingress

@@ -3,8 +3,13 @@
   hosts: all
   gather_facts: false
   tasks:
+    - name: Get User ID (UID)
+      shell: "id -u `whoami`"
+      register: uid_output
+    
     - name: Set shared facts
       set_fact:
+        uid: "{{ uid_output.stdout }}"
         user: "{{ ansible_user }}"
         dir_home: "/home/{{ ansible_user }}"
         dir_data: "/home/{{ ansible_user }}/data"
