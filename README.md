@@ -98,12 +98,13 @@ Use your own server
   - ##### Setup Jellyfin
     - Initial setup is just following on-screen instructions.
       - If asked to select server, delete it and refresh the page.
-    - Point Jellyfin to use the directories mentioned in the playbooks for shows, movies and music.
+    - Point Jellyfin to use the directories mentioned in the playbooks for shows, movies, music and books.
       - By default, on the Jellyfin pod, the directories it will be:
         ```
         /media/data/shows
         /media/data/movies
         /media/data/music
+        /media/data/books
         ```
     - Add any other config required.
       - Recommend setting up the Open Subtitles plugin which requires creating an account on [their website](https://www.opensubtitles.org/en/?).
