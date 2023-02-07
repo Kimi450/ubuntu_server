@@ -11,7 +11,7 @@ vnc_password:
 squid_username:
 
 # Set a password for the squid access
-squid_password: 
+squid_password:
 
 # Set a password for the sambashare
 smb_password:
@@ -21,6 +21,47 @@ cloudflare_zone_id:
 
 # Set your Cloudflare Bearer token to view the zone and edit DNS records in it
 cloudflare_auth_key:
+
+# ==== Select what services you wish to install ====
+
+# monitoring
+kube_prometheus_stack: True
+
+# media client
+jellyfin: True
+
+# torrents
+qbittorrent: True
+
+# to manage indexers
+prowlarr: True
+
+# movie monitoring
+radarr: True
+
+# show monitoring
+sonarr: True
+
+# subtitle hunting
+bazarr: True
+
+# book monitoring
+readarr: True
+
+# music monitoring
+lidarr: True
+
+# movie and show interface
+ombi: True
+
+# speed test to server
+librespeed: True
+
+# book client
+calibre_web: True
+
+# book management
+calibre: True
 
 # ==== For the Work in Progress playbooks ====
 
