@@ -5,7 +5,6 @@
   gather_facts: True
   vars:
     config_location: /etc/squid/squid.conf
-    squid_port: 3128
     passwords_loc: /etc/squid/htpasswd
   tasks:
     - name: Install the package
@@ -23,15 +22,15 @@
         src: "{{ config_location }}"
         dest: "{{ config_location }}.bak"
 
-    - name: "Change default port from 3128 to {{ squid_port }}"
+    - name: "Change default port from 3128 to {{ squid.port }}"
       become: True
       replace:
         path: "{{ config_location }}"
         regexp: '^host_port'
-        replace: "http_port {{ squid_port }}"
+        replace: "http_port {{ squid.port }}"
 
     - name: "Generate authentication information" 
-      shell: "echo {{ squid_username }}:$(openssl passwd -crypt {{ squid_password }})\n"
+      shell: "echo {{ squid.username }}:$(openssl passwd -crypt {{ squid.password }})\n"
       register: auth_output
 
     - name: "Ensure {{ paswords_loc }} exists"
@@ -74,11 +73,11 @@
     - include_tasks: tasks-allow-ports.yaml
       vars:
         ports: 
-          - "{{ squid_port }}"
+          - "{{ squid.port }}"
 
     - debug:
         msg: >-
           You can now use this server as a proxy. The hostname is
           "{{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}" 
-          and port is "{{ squid_port }}". Please expose this port on your router too for external access.
+          and port is "{{ squid.port }}". Please expose this port on your router too for external access.
           Use the username and password as the auth details.

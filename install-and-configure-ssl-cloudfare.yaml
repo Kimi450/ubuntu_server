@@ -55,7 +55,7 @@
         dest: "{{ dir_cloudfare_config_ini }}{{ name_cloudfare_config_ini }}"
         content: |
           # Cloudflare API token used by Certbot
-          dns_cloudflare_api_token = {{ api_token }}
+          dns_cloudflare_api_token = {{ cloudflare.api_token }}
         mode: 700
 
     - name: Install certs

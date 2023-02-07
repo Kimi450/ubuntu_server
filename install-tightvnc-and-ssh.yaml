@@ -3,7 +3,6 @@
   hosts: all
   gather_facts: false
   vars:
-    vnc_display: 4
     service_file_location: /etc/systemd/system/vncserver@.service
   tasks:
     #https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-vnc-on-ubuntu-18-04
@@ -25,8 +24,8 @@
       expect:
         command: vncpasswd
         responses:
-          Password: "{{ vnc_password }}"
-          Verify: "{{ vnc_password }}"
+          Password: "{{ vnc.password }}"
+          Verify: "{{ vnc.password }}"
           "Would you like to enter a view-only password (y/n)?": n
 
     - name: Copy over the new config
@@ -80,11 +79,11 @@
     - name: Reload systemd service
       include_tasks: tasks-reload-systemd-service.yaml
       vars:
-        service_name: "vncserver@{{ vnc_display }}.service"
+        service_name: "vncserver@{{ vnc.display }}.service"
         become: True
 
     - include_tasks: tasks-allow-ports.yaml # should already work
       vars:
         ports: 
           - "ssh"
-          - "590{{ vnc_display }}"
+          - "590{{ vnc.display }}"

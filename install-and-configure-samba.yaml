@@ -5,7 +5,6 @@
   vars:
     share_directory: "{{ dir_home }}"
     config_location: /etc/samba/smb.conf
-    share_name: sambashare
   tasks:
     # https://ubuntu.com/tutorials/install-and-configure-samba#1-overview
     - name: Install the package
@@ -26,7 +25,7 @@
       blockinfile:
         path: "{{ config_location }}"
         block: |
-          [{{ share_name }}]
+          [{{ smb.share_name }}]
               comment = Samba on Ubuntu
               path = {{ share_directory }}
               read only = no
@@ -43,10 +42,10 @@
 
     - name: Set password
       become: True
-      shell: "(echo \"{{ smb_password }}\"; echo \"{{ smb_password }}\") | smbpasswd -s -a {{ ansible_user }}"
+      shell: "(echo \"{{ smb.password }}\"; echo \"{{ smb.password }}\") | smbpasswd -s -a {{ ansible_user }}"
 
     - debug:
         msg: >-
           You can add the file share with server IP
-          "{{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}" and share name "{{ share_name }}", and login using
-          {{ ansible_user }}/{{ smb_password }}. More info: https://ubuntu.com/tutorials/install-and-configure-samba#4-setting-up-user-accounts-and-connecting-to-share
+          "{{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}" and share name "{{ smb.share_name }}", and login using
+          {{ ansible_user }}/{{ smb.password }}. More info: https://ubuntu.com/tutorials/install-and-configure-samba#4-setting-up-user-accounts-and-connecting-to-share

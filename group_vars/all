@@ -4,74 +4,71 @@
 # Domain name to be used
 domain_name:
 
-# Set a password for VNC
-vnc_password:
+vnc: # vnc for remote desktop with GUI
+  # will be truncated to 8 characters
+  password:
+  # display for what port will be accessed
+  # use 0-9 only for access port to be 590{{display}}
+  display: 4
 
-# Set a username for the squid access
-squid_username:
+squid: # squid credentials, for proxy
+  username:
+  password:
+  port: 3128
 
-# Set a password for the squid access
-squid_password:
+smb: # sambashare for network attached storage
+  password:
+  share_name: sambashare
 
-# Set a password for the sambashare
-smb_password:
-
-# Set your Cloudflare Zone ID
-cloudflare_zone_id:
-
-# Set your Cloudflare Bearer token to view the zone and edit DNS records in it
-cloudflare_auth_key:
+cloudflare:
+  # Set your Cloudflare Zone ID
+  zone_id:
+  # Set your Cloudflare Bearer token to view the zone and edit DNS records in it
+  auth_key:
+  # WORK_IN_PROGRESS: Set your Cloudfare API token for editing zone DNS
+  api_token: "WORK_IN_PROGRESS"
 
 # ==== Select what services you wish to install ====
+services:
+  # monitoring
+  kube_prometheus_stack: True
+  # media client
+  jellyfin: True
+  # torrents
+  qbittorrent: True
+  # to manage indexers
+  prowlarr: True
+  # movie monitoring
+  radarr: True
+  # show monitoring
+  sonarr: True
+  # subtitle hunting
+  bazarr: True
+  # book monitoring
+  readarr: True
+  # music monitoring
+  lidarr: True
+  # movie and show interface
+  ombi: True
+  # speed test to server
+  librespeed: True
+  # book client
+  calibre_web: True
+  # book management
+  calibre: True
 
-# monitoring
-kube_prometheus_stack: True
+# ==== Minikube settings ====
 
-# media client
-jellyfin: True
-
-# torrents
-qbittorrent: True
-
-# to manage indexers
-prowlarr: True
-
-# movie monitoring
-radarr: True
-
-# show monitoring
-sonarr: True
-
-# subtitle hunting
-bazarr: True
-
-# book monitoring
-readarr: True
-
-# music monitoring
-lidarr: True
-
-# movie and show interface
-ombi: True
-
-# speed test to server
-librespeed: True
-
-# book client
-calibre_web: True
-
-# book management
-calibre: True
-
-# ==== For the Work in Progress playbooks ====
-
-# Set your Cloudfare API token for editing zone DNS
-api_token: 
+minikube: # cli param values for minikube
+  cpus: "max"
+  memory: "6000"
+  disk_size: "50gb"
+  nodes: "1"
+  cert_expiration: "87660h0m0s"
 
 # ==== For the Archived playbooks ====
 
-# Set your Spotify username
-spotify_username:
-
-# Set your Spotify password
-spotify_password:
+spotify: # spotify credentials
+  username:
+  password:
+  init_volume: 69

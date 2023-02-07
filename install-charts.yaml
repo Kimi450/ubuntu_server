@@ -44,7 +44,7 @@
         msg: You can access the ingress controller at port '8080' and '8081' for HTTP and HTTPS.
 
     - name: Install grafana
-      when: kube_prometheus_stack
+      when: services.kube_prometheus_stack
       block:
       - name: Install/Upgrade the grafana chart
         include_tasks: tasks-install-chart.yaml
@@ -87,7 +87,7 @@
 
     - name: Install jellyfin
       # https://artifacthub.io/packages/helm/k8s-at-home/jellyfin
-      when: jellyfin
+      when: services.jellyfin
       block:
       - name: Install/Upgrade the jellyfin chart
         include_tasks: tasks-install-chart.yaml
@@ -132,7 +132,7 @@
               URL mention above once again to setup a new server.
 
     - name: Install qbittorrent
-      when: qbittorrent
+      when: services.qbittorrent
       block:
       - name: Install/Upgrade the qbittorrent chart
         include_tasks: tasks-install-chart.yaml
@@ -174,7 +174,7 @@
             the directories under {{ dir_data }} will be picked up by Jellyfin.
 
     - name: Install prowlarr
-      when: prowlarr
+      when: services.prowlarr
       block:
       - name: Install/Upgrade the prowlarr chart
         include_tasks: tasks-install-chart.yaml
@@ -216,7 +216,7 @@
             the directories under {{ dir_data }} will be picked up by Jellyfin.
 
     - name: Install radarr
-      when: radarr
+      when: services.radarr
       block:
       - name: Install/Upgrade the radarr chart
         include_tasks: tasks-install-chart.yaml
@@ -257,7 +257,7 @@
             the directories under {{ dir_data }} will be picked up by Jellyfin.
 
     - name: Install sonarr
-      when: sonarr
+      when: services.sonarr
       block:
       - name: Install/Upgrade the sonarr chart
         include_tasks: tasks-install-chart.yaml
@@ -298,7 +298,7 @@
             the directories under {{ dir_data }} will be picked up by Jellyfin.
 
     - name: Install bazarr
-      when: bazarr
+      when: services.bazarr
       block:
       - name: Install/Upgrade the bazarr chart
         include_tasks: tasks-install-chart.yaml
@@ -338,7 +338,7 @@
             can be used by the application.
 
     - name: Install readarr
-      when: readarr
+      when: services.readarr
       block:
       - name: Install/Upgrade the readarr chart
         include_tasks: tasks-install-chart.yaml
@@ -378,7 +378,7 @@
             can be used by the application.
 
     - name: Install lidarr
-      when: lidarr
+      when: services.lidarr
       block:
       - name: Install/Upgrade the lidarr chart
         include_tasks: tasks-install-chart.yaml
@@ -419,7 +419,7 @@
 
     - name: Install ombi
       # https://artifacthub.io/packages/helm/k8s-at-home/ombi
-      when: ombi
+      when: services.ombi
       block:
       - name: Install/Upgrade the ombi chart
         include_tasks: tasks-install-chart.yaml
@@ -449,7 +449,7 @@
               URL mention above once again to setup a new server.
 
     - name: Install librespeed
-      when: librespeed
+      when: services.librespeed
       block:
       - name: Install/Upgrade the librespeed chart
         include_tasks: tasks-install-chart.yaml
@@ -478,7 +478,7 @@
             You can log into librespeed at 'librespeed.{{ domain_name }}'.
 
     - name: Install calibre-web
-      when: calibre_web
+      when: services.calibre_web
       block:
       - name: Install/Upgrade the calibre-web chart
         include_tasks: tasks-install-chart.yaml
@@ -517,7 +517,7 @@
             can be used by the application.
 
     - name: Install calibre
-      when: calibre
+      when: services.calibre
       block:
       - name: Install/Upgrade the calibre chart
         include_tasks: tasks-install-chart.yaml

@@ -5,15 +5,6 @@
   vars:
     repo_dir: "{{ dir_repos }}/spotifyd"
     systemd_file_location: /etc/systemd/system/
-    init_volume: 69
-  vars_prompt:
-    - name: username
-      prompt: What is your Spotify username?
-      private: no
-
-    - name: password
-      prompt: What is your Spotify password?
-
   tasks:
     # https://spotifyd.github.io/spotifyd/installation/Ubuntu.html#building-spotifyd
     - name: Required dependencies
@@ -50,7 +41,7 @@
       lineinfile: 
         path: "{{ systemd_file_location }}spotifyd.service"
         regexp: '^ExecStart=(.*)$' 
-        line: 'ExecStart=/usr/bin/spotifyd --no-daemon -u {{ username }} -p {{ password }} --initial-volume {{ init_volume }}'
+        line: 'ExecStart=/usr/bin/spotifyd --no-daemon -u {{ spotify.username }} -p {{ spotify.password }} --initial-volume {{ spotify.init_volume }}'
         backrefs: yes
 
     - name: Stop service (ignore error if it doesnt exist)
