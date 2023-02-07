@@ -49,6 +49,7 @@ Use your own server
 - #### Update the `hosts.yaml` file to fill out the template
 
 - #### Update the `group_vars/all` file to fill out the required information there
+  At the very least, search for the items with tags `# FILL OUT`
 
   - ##### Get CloudFlare information [OPTIONAL]
     - This is if you use CloudFlare for your domain name and want the public IP updated automatically every set amount of time incase it is changed on the server.

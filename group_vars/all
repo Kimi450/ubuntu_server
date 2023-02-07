@@ -2,29 +2,29 @@
 # file: group_vars/all
 
 # Domain name to be used
-domain_name:
+domain_name: "" # FILL OUT
 
 vnc: # vnc for remote desktop with GUI
   # will be truncated to 8 characters
-  password:
+  password: "" # FILL OUT
   # display for what port will be accessed
   # use 0-9 only for access port to be 590{{display}}
   display: 4
 
 squid: # squid credentials, for proxy
-  username:
-  password:
+  username: "" # FILL OUT
+  password: "" # FILL OUT
   port: 3128
 
 smb: # sambashare for network attached storage
-  password:
+  password: "" # FILL OUT
   share_name: sambashare
 
 cloudflare:
   # Set your Cloudflare Zone ID
-  zone_id:
+  zone_id: "" # FILL OUT
   # Set your Cloudflare Bearer token to view the zone and edit DNS records in it
-  auth_key:
+  auth_key: "" # FILL OUT
   # WORK_IN_PROGRESS: Set your Cloudfare API token for editing zone DNS
   api_token: "WORK_IN_PROGRESS"
 
@@ -69,6 +69,6 @@ minikube: # cli param values for minikube
 # ==== For the Archived playbooks ====
 
 spotify: # spotify credentials
-  username:
-  password:
+  username: "NO_NEED_TO_FILL"
+  password: "NO_NEED_TO_FILL"
   init_volume: 69
