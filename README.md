@@ -55,23 +55,23 @@ Use your own server
     - This is if you use CloudFlare for your domain name and want the public IP updated automatically every set amount of time incase it is changed on the server.
     - **NOTE:** Make sure the services installed in this dont overlap with any existing implied DNS entries you may have (keep this in mind if you see any weird behaviour, im not an expert here and im too tired to think about this at the moment)
     - Register your domain name on CloudFlare
-    - Put in entries for your specific zone
-      - Go to your `website` page from the `Overview` section
-      - Add the following records:
-
-        | Type | Name                   | Content           | Proxy Status | TTL    |
-        |------|------------------------|-------------------|--------------|--------|
-        | `A`  | `<YOUR_DOMAIN_NAME>`   | `<YOUR_PUBLIC_IP` | `DNS only`   | `Auto` |
-        | `A`  | `*.<YOUR_DOMAIN_NAME>` | `<YOUR_PUBLIC_IP` | `DNS only`   | `Auto` |
-
-    - Get the `Zone ID` from Cloudflare where your DNS entries are present
-      - Go to the main CloudFlare page
-      - Then `Websites`
-      - Then select the relevant `Zone` (basically the website you used in the `group_vals/all` file)
-      - In the `Overview` page on the right size you can see the `Zone ID`
-        - Has the link to the API token stuff here too
+    - Go to the main CloudFlare page
+    - Then `Websites`
+    - Then select the relevant `Zone` (basically the website you used in the `group_vals/all` file)
+    - Go to the `Overview` page
+      - On the right side you can see the `Zone ID`
       - Put this in the `group_vars/all` file
-    - Create a Custom API token from [this](https://dash.cloudflare.com/profile/api-tokens) page with the following permissions and include the specific `Zone` (or website) from `Zone Resources` section
+      - Here you can also see the link to the API token page
+    - Go to the `DNS` page 
+      - Put in the following records (**REQUIRED**)
+
+        | Type | Name                   | Content            | Proxy Status | TTL    |
+        |------|------------------------|--------------------|--------------|--------|
+        | `A`  | `<YOUR_DOMAIN_NAME>`   | `<YOUR_PUBLIC_IP>` | `DNS only`   | `Auto` |
+        | `A`  | `*.<YOUR_DOMAIN_NAME>` | `<YOUR_PUBLIC_IP>` | `DNS only`   | `Auto` |
+  
+      - Now you can also use `<YOUR_DOMAIN_NAME>` in the `group_vars/all` file instead of the server's IP address
+    - Create a Custom API token from the [api-tokens](https://dash.cloudflare.com/profile/api-tokens) page with the following permissions and include the specific `Zone` (or website) from `Zone Resources` section
       - To edit DNS entries
         - `Zone:DNS:Edit`
       - To read `Zone` information
