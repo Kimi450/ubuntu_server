@@ -15,7 +15,7 @@
   - name: "Copy over the skeleton service file for systemd"
     become: True
     copy:
-      src: charts-config/skeleton.service
+      src: charts_config/skeleton.service
       dest: "{{ service_file_location_base }}{{ service_file_name }}"
 
   # TODO what if minikube IP changes, the IP is set at deployment time here

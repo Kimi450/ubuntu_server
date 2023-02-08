@@ -35,7 +35,7 @@
         - name: Copy over the service file for systemd
           become: true
           copy:
-            src: minikube-config/{{ service_name_minikube }}
+            src: minikube_config/{{ service_name_minikube }}
             dest: "{{ service_file_location }}"
 
         - name: "Service file edit: Add command to start minikube"
