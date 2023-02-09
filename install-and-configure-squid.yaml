@@ -5,7 +5,7 @@
   gather_facts: True
   vars:
     config_location: /etc/squid/squid.conf
-    passwords_loc: /etc/squid/htpasswd
+    passwords_loc: /etc/squid/squid_password
   tasks:
     - name: Install the package
       become: True
@@ -30,38 +30,48 @@
         replace: "http_port {{ squid.port }}"
 
     - name: "Generate authentication information" 
-      shell: "echo {{ squid.username }}:$(openssl passwd -crypt {{ squid.password }})\n"
+      shell: "echo {{ squid.username }}:$(openssl passwd -6 {{ squid.password }})\n"
       register: auth_output
 
-    - name: "Ensure {{ paswords_loc }} exists"
+    - name: "Ensure {{ passwords_loc }} exists"
       become: True
       file:
         path: "{{ passwords_loc }}"
         state: touch
         mode: 0644
 
-    - name: "Add authentication line to {{ paswords_loc }}"
+    - name: "Add authentication line to {{ passwords_loc }}"
       become: True
       lineinfile:
         dest: "{{ passwords_loc }}"
         line: "{{ auth_output.stdout }}"
 
+    - name: Find basic_ncsa_auth file location
+      become: True
+      find:
+        paths: "/"
+        patterns: "basic_ncsa_auth"
+        recurse: yes
+      register: basic_ncsa_auth_location
+
     - name: "Add ACL config to {{ config_location }}"
       become: True
-      lineinfile:
+      blockinfile:
         dest: "{{ config_location }}"
+        marker: "### ANSIBLE MANAGED BLOCK for ACL CONFIG"
         insertafter: "include /etc/squid/conf.d/*"
-        line: |
-          auth_param basic program /usr/lib/squid3/basic_ncsa_auth {{ passwords_loc }}
+        block: |
+          auth_param basic program {{ basic_ncsa_auth_location.files[0].path }} {{ passwords_loc }}
           auth_param basic realm proxy
           acl authenticated proxy_auth REQUIRED
 
     - name: "Add access config to {{ config_location }}"
       become: True
-      lineinfile:
+      blockinfile:
+        marker: "### ANSIBLE MANAGED BLOCK for access config"
         dest: "{{ config_location }}"
         insertafter: "http_access allow localhost"
-        line: |
+        block: |
           http_access allow authenticated
 
     - name: Reload systemd service
