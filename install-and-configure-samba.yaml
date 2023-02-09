@@ -36,6 +36,10 @@
       shell: service smbd restart
 
     - include_tasks: tasks-allow-ports.yaml
+      # Following ports on respective protocols are exposed because of this
+      # Run `sudo ufw status verbose | grep Samba` to verify
+      # UDP: 137,138
+      # TCP: 139,445
       vars:
         ports: 
           - "samba"

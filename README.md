@@ -291,32 +291,51 @@ Use your own server
     - Edit your local `~/.kube/config` and incorporate the information from the `minikube_config` into it
 
   - ##### Use Squid
-    - Use the username and password passed in during installation to use this as a proxy server
-    - The address would be ``<PUBLIC_IP>:3128`` or ``<DOMAIN_NAME>:3128`` or ``<LAN_IP>:3128``
+    - Use the username and password from the `group_vars/all` file to use this as a proxy server
+    - The address would be `<PUBLIC_IP>:<GROUP_VARS_PORT>` or `<DOMAIN_NAME>:<GROUP_VARS_PORT>` or `<LAN_IP>:<GROUP_VARS_PORT>`
+
+  - ##### Use Sambashare
+    - For external access:
+      - The following info was retrieved by running `sudo ufw status verbose | grep -i samba` on the server which lists what ports were exposed as part of `sudo ufw allow samba`
+      - Expose the following ports for UDP
+        ```
+        139
+        445
+        ```
+      - Expose the following ports for TCP
+        ```
+        137
+        138
+        ```
+    - To authenticate
+      - Thee username will be the `<ANSIBLE_USER>` you used in the `hosts.yaml` file
+      - The password will be in the `group_vars/all` file (`smb.password` section).
+    - In Windows, connect to it using `\\<LAN_IP>\<SHARE_NAME_FROM_GROUP_VARS_ALL>`
+    - More information [here](https://ubuntu.com/tutorials/install-and-configure-samba#4-setting-up-user-accounts-and-connecting-to-share)
 
   - ##### Exposed Services
     - You can port forward the following ports on your router to gain external.
     - You need to create DNS entries to access the Ingress services. The following entries are recommended:
-      - ``*.<DOMAIN_NAME>``
-      - ``<DOMAIN_NAME>``
+      - `*.<DOMAIN_NAME>`
+      - `<DOMAIN_NAME>`
 
-      | Service     | Default access | Where                                       | Port to be forwarded from server |
-      |-------------|----------------|---------------------------------------------|----------------------------------|
-      | ssh         | ssh            | ``<LAN_IP>`` or ``<DOMAIN_NAME>``           |  22                              |
-      | minikube    | api-access     | ``<LAN_IP>`` or ``<DOMAIN_NAME>``           |  3001                            |
-      | squid       | proxy          | ``<LAN_IP>:3128`` or ``<DOMAIN_NAME>:3128`` | 3128                             |
-      | grafana     | Ingress        | ``grafana.<DOMAIN_NAME>``                   |  80                              |
-      | jellyfin    | Ingress        | ``jellyin.<DOMAIN_NAME>``                   |  80                              |
-      | ombi        | Ingress        | ``ombi.<DOMAIN_NAME>``                      |  80                              |
-      | prowlarr    | Ingress        | ``prowlarr.<DOMAIN_NAME>``                  |  80                              |
-      | bazarr      | Ingress        | ``bazarr.<DOMAIN_NAME>``                    |  80                              |
-      | radarr      | Ingress        | ``radarr.<DOMAIN_NAME>``                    |  80                              |
-      | sonarr      | Ingress        | ``sonarr.<DOMAIN_NAME>``                    |  80                              |
-      | readarr     | Ingress        | ``readarr.<DOMAIN_NAME>``                   |  80                              |
-      | lidarr      | Ingress        | ``lidarr.<DOMAIN_NAME>``                    |  80                              |
-      | librespeed  | Ingress        | ``librespeed.<DOMAIN_NAME>``                |  80                              |
-      | calibre-web | Ingress        | ``calibre-web.<DOMAIN_NAME>``               |  80                              |
-      | calibre     | LAN            | ``<LAN_IP>:3002``                           | 3002                             |
+      | Service     | Default access | Where                                                             | Port to be forwarded from server |
+      |-------------|----------------|-------------------------------------------------------------------|----------------------------------|
+      | ssh         | ssh            | `<LAN_IP>` or `<DOMAIN_NAME>`                                     |    22                            |
+      | minikube    | api-access     | `<LAN_IP>` or `<DOMAIN_NAME>`                                     |  3001                            |
+      | squid       | proxy          | `<LAN_IP>:<GROUP_VARS_PORT>` or `<DOMAIN_NAME>:<GROUP_VARS_PORT>` |  3128                            |
+      | grafana     | Ingress        | `grafana.<DOMAIN_NAME>`                                           |    80                            |
+      | jellyfin    | Ingress        | `jellyin.<DOMAIN_NAME>`                                           |    80                            |
+      | ombi        | Ingress        | `ombi.<DOMAIN_NAME>`                                              |    80                            |
+      | prowlarr    | Ingress        | `prowlarr.<DOMAIN_NAME>`                                          |    80                            |
+      | bazarr      | Ingress        | `bazarr.<DOMAIN_NAME>`                                            |    80                            |
+      | radarr      | Ingress        | `radarr.<DOMAIN_NAME>`                                            |    80                            |
+      | sonarr      | Ingress        | `sonarr.<DOMAIN_NAME>`                                            |    80                            |
+      | readarr     | Ingress        | `readarr.<DOMAIN_NAME>`                                           |    80                            |
+      | lidarr      | Ingress        | `lidarr.<DOMAIN_NAME>`                                            |    80                            |
+      | librespeed  | Ingress        | `librespeed.<DOMAIN_NAME>`                                        |    80                            |
+      | calibre-web | Ingress        | `calibre-web.<DOMAIN_NAME>`                                       |    80                            |
+      | calibre     | LAN            | `<LAN_IP>:3002`                                                   |  3002                            |
 
       NOTE: Security is an unkown when exposing a service to the internet.
 
