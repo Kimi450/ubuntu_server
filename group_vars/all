@@ -60,6 +60,7 @@ services:
 # ==== Minikube settings ====
 
 minikube: # cli param values for minikube
+  # This cant be less than 2, it is the minimum required for kubernetes
   cpus: "max"
   # This cant be less than 1800, it is the minimum required for kubernetes
   memory: "6000"
