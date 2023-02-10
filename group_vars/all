@@ -45,22 +45,23 @@ services:
   # subtitle hunting
   bazarr: True
   # book monitoring
-  readarr: True
+  readarr: False
   # music monitoring
-  lidarr: True
+  lidarr: False
   # movie and show interface
   ombi: True
   # speed test to server
   librespeed: True
   # book client
-  calibre_web: True
+  calibre_web: False
   # book management
-  calibre: True
+  calibre: False
 
 # ==== Minikube settings ====
 
 minikube: # cli param values for minikube
   cpus: "max"
+  # This cant be less than 1800, it is the minimum required for kubernetes
   memory: "6000"
   disk_size: "50gb"
   nodes: "1"
