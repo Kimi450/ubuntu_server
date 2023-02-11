@@ -7,12 +7,8 @@
     service_name_minikube: minikube.service
     port_expose_file_location: /etc/minikube-apiserver-port-forward.conf
   tasks:
-    - name: Get architecture
-      command: dpkg --print-architecture
-      register: architecture
-
     - name: Generate minikube file name
-      command: "echo -n minikube_latest_{{ architecture.stdout }}.deb"
+      command: "echo -n minikube_latest_{{ architecture }}.deb"
       register: minikube_file_name
 
     - name: Install Minikube

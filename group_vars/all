@@ -5,6 +5,7 @@
 domain_name: "" # FILL OUT
 
 vnc: # vnc for remote desktop with GUI
+  enabled: True
   # will be truncated to 8 characters
   password: "" # FILL OUT
   # display for what port will be accessed
@@ -12,21 +13,28 @@ vnc: # vnc for remote desktop with GUI
   display: "4"
 
 squid: # squid credentials, for proxy
+  enabled: True
   username: "" # FILL OUT
   password: "" # FILL OUT
   port: "3128"
 
 smb: # sambashare for network attached storage
+  enabled: True
   password: "" # FILL OUT
   share_name: "sambashare"
 
 cloudflare:
+  enabled: True
   # Set your Cloudflare Zone ID
   zone_id: "" # FILL OUT
   # Set your Cloudflare Bearer token to view the zone and edit DNS records in it
   auth_key: "" # FILL OUT
   # WORK_IN_PROGRESS: Set your Cloudfare API token for editing zone DNS
   api_token: "WORK_IN_PROGRESS"
+
+bluetooth:
+  pinless:
+    enabled: False
 
 # ==== Select what services you wish to install ====
 services:
@@ -57,9 +65,15 @@ services:
   # book management
   calibre: False
 
+# ==== To install Docker, helm and kubectl ====
+
+cloud_native:
+  enabled: True
+
 # ==== Minikube settings ====
 
 minikube: # cli param values for minikube
+  enabled: True
   # This cant be less than 2, it is the minimum required for kubernetes
   cpus: "max"
   # This cant be less than 1800, it is the minimum required for kubernetes
@@ -67,10 +81,13 @@ minikube: # cli param values for minikube
   disk_size: "50gb"
   nodes: "1"
   cert_expiration: "87660h0m0s"
+  remote_access:
+    enabled: True
 
 # ==== For the Archived playbooks ====
 
-spotify: # spotify credentials
+spotify: # spotify settings
+  enabled: False
   username: "NO_NEED_TO_FILL"
   password: "NO_NEED_TO_FILL"
   init_volume: "69"

@@ -6,148 +6,79 @@
     - name: Get User ID (UID)
       shell: "id -u `whoami`"
       register: uid_output
+
+    - name: Get architecture
+      command: dpkg --print-architecture
+      register: architecture_output
     
     - name: Set shared facts
       set_fact:
         uid: "{{ uid_output.stdout }}"
         user: "{{ ansible_user }}"
+        architecture: "{{ architecture_output.stdout }}"
+        dir_minikube_mount: "/minikube-host"
+        dir_mount_path: "/media"
         dir_home: "/home/{{ ansible_user }}"
         dir_data: "/home/{{ ansible_user }}/data"
+        dir_repos: "/home/{{ ansible_user }}/repos"
         dir_data_movies: "/home/{{ ansible_user }}/data/movies"
         dir_data_shows: "/home/{{ ansible_user }}/data/shows"
         dir_data_games: "/home/{{ ansible_user }}/data/games"
         dir_data_books: "/home/{{ ansible_user }}/data/books"
         dir_data_music: "/home/{{ ansible_user }}/data/music"
         dir_data_downloads: "/home/{{ ansible_user }}/data/downloads"
-        dir_repos: "/home/{{ ansible_user }}/repos"
-        dir_minikube_mount: "/minikube-host"
-        dir_mount_path: "/media"
 
-    - name: Disable sleep
-      # https://serverfault.com/questions/1045949/how-to-disable-suspend-on-ubuntu-20-04-systemd-via-cli
-      become: True
-      block:
-        - name: Change the logind service config file
-          blockinfile:
-            path: /etc/systemd/logind.conf
-            block: |
-              HandleSuspendKey=ignore
-              HandleHibernateKey=ignore
-              HandleLidSwitch=ignore
-              HandleLidSwitchExternalPower=ignore
-              HandleLidSwitchDocked=ignore
- 
-        - name: Restart service
-          shell: systemctl restart systemd-logind
-
-        - name: Disable sleep in systemd
-          # https://www.unixtutorial.org/disable-sleep-on-ubuntu-server/
-          become: true
-          shell: systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
-
-    - name: Upgrade the system
-      become: true
-      apt:
-        update_cache: yes
-        upgrade: yes
-
-    - name: Ensure all basic dependencies are present
-      become: true
-      apt:
-        pkg: "{{ item }}"
-        state: latest
-      ignore_errors: yes
-      loop:
-        - git
-        - curl
-        - vim
-        - python3
-        - python3-pip
-        - htop
-        - lm-sensors
-        - stress
-        - vlc
-        - jq
-        - net-tools
-        - speedtest-cli
-        - w3m
-        - fio # for disk tests
-        - mesa-utils # for GPU tests
-        - cpustat # for CPU logs
-        - xclip # for clipboard
-        - nethogs # for network usage
-        - fzf # fuzzy find, to get a list of things to select from
-        - kubectx # MIGHT NOT BE FOUND
-        - intel-gpu-tools # for intel GPU usage, MIGHT NOT BE FOUND
-
-    - name: Create directories
-      file:
-        path: "{{ item }}"
-        state: directory
-        mode: '0755'
-      with_items:
-        - "{{ dir_data }}"
-        - "{{ dir_repos }}"
-        - "{{ dir_data_movies }}"
-        - "{{ dir_data_shows }}"
-        - "{{ dir_data_games }}"
-        - "{{ dir_data_books }}"
-        - "{{ dir_data_music }}"
-        - "{{ dir_data_downloads }}"
-
-    - name: Setup the bashrc file and the vimrc file
-      block:
-        - name: Clone useful_files from github
-          include_tasks: tasks-clone-git-repo.yaml
-          vars:
-            repo_dir:  "{{ useful_files_repo_dir }}"
-            repo_link:  https://github.com/Kimi450/useful_files.git
-
-        - name: Transfer bashrc file
-          copy:
-            remote_src: True
-            src: "{{ useful_files_repo_dir }}/.bashrc"
-            dest: "{{ dir_home }}"
-
-        - name: Transfer vimrc edit script
-          copy:
-            remote_src: True
-            src: "{{ useful_files_repo_dir }}/vimmer.sh"
-            dest: "{{ dir_home }}"
-            mode: "0755"
-
-        - name: Run vimrc edit script
-          command: "{{ useful_files_repo_dir }}/vimmer.sh"
-
-        - name: Run vimrc edit script for sudo
-          become: true
-          command: "{{ useful_files_repo_dir }}/vimmer.sh"
-      vars:
-        useful_files_repo_dir: "{{ dir_repos }}/useful_files"
+- import_playbook: server-basics.yaml
 
 - import_playbook: install-tightvnc-and-ssh.yaml
+  when:
+    - vnc.enabled
 
 - import_playbook: install-cn-basics.yaml
+  when:
+    - minikube.enabled or cloud_native.enabled
 
 - import_playbook: install-and-configure-minikube.yaml
   vars:
     api_server_forwarded_port: "3001"
+  when:
+    - cloud_native.enabled
+    - minikube.enabled
 
 - import_playbook: install-charts.yaml
   vars:
     ip: "{{ ansible_host }}"
+  when:
+    - cloud_native.enabled
+    - minikube.enabled
 
 - import_playbook: install-and-configure-samba.yaml
+  when:
+    - smb.enabled
 
 - import_playbook: install-and-configure-squid.yaml
+  when:
+    - squid.enabled
 
 - import_playbook: install-and-configure-cloudflare-dns-updater-service.yaml
+  when:
+    - cloudflare.enabled
 
-# Enable if needed
+- import_playbook: remote-access-minikube.yaml
+  vars:
+    api_server_forwarded_port: "3001"
+    ip: "{{ ansible_host }}"
+  when:
+    - cloud_native.enabled
+    - minikube.enabled
+    - minikube.remote_access.enabled
 
-# - import_playbook: install-and-configure-pinless-bluetooth-pairing.yaml
+- import_playbook: install-and-configure-pinless-bluetooth-pairing.yaml
+  when:
+    - bluetooth.pinless.enabled
 
-# - import_playbook: remote-access-minikube.yaml
-#   vars:
-#     api_server_forwarded_port: "3001"
-#     ip: "{{ ansible_host }}"
+# Deprecated stuff
+
+- import_playbook: deprecated_playbooks/spotify/install-and-configure-spotifyd.yaml
+  when:
+    - spotify.enabled

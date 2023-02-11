@@ -1,0 +1,125 @@
+---
+- name: Do basic setup on the server
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Disable sleep
+      # https://serverfault.com/questions/1045949/how-to-disable-suspend-on-ubuntu-20-04-systemd-via-cli
+      become: True
+      block:
+        - name: Change the logind service config file
+          blockinfile:
+            path: /etc/systemd/logind.conf
+            block: |
+              HandleSuspendKey=ignore
+              HandleHibernateKey=ignore
+              HandleLidSwitch=ignore
+              HandleLidSwitchExternalPower=ignore
+              HandleLidSwitchDocked=ignore
+ 
+        - name: Restart service
+          shell: systemctl restart systemd-logind
+
+        - name: Disable sleep in systemd
+          # https://www.unixtutorial.org/disable-sleep-on-ubuntu-server/
+          become: true
+          shell: systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+
+    - name: Upgrade the system
+      become: true
+      apt:
+        update_cache: yes
+        upgrade: yes
+
+    - name: Ensure all basic dependencies are present
+      block:
+      - name: apt packages
+        become: true
+        apt:
+          pkg: "{{ item }}"
+          state: latest
+        ignore_errors: yes
+        loop:
+          - git
+          - curl
+          - vim
+          - python3
+          - python3-pip
+          - htop
+          - lm-sensors
+          - stress
+          - vlc
+          - jq
+          - net-tools
+          - speedtest-cli
+          - w3m
+          - fio # for disk tests
+          - mesa-utils # for GPU tests
+          - cpustat # for CPU logs
+          - xclip # for clipboard
+          - nethogs # for network usage
+          - fzf # fuzzy find, to get a list of things to select from
+          - intel-gpu-tools # for intel GPU usage, MIGHT NOT BE FOUND
+
+      - name: Install kubectx/kubens
+        # https://github.com/ahmetb/kubectx
+        snap:
+          name: kubectx
+        become: True
+
+    - name: Create directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+      with_items:
+        - "{{ dir_data }}"
+        - "{{ dir_repos }}"
+        - "{{ dir_data_movies }}"
+        - "{{ dir_data_shows }}"
+        - "{{ dir_data_games }}"
+        - "{{ dir_data_books }}"
+        - "{{ dir_data_music }}"
+        - "{{ dir_data_downloads }}"
+
+    - name: Setup the bashrc file and the vimrc file
+      block:
+        - name: Clone useful_files from github
+          include_tasks: tasks-clone-git-repo.yaml
+          vars:
+            repo_dir:  "{{ useful_files_repo_dir }}"
+            repo_link:  https://github.com/Kimi450/useful_files.git
+
+        - name: Transfer bashrc file
+          copy:
+            remote_src: True
+            src: "{{ useful_files_repo_dir }}/.bashrc"
+            dest: "{{ dir_home }}"
+
+        - name: Transfer vimrc edit script
+          copy:
+            remote_src: True
+            src: "{{ useful_files_repo_dir }}/vimmer.sh"
+            dest: "{{ dir_home }}"
+            mode: "0755"
+
+        - name: Run vimrc edit script
+          command: "{{ useful_files_repo_dir }}/vimmer.sh"
+
+        - name: Run vimrc edit script for sudo
+          become: true
+          command: "{{ useful_files_repo_dir }}/vimmer.sh"
+      vars:
+        useful_files_repo_dir: "{{ dir_repos }}/useful_files"
+
+    - name: Install Google Chrome
+      block:
+      - name: Download Google Chrome
+        get_url:
+          url: https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          dest: "{{ location_deb }}"
+      - name: Install Google Chrome
+        ansible.builtin.apt:
+        deb: "{{ location_deb }}"
+      vars:
+        location_deb: "/tmp/chrome.deb"
