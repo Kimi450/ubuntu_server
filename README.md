@@ -242,7 +242,6 @@ Use your own server
           ```
           1337x
           Rarbg
-          showRSS
           LimeTorrents
           ```
         - Anime
