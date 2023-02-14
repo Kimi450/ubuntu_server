@@ -116,10 +116,10 @@
       block:
       - name: Download Google Chrome
         get_url:
-          url: https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          url: "https://dl.google.com/linux/direct/google-chrome-stable_current_{{ architecture }}.deb"
           dest: "{{ location_deb }}"
       - name: Install Google Chrome
-        ansible.builtin.apt:
-        deb: "{{ location_deb }}"
+        apt:
+          deb: "{{ location_deb }}"
       vars:
         location_deb: "/tmp/chrome.deb"
