@@ -60,6 +60,7 @@
           - nethogs # for network usage
           - fzf # fuzzy find, to get a list of things to select from
           - intel-gpu-tools # for intel GPU usage, MIGHT NOT BE FOUND
+          - firefox # browser
 
       - name: Install kubectx/kubens
         # https://github.com/ahmetb/kubectx
@@ -111,15 +112,3 @@
           command: "{{ useful_files_repo_dir }}/vimmer.sh"
       vars:
         useful_files_repo_dir: "{{ dir_repos }}/useful_files"
-
-    - name: Install Google Chrome
-      block:
-      - name: Download Google Chrome
-        get_url:
-          url: "https://dl.google.com/linux/direct/google-chrome-stable_current_{{ architecture }}.deb"
-          dest: "{{ location_deb }}"
-      - name: Install Google Chrome
-        apt:
-          deb: "{{ location_deb }}"
-      vars:
-        location_deb: "/tmp/chrome.deb"
