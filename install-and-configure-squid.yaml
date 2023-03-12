@@ -48,8 +48,8 @@
 
     - name: Find basic_ncsa_auth file location
       become: True
-      find:
-        paths: "/"
+      ansible.builtin.find:
+        paths: "/usr"
         patterns: "basic_ncsa_auth"
         recurse: yes
       register: basic_ncsa_auth_location
