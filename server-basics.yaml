@@ -53,6 +53,7 @@
           - net-tools
           - speedtest-cli
           - w3m
+          - ufw #firewall
           - fio # for disk tests
           - mesa-utils # for GPU tests
           - cpustat # for CPU logs
