@@ -29,6 +29,8 @@
         dir_data_downloads: "/home/{{ ansible_user }}/data/downloads"
 
 - import_playbook: server-basics.yaml
+  when:
+    - basics.enabled
 
 - import_playbook: install-tightvnc-and-ssh.yaml
   when:

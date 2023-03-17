@@ -4,6 +4,9 @@
 # Domain name to be used
 domain_name: "" # FILL OUT
 
+basics: # for basic server setup (in my opinion)
+  enabled: True
+
 vnc: # vnc for remote desktop with GUI
   enabled: True
   # will be truncated to 8 characters
