@@ -176,7 +176,7 @@ Use your own server
     - Add torrent client
       - Go to ``Settings > Download Clients > Add > qBittorent > Custom``
       - Add the host: ``qbittorrent``
-      - Add the port: ``8080``
+      - Add the port: ``10095``
       - Add the username: ``<qBittorrent_username>``
       - Add the password: ``<qBittorrent_password>``
       - Uncheck the ``Remove Completed`` option.

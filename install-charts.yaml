@@ -56,8 +56,13 @@
           timeout: "{{ charts.timeout }}"
           release_name: kube-prometheus-stack
           chart_name: kube-prometheus-stack
+          # The following has been set to disable Truecharts own injection
+          # of manifests for SCALE products I believe
+          # either way I dont need it:
+          # - common.manifests.enabled=false
           set_options: "--set \
             prometheus.prometheusSpec.retention=730d,\
+            common.manifests.enabled=false,\
             grafana.persistence.enabled=true,\
             prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.accessModes={'ReadWriteOnce'},\
             prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage='50Gi',\
@@ -93,18 +98,25 @@
       - name: Install/Upgrade the jellyfin chart
         include_tasks: tasks-install-chart.yaml
         vars:
-          repo_name: k8s-at-home
-          repo_link: https://k8s-at-home.com/charts/
+          repo_name: TrueCharts
+          repo_link: https://charts.truecharts.org
           install_namespace: "{{ namespace_generic_services }}"
           timeout: "{{ charts.timeout }}"
           release_name: jellyfin
           chart_name: jellyfin
-          # "common.securityContext.privileged=true" is to allow the pod
-          # to be able to use the dev mount to access /dev/dri/renderD128 for
-          # hwa
+          # to allow the pod # to be able to use the /dev mount
+          # to access /dev/dri/renderD128 for hwa, these options are set to true
+          # - common.securityContext.privileged=true
+          # - common.securityContext.allowPrivilegeEscalation=true
+          # The following has been set to disable Truecharts own injection
+          # of manifests for SCALE products I believe
+          # either way I dont need it:
+          # - common.manifests.enabled=false
           set_options: "--set \
             controller.type=statefulset,\
+            common.manifests.enabled=false,\
             common.securityContext.privileged=true,\
+            common.securityContext.allowPrivilegeEscalation=true,\
             persistence.config.enabled=yes,\
             persistence.cache.enabled=true,\
             persistence.cache.accessMode=ReadWriteOnce,\
@@ -140,16 +152,21 @@
         include_tasks: tasks-install-chart.yaml
         # https://artifacthub.io/packages/helm/k8s-at-home/qbittorrent
         vars:
-          repo_name: k8s-at-home
-          repo_link: https://k8s-at-home.com/charts/
+          repo_name: TrueCharts
+          repo_link: https://charts.truecharts.org
           install_namespace: "{{ namespace_generic_services }}"
           timeout: "{{ charts.timeout }}"
           release_name: qbittorrent
           chart_name: qbittorrent
           # runAsUser={{ uid }} gives write access on the pod
           # 568 is the default user ID, added to the groups cause why not
+          # The following has been set to disable Truecharts own injection
+          # of manifests for SCALE products I believe
+          # either way I dont need it:
+          # - common.manifests.enabled=false
           set_options: "--set \
             controller.type=statefulset,\
+            common.manifests.enabled=false,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
             common.podSecurityContext.runAsUser={{ uid }},\
             common.podSecurityContext.runAsGroup=568,\
@@ -166,7 +183,7 @@
             ingress.main.hosts[0].paths[0].path='/',\
             ingress.main.hosts[0].paths[0].pathType='Prefix',\
             ingress.main.hosts[0].paths[0].service.name=qbittorrent,\
-            ingress.main.hosts[0].paths[0].service.port=8080"
+            ingress.main.hosts[0].paths[0].service.port=10095"
 
       - debug:
           msg: >
@@ -183,16 +200,21 @@
         include_tasks: tasks-install-chart.yaml
         # https://artifacthub.io/packages/helm/k8s-at-home/prowlarr
         vars:
-          repo_name: k8s-at-home
-          repo_link: https://k8s-at-home.com/charts/
+          repo_name: TrueCharts
+          repo_link: https://charts.truecharts.org
           install_namespace: "{{ namespace_generic_services }}"
           timeout: "{{ charts.timeout }}"
           release_name: prowlarr
           chart_name: prowlarr
           # runAsUser={{ uid }} gives write access on the pod
           # 568 is the default user ID, added to the groups cause why not
+          # The following has been set to disable Truecharts own injection
+          # of manifests for SCALE products I believe
+          # either way I dont need it:
+          # - common.manifests.enabled=false
           set_options: "--set \
             controller.type=statefulset,\
+            common.manifests.enabled=false,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
             common.podSecurityContext.runAsUser={{ uid }},\
             common.podSecurityContext.runAsGroup=568,\
@@ -226,16 +248,21 @@
         include_tasks: tasks-install-chart.yaml
         # https://artifacthub.io/packages/helm/k8s-at-home/radarr
         vars:
-          repo_name: k8s-at-home
-          repo_link: https://k8s-at-home.com/charts/
+          repo_name: TrueCharts
+          repo_link: https://charts.truecharts.org
           install_namespace: "{{ namespace_generic_services }}"
           timeout: "{{ charts.timeout }}"
           release_name: radarr
           chart_name: radarr
           # runAsUser={{ uid }} gives write access on the pod
           # 568 is the default user ID, added to the groups cause why not
+          # The following has been set to disable Truecharts own injection
+          # of manifests for SCALE products I believe
+          # either way I dont need it:
+          # - common.manifests.enabled=false
           set_options: "--set \
             controller.type=statefulset,\
+            common.manifests.enabled=false,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
             common.podSecurityContext.runAsUser={{ uid }},\
             common.podSecurityContext.runAsGroup=568,\
@@ -268,16 +295,21 @@
         include_tasks: tasks-install-chart.yaml
         # https://artifacthub.io/packages/helm/k8s-at-home/sonarr
         vars:
-          repo_name: k8s-at-home
-          repo_link: https://k8s-at-home.com/charts/
+          repo_name: TrueCharts
+          repo_link: https://charts.truecharts.org
           install_namespace: "{{ namespace_generic_services }}"
           timeout: "{{ charts.timeout }}"
           release_name: sonarr
           chart_name: sonarr
           # runAsUser={{ uid }} gives write access on the pod
           # 568 is the default user ID, added to the groups cause why not
+          # The following has been set to disable Truecharts own injection
+          # of manifests for SCALE products I believe
+          # either way I dont need it:
+          # - common.manifests.enabled=false
           set_options: "--set \
             controller.type=statefulset,\
+            common.manifests.enabled=false,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
             common.podSecurityContext.runAsUser={{ uid }},\
             common.podSecurityContext.runAsGroup=568,\
@@ -310,16 +342,21 @@
         include_tasks: tasks-install-chart.yaml
         # https://artifacthub.io/packages/helm/k8s-at-home/bazarr
         vars:
-          repo_name: k8s-at-home
-          repo_link: https://k8s-at-home.com/charts/
+          repo_name: TrueCharts
+          repo_link: https://charts.truecharts.org
           install_namespace: "{{ namespace_generic_services }}"
           timeout: "{{ charts.timeout }}"
           release_name: bazarr
           chart_name: bazarr
           # runAsUser={{ uid }} gives write access on the pod
           # 568 is the default user ID, added to the groups cause why not
+          # The following has been set to disable Truecharts own injection
+          # of manifests for SCALE products I believe
+          # either way I dont need it:
+          # - common.manifests.enabled=false
           set_options: "--set \
             controller.type=statefulset,\
+            common.manifests.enabled=false,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
             common.podSecurityContext.runAsUser={{ uid }},\
             common.podSecurityContext.runAsGroup=568,\
@@ -351,16 +388,21 @@
         include_tasks: tasks-install-chart.yaml
         # https://artifacthub.io/packages/helm/k8s-at-home/readarr
         vars:
-          repo_name: k8s-at-home
-          repo_link: https://k8s-at-home.com/charts/
+          repo_name: TrueCharts
+          repo_link: https://charts.truecharts.org
           install_namespace: "{{ namespace_generic_services }}"
           timeout: "{{ charts.timeout }}"
           release_name: readarr
           chart_name: readarr
           # runAsUser={{ uid }} gives write access on the pod
           # 568 is the default user ID, added to the groups cause why not
+          # The following has been set to disable Truecharts own injection
+          # of manifests for SCALE products I believe
+          # either way I dont need it:
+          # - common.manifests.enabled=false
           set_options: "--set \
             controller.type=statefulset,\
+            common.manifests.enabled=false,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
             common.podSecurityContext.runAsUser={{ uid }},\
             common.podSecurityContext.runAsGroup=568,\
@@ -392,16 +434,21 @@
         include_tasks: tasks-install-chart.yaml
         # https://artifacthub.io/packages/helm/k8s-at-home/lidarr
         vars:
-          repo_name: k8s-at-home
-          repo_link: https://k8s-at-home.com/charts/
+          repo_name: TrueCharts
+          repo_link: https://charts.truecharts.org
           install_namespace: "{{ namespace_generic_services }}"
           timeout: "{{ charts.timeout }}"
           release_name: lidarr
           chart_name: lidarr
           # runAsUser={{ uid }} gives write access on the pod
           # 568 is the default user ID, added to the groups cause why not
+          # The following has been set to disable Truecharts own injection
+          # of manifests for SCALE products I believe
+          # either way I dont need it:
+          # - common.manifests.enabled=false
           set_options: "--set \
             controller.type=statefulset,\
+            common.manifests.enabled=false,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
             common.podSecurityContext.runAsUser={{ uid }},\
             common.podSecurityContext.runAsGroup=568,\
@@ -433,14 +480,19 @@
       - name: Install/Upgrade the ombi chart
         include_tasks: tasks-install-chart.yaml
         vars:
-          repo_name: k8s-at-home
-          repo_link: https://k8s-at-home.com/charts/
+          repo_name: TrueCharts
+          repo_link: https://charts.truecharts.org
           install_namespace: "{{ namespace_generic_services }}"
           timeout: "{{ charts.timeout }}"
           release_name: ombi
           chart_name: ombi
+          # The following has been set to disable Truecharts own injection
+          # of manifests for SCALE products I believe
+          # either way I dont need it:
+          # - common.manifests.enabled=false
           set_options: "--set \
             controller.type=statefulset,\
+            common.manifests.enabled=false,\
             persistence.config.enabled=yes,\
             ingress.main.enabled=true,\
             ingress.main.primary=false,\
@@ -465,14 +517,19 @@
         include_tasks: tasks-install-chart.yaml
         # https://artifacthub.io/packages/helm/k8s-at-home/librespeed
         vars:
-          repo_name: k8s-at-home
-          repo_link: https://k8s-at-home.com/charts/
+          repo_name: TrueCharts
+          repo_link: https://charts.truecharts.org
           install_namespace: "{{ namespace_generic_services }}"
           timeout: "{{ charts.timeout }}"
           release_name: librespeed
           chart_name: librespeed
+          # The following has been set to disable Truecharts own injection
+          # of manifests for SCALE products I believe
+          # either way I dont need it:
+          # - common.manifests.enabled=false
           set_options: "--set \
             controller.type=statefulset,\
+            common.manifests.enabled=false,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
             persistence.config.enabled=yes,\
             ingress.main.enabled=true,\
@@ -482,7 +539,7 @@
             ingress.main.hosts[0].paths[0].path='/',\
             ingress.main.hosts[0].paths[0].pathType='Prefix',\
             ingress.main.hosts[0].paths[0].service.name=librespeed,\
-            ingress.main.hosts[0].paths[0].service.port=80"
+            ingress.main.hosts[0].paths[0].service.port=10016"
 
       - debug:
           msg: >
@@ -495,16 +552,21 @@
         include_tasks: tasks-install-chart.yaml
         # https://artifacthub.io/packages/helm/k8s-at-home/calibre-web
         vars:
-          repo_name: k8s-at-home
-          repo_link: https://k8s-at-home.com/charts/
+          repo_name: TrueCharts
+          repo_link: https://charts.truecharts.org
           install_namespace: "{{ namespace_generic_services }}"
           timeout: "{{ charts.timeout }}"
           release_name: calibre-web
           chart_name: calibre-web
           # PUID={{ uid }} gives write access on the pod
           # 568 is the default user ID, added to the groups cause why not
+          # The following has been set to disable Truecharts own injection
+          # of manifests for SCALE products I believe
+          # either way I dont need it:
+          # - common.manifests.enabled=false
           set_options: "--set \
             controller.type=statefulset,\
+            common.manifests.enabled=false,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
             env.PUID=\"{{ uid }}\",\
             env.PGID=\"568\",\
@@ -535,16 +597,21 @@
         include_tasks: tasks-install-chart.yaml
         # https://artifacthub.io/packages/helm/k8s-at-home/calibre
         vars:
-          repo_name: k8s-at-home
-          repo_link: https://k8s-at-home.com/charts/
+          repo_name: TrueCharts
+          repo_link: https://charts.truecharts.org
           install_namespace: "{{ namespace_generic_services }}"
           timeout: "{{ charts.timeout }}"
           release_name: calibre
           chart_name: calibre
           # PUID={{ uid }} gives write access on the pod
           # 568 is the default user ID, added to the groups cause why not
+          # The following has been set to disable Truecharts own injection
+          # of manifests for SCALE products I believe
+          # either way I dont need it:
+          # - common.manifests.enabled=false
           set_options: "--set \
             controller.type=statefulset,\
+            common.manifests.enabled=false,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
             env.PUID=\"{{ uid }}\",\
             env.PGID=\"568\",\
