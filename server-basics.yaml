@@ -45,7 +45,8 @@
           - vim
           - python3
           - python3-pip
-          - htop
+          - htop # for top resource usage
+          - iotop # for top io usage
           - lm-sensors
           - stress
           - vlc
