@@ -62,7 +62,6 @@
           # - common.manifests.enabled=false
           set_options: "--set \
             prometheus.prometheusSpec.retention=730d,\
-            common.manifests.enabled=false,\
             grafana.persistence.enabled=true,\
             prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.accessModes={'ReadWriteOnce'},\
             prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage='50Gi',\
@@ -113,25 +112,34 @@
           # either way I dont need it:
           # - common.manifests.enabled=false
           set_options: "--set \
+            global.addMetalLBAnnotations=false,\
+            global.addTraefikAnnotations=false,\
             controller.type=statefulset,\
+            common.persistence.shared.enabled=false,\
+            common.persistence.shm.enabled=false,\
+            common.persistence.temp.enabled=false,\
+            common.persistence.varlogs.enabled=false,\
             common.manifests.enabled=false,\
             common.securityContext.privileged=true,\
             common.securityContext.allowPrivilegeEscalation=true,\
-            persistence.config.enabled=yes,\
+            persistence.config.enabled=true,\
+            persistence.config.size=1Gi,\
             persistence.cache.enabled=true,\
             persistence.cache.accessMode=ReadWriteOnce,\
             persistence.cache.size=50G,\
-            persistence.media.enabled=yes,\
+            persistence.media.enabled=true,\
             persistence.media.type=hostPath,\
             persistence.media.mountPath={{ dir_mount_path }},\
             persistence.media.hostPath={{ dir_minikube_mount }},\
-            persistence.dev.enabled=yes,\
+            persistence.dev.enabled=true,\
             persistence.dev.type=hostPath,\
             persistence.dev.mountPath=/dev,\
-            persistence.dev.hostPath=/dev,\
+            persistence.dev.hostPath=/dev,\ # maybe use host-dev
             ingress.main.enabled=true,\
             ingress.main.primary=false,\
             ingress.main.ingressClassName=nginx,\
+            ingress.main.fixedMiddlewares={},\
+            ingress.main.enableFixedMiddlewares=false,\
             ingress.main.hosts[0].host='jellyfin.{{ domain_name }}',\
             ingress.main.hosts[0].paths[0].path='/',\
             ingress.main.hosts[0].paths[0].pathType='Prefix',\
@@ -165,20 +173,29 @@
           # either way I dont need it:
           # - common.manifests.enabled=false
           set_options: "--set \
+            global.addMetalLBAnnotations=false,\
+            global.addTraefikAnnotations=false,\
             controller.type=statefulset,\
+            common.persistence.shared.enabled=false,\
+            common.persistence.shm.enabled=false,\
+            common.persistence.temp.enabled=false,\
+            common.persistence.varlogs.enabled=false,\
             common.manifests.enabled=false,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
             common.podSecurityContext.runAsUser={{ uid }},\
             common.podSecurityContext.runAsGroup=568,\
             common.podSecurityContext.fsGroup=568,\
-            persistence.config.enabled=yes,\
-            persistence.media.enabled=yes,\
+            persistence.config.enabled=true,\
+            persistence.config.size=1Gi,\
+            persistence.media.enabled=true,\
             persistence.media.type=hostPath,\
             persistence.media.mountPath={{ dir_mount_path }},\
             persistence.media.hostPath={{ dir_minikube_mount }},\
             ingress.main.enabled=true,\
             ingress.main.primary=false,\
             ingress.main.ingressClassName=nginx,\
+            ingress.main.fixedMiddlewares={},\
+            ingress.main.enableFixedMiddlewares=false,\
             ingress.main.hosts[0].host='qbittorrent.{{ domain_name }}',\
             ingress.main.hosts[0].paths[0].path='/',\
             ingress.main.hosts[0].paths[0].pathType='Prefix',\
@@ -213,20 +230,29 @@
           # either way I dont need it:
           # - common.manifests.enabled=false
           set_options: "--set \
+            global.addMetalLBAnnotations=false,\
+            global.addTraefikAnnotations=false,\
             controller.type=statefulset,\
+            common.persistence.shared.enabled=false,\
+            common.persistence.shm.enabled=false,\
+            common.persistence.temp.enabled=false,\
+            common.persistence.varlogs.enabled=false,\
             common.manifests.enabled=false,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
             common.podSecurityContext.runAsUser={{ uid }},\
             common.podSecurityContext.runAsGroup=568,\
             common.podSecurityContext.fsGroup=568,\
-            persistence.config.enabled=yes,\
-            persistence.media.enabled=yes,\
+            persistence.config.enabled=true,\
+            persistence.config.size=1Gi,\
+            persistence.media.enabled=true,\
             persistence.media.type=hostPath,\
             persistence.media.mountPath={{ dir_mount_path }},\
             persistence.media.hostPath={{ dir_minikube_mount }},\
             ingress.main.enabled=true,\
             ingress.main.primary=false,\
             ingress.main.ingressClassName=nginx,\
+            ingress.main.fixedMiddlewares={},\
+            ingress.main.enableFixedMiddlewares=false,\
             ingress.main.hosts[0].host='prowlarr.{{ domain_name }}',\
             ingress.main.hosts[0].paths[0].path='/',\
             ingress.main.hosts[0].paths[0].pathType='Prefix',\
@@ -261,20 +287,29 @@
           # either way I dont need it:
           # - common.manifests.enabled=false
           set_options: "--set \
+            global.addMetalLBAnnotations=false,\
+            global.addTraefikAnnotations=false,\
             controller.type=statefulset,\
+            common.persistence.shared.enabled=false,\
+            common.persistence.shm.enabled=false,\
+            common.persistence.temp.enabled=false,\
+            common.persistence.varlogs.enabled=false,\
             common.manifests.enabled=false,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
             common.podSecurityContext.runAsUser={{ uid }},\
             common.podSecurityContext.runAsGroup=568,\
             common.podSecurityContext.fsGroup=568,\
-            persistence.config.enabled=yes,\
-            persistence.media.enabled=yes,\
+            persistence.config.enabled=true,\
+            persistence.config.size=1Gi,\
+            persistence.media.enabled=true,\
             persistence.media.type=hostPath,\
             persistence.media.mountPath={{ dir_mount_path }},\
             persistence.media.hostPath={{ dir_minikube_mount }},\
             ingress.main.enabled=true,\
             ingress.main.primary=false,\
             ingress.main.ingressClassName=nginx,\
+            ingress.main.fixedMiddlewares={},\
+            ingress.main.enableFixedMiddlewares=false,\
             ingress.main.hosts[0].host='radarr.{{ domain_name }}',\
             ingress.main.hosts[0].paths[0].path='/',\
             ingress.main.hosts[0].paths[0].pathType='Prefix',\
@@ -308,20 +343,29 @@
           # either way I dont need it:
           # - common.manifests.enabled=false
           set_options: "--set \
+            global.addMetalLBAnnotations=false,\
+            global.addTraefikAnnotations=false,\
             controller.type=statefulset,\
+            common.persistence.shared.enabled=false,\
+            common.persistence.shm.enabled=false,\
+            common.persistence.temp.enabled=false,\
+            common.persistence.varlogs.enabled=false,\
             common.manifests.enabled=false,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
             common.podSecurityContext.runAsUser={{ uid }},\
             common.podSecurityContext.runAsGroup=568,\
             common.podSecurityContext.fsGroup=568,\
-            persistence.config.enabled=yes,\
-            persistence.media.enabled=yes,\
+            persistence.config.enabled=true,\
+            persistence.config.size=1Gi,\
+            persistence.media.enabled=true,\
             persistence.media.type=hostPath,\
             persistence.media.mountPath={{ dir_mount_path }},\
             persistence.media.hostPath={{ dir_minikube_mount }},\
             ingress.main.enabled=true,\
             ingress.main.primary=false,\
             ingress.main.ingressClassName=nginx,\
+            ingress.main.fixedMiddlewares={},\
+            ingress.main.enableFixedMiddlewares=false,\
             ingress.main.hosts[0].host='sonarr.{{ domain_name }}',\
             ingress.main.hosts[0].paths[0].path='/',\
             ingress.main.hosts[0].paths[0].pathType='Prefix',\
@@ -355,20 +399,29 @@
           # either way I dont need it:
           # - common.manifests.enabled=false
           set_options: "--set \
+            global.addMetalLBAnnotations=false,\
+            global.addTraefikAnnotations=false,\
             controller.type=statefulset,\
+            common.persistence.shared.enabled=false,\
+            common.persistence.shm.enabled=false,\
+            common.persistence.temp.enabled=false,\
+            common.persistence.varlogs.enabled=false,\
             common.manifests.enabled=false,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
             common.podSecurityContext.runAsUser={{ uid }},\
             common.podSecurityContext.runAsGroup=568,\
             common.podSecurityContext.fsGroup=568,\
-            persistence.config.enabled=yes,\
-            persistence.media.enabled=yes,\
+            persistence.config.enabled=true,\
+            persistence.config.size=1Gi,\
+            persistence.media.enabled=true,\
             persistence.media.type=hostPath,\
             persistence.media.mountPath={{ dir_mount_path }},\
             persistence.media.hostPath={{ dir_minikube_mount }},\
             ingress.main.enabled=true,\
             ingress.main.primary=false,\
             ingress.main.ingressClassName=nginx,\
+            ingress.main.fixedMiddlewares={},\
+            ingress.main.enableFixedMiddlewares=false,\
             ingress.main.hosts[0].host='bazarr.{{ domain_name }}',\
             ingress.main.hosts[0].paths[0].path='/',\
             ingress.main.hosts[0].paths[0].pathType='Prefix',\
@@ -401,20 +454,29 @@
           # either way I dont need it:
           # - common.manifests.enabled=false
           set_options: "--set \
+            global.addMetalLBAnnotations=false,\
+            global.addTraefikAnnotations=false,\
             controller.type=statefulset,\
+            common.persistence.shared.enabled=false,\
+            common.persistence.shm.enabled=false,\
+            common.persistence.temp.enabled=false,\
+            common.persistence.varlogs.enabled=false,\
             common.manifests.enabled=false,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
             common.podSecurityContext.runAsUser={{ uid }},\
             common.podSecurityContext.runAsGroup=568,\
             common.podSecurityContext.fsGroup=568,\
-            persistence.config.enabled=yes,\
-            persistence.media.enabled=yes,\
+            persistence.config.enabled=true,\
+            persistence.config.size=1Gi,\
+            persistence.media.enabled=true,\
             persistence.media.type=hostPath,\
             persistence.media.mountPath={{ dir_mount_path }},\
             persistence.media.hostPath={{ dir_minikube_mount }},\
             ingress.main.enabled=true,\
             ingress.main.primary=false,\
             ingress.main.ingressClassName=nginx,\
+            ingress.main.fixedMiddlewares={},\
+            ingress.main.enableFixedMiddlewares=false,\
             ingress.main.hosts[0].host='readarr.{{ domain_name }}',\
             ingress.main.hosts[0].paths[0].path='/',\
             ingress.main.hosts[0].paths[0].pathType='Prefix',\
@@ -447,20 +509,29 @@
           # either way I dont need it:
           # - common.manifests.enabled=false
           set_options: "--set \
+            global.addMetalLBAnnotations=false,\
+            global.addTraefikAnnotations=false,\
             controller.type=statefulset,\
+            common.persistence.shared.enabled=false,\
+            common.persistence.shm.enabled=false,\
+            common.persistence.temp.enabled=false,\
+            common.persistence.varlogs.enabled=false,\
             common.manifests.enabled=false,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
             common.podSecurityContext.runAsUser={{ uid }},\
             common.podSecurityContext.runAsGroup=568,\
             common.podSecurityContext.fsGroup=568,\
-            persistence.config.enabled=yes,\
-            persistence.media.enabled=yes,\
+            persistence.config.enabled=true,\
+            persistence.config.size=1Gi,\
+            persistence.media.enabled=true,\
             persistence.media.type=hostPath,\
             persistence.media.mountPath={{ dir_mount_path }},\
             persistence.media.hostPath={{ dir_minikube_mount }},\
             ingress.main.enabled=true,\
             ingress.main.primary=false,\
             ingress.main.ingressClassName=nginx,\
+            ingress.main.fixedMiddlewares={},\
+            ingress.main.enableFixedMiddlewares=false,\
             ingress.main.hosts[0].host='lidarr.{{ domain_name }}',\
             ingress.main.hosts[0].paths[0].path='/',\
             ingress.main.hosts[0].paths[0].pathType='Prefix',\
@@ -491,12 +562,21 @@
           # either way I dont need it:
           # - common.manifests.enabled=false
           set_options: "--set \
+            global.addMetalLBAnnotations=false,\
+            global.addTraefikAnnotations=false,\
             controller.type=statefulset,\
+            common.persistence.shared.enabled=false,\
+            common.persistence.shm.enabled=false,\
+            common.persistence.temp.enabled=false,\
+            common.persistence.varlogs.enabled=false,\
             common.manifests.enabled=false,\
-            persistence.config.enabled=yes,\
+            persistence.config.enabled=true,\
+            persistence.config.size=1Gi,\
             ingress.main.enabled=true,\
             ingress.main.primary=false,\
             ingress.main.ingressClassName=nginx,\
+            ingress.main.fixedMiddlewares={},\
+            ingress.main.enableFixedMiddlewares=false,\
             ingress.main.hosts[0].host='ombi.{{ domain_name }}',\
             ingress.main.hosts[0].paths[0].path='/',\
             ingress.main.hosts[0].paths[0].pathType='Prefix',\
@@ -528,13 +608,22 @@
           # either way I dont need it:
           # - common.manifests.enabled=false
           set_options: "--set \
+            global.addMetalLBAnnotations=false,\
+            global.addTraefikAnnotations=false,\
             controller.type=statefulset,\
+            common.persistence.shared.enabled=false,\
+            common.persistence.shm.enabled=false,\
+            common.persistence.temp.enabled=false,\
+            common.persistence.varlogs.enabled=false,\
             common.manifests.enabled=false,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
-            persistence.config.enabled=yes,\
+            persistence.config.enabled=true,\
+            persistence.config.size=1Gi,\
             ingress.main.enabled=true,\
             ingress.main.primary=false,\
             ingress.main.ingressClassName=nginx,\
+            ingress.main.fixedMiddlewares={},\
+            ingress.main.enableFixedMiddlewares=false,\
             ingress.main.hosts[0].host='librespeed.{{ domain_name }}',\
             ingress.main.hosts[0].paths[0].path='/',\
             ingress.main.hosts[0].paths[0].pathType='Prefix',\
@@ -565,19 +654,28 @@
           # either way I dont need it:
           # - common.manifests.enabled=false
           set_options: "--set \
+            global.addMetalLBAnnotations=false,\
+            global.addTraefikAnnotations=false,\
             controller.type=statefulset,\
+            common.persistence.shared.enabled=false,\
+            common.persistence.shm.enabled=false,\
+            common.persistence.temp.enabled=false,\
+            common.persistence.varlogs.enabled=false,\
             common.manifests.enabled=false,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
             env.PUID=\"{{ uid }}\",\
             env.PGID=\"568\",\
-            persistence.config.enabled=yes,\
-            persistence.media.enabled=yes,\
+            persistence.config.enabled=true,\
+            persistence.config.size=1Gi,\
+            persistence.media.enabled=true,\
             persistence.media.type=hostPath,\
             persistence.media.mountPath={{ dir_mount_path }},\
             persistence.media.hostPath={{ dir_minikube_mount }},\
             ingress.main.enabled=true,\
             ingress.main.primary=false,\
             ingress.main.ingressClassName=nginx,\
+            ingress.main.fixedMiddlewares={},\
+            ingress.main.enableFixedMiddlewares=false,\
             ingress.main.hosts[0].host='calibre-web.{{ domain_name }}',\
             ingress.main.hosts[0].paths[0].path='/',\
             ingress.main.hosts[0].paths[0].pathType='Prefix',\
@@ -610,13 +708,20 @@
           # either way I dont need it:
           # - common.manifests.enabled=false
           set_options: "--set \
+            global.addMetalLBAnnotations=false,\
+            global.addTraefikAnnotations=false,\
             controller.type=statefulset,\
+            common.persistence.shared.enabled=false,\
+            common.persistence.shm.enabled=false,\
+            common.persistence.temp.enabled=false,\
+            common.persistence.varlogs.enabled=false,\
             common.manifests.enabled=false,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
             env.PUID=\"{{ uid }}\",\
             env.PGID=\"568\",\
-            persistence.config.enabled=yes,\
-            persistence.media.enabled=yes,\
+            persistence.config.enabled=true,\
+            persistence.config.size=1Gi,\
+            persistence.media.enabled=true,\
             persistence.media.type=hostPath,\
             persistence.media.mountPath={{ dir_mount_path }},\
             persistence.media.hostPath={{ dir_minikube_mount }},\
