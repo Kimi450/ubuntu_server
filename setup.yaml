@@ -51,8 +51,8 @@
   vars:
     ip: "{{ ansible_host }}"
   when:
-    - cloud_native.enabled
-    - minikube.enabled
+    - cloud_native.enabled or charts.enabled
+    - minikube.enabled or charts.enabled
 
 - import_playbook: install-and-configure-samba.yaml
   when:

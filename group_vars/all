@@ -40,33 +40,37 @@ bluetooth:
     enabled: False
 
 # ==== Select what services you wish to install ====
-services:
-  # monitoring
-  kube_prometheus_stack: True
-  # media client
-  jellyfin: True
-  # torrents
-  qbittorrent: True
-  # to manage indexers
-  prowlarr: True
-  # movie monitoring
-  radarr: True
-  # show monitoring
-  sonarr: True
-  # subtitle hunting
-  bazarr: True
-  # book monitoring
-  readarr: False
-  # music monitoring
-  lidarr: False
-  # movie and show interface
-  ombi: True
-  # speed test to server
-  librespeed: True
-  # book client
-  calibre_web: False
-  # book management
-  calibre: False
+charts:
+  enabled: True
+  # timeout as helm expects it in --timeout for the charts
+  timeout: 15m
+  services:
+    # monitoring
+    kube_prometheus_stack: True
+    # media client
+    jellyfin: True
+    # torrents
+    qbittorrent: True
+    # to manage indexers
+    prowlarr: True
+    # movie monitoring
+    radarr: True
+    # show monitoring
+    sonarr: True
+    # subtitle hunting
+    bazarr: True
+    # book monitoring
+    readarr: False
+    # music monitoring
+    lidarr: False
+    # movie and show interface
+    ombi: True
+    # speed test to server
+    librespeed: True
+    # book client
+    calibre_web: False
+    # book management
+    calibre: False
 
 # ==== To install Docker, helm and kubectl ====
 
