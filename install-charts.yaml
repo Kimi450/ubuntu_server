@@ -138,7 +138,7 @@
             persistence.dev.enabled=true,\
             persistence.dev.type=hostPath,\
             persistence.dev.mountPath=/dev,\
-            persistence.dev.hostPath=/dev,\ # maybe use host-dev
+            persistence.dev.hostPath=/dev,\
             ingress.main.enabled=true,\
             ingress.main.primary=false,\
             ingress.main.ingressClassName=nginx,\
