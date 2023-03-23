@@ -257,8 +257,8 @@ Use your own server
           ```
           Nyaa.si
           ```
-    - Add Sonarr, Radarr and Readarr to the ``Settings > Apps > Application`` section using the correct API token and kubernetes service names
-      - By default the services will be ``http://sonarr:8989``, ``http://radarr:7878`` and ``http://readarr:8787``
+    - Add Sonarr, Radarr, Lidarr and Readarr to the ``Settings > Apps > Application`` section using the correct API token and kubernetes service names
+      - By default the services will be ``http://sonarr:8989``, ``http://radarr:7878``, ``http://lidarr:8686`` and ``http://readarr:8787``
 
   - ##### Setup Bazarr
     - Enable authentication
