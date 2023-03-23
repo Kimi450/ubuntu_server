@@ -139,6 +139,10 @@
             persistence.dev.type=hostPath,\
             persistence.dev.mountPath=/dev,\
             persistence.dev.hostPath=/dev,\
+            resources.requests.cpu={{ charts.resources.requests.cpu }},\
+            resources.requests.memory={{ charts.resources.requests.memory }},\
+            resources.limits.cpu={{ charts.resources.limits.cpu }},\
+            resources.limits.memory={{ charts.resources.limits.memory }},\
             ingress.main.enabled=true,\
             ingress.main.primary=false,\
             ingress.main.ingressClassName=nginx,\
@@ -195,6 +199,10 @@
             persistence.media.type=hostPath,\
             persistence.media.mountPath={{ dir_mount_path }},\
             persistence.media.hostPath={{ dir_minikube_mount }},\
+            resources.requests.cpu={{ charts.resources.requests.cpu }},\
+            resources.requests.memory={{ charts.resources.requests.memory }},\
+            resources.limits.cpu={{ charts.resources.limits.cpu }},\
+            resources.limits.memory={{ charts.resources.limits.memory }},\
             ingress.main.enabled=true,\
             ingress.main.primary=false,\
             ingress.main.ingressClassName=nginx,\
@@ -252,6 +260,10 @@
             persistence.media.type=hostPath,\
             persistence.media.mountPath={{ dir_mount_path }},\
             persistence.media.hostPath={{ dir_minikube_mount }},\
+            resources.requests.cpu={{ charts.resources.requests.cpu }},\
+            resources.requests.memory={{ charts.resources.requests.memory }},\
+            resources.limits.cpu={{ charts.resources.limits.cpu }},\
+            resources.limits.memory={{ charts.resources.limits.memory }},\
             ingress.main.enabled=true,\
             ingress.main.primary=false,\
             ingress.main.ingressClassName=nginx,\
@@ -309,6 +321,10 @@
             persistence.media.type=hostPath,\
             persistence.media.mountPath={{ dir_mount_path }},\
             persistence.media.hostPath={{ dir_minikube_mount }},\
+            resources.requests.cpu={{ charts.resources.requests.cpu }},\
+            resources.requests.memory={{ charts.resources.requests.memory }},\
+            resources.limits.cpu={{ charts.resources.limits.cpu }},\
+            resources.limits.memory={{ charts.resources.limits.memory }},\
             ingress.main.enabled=true,\
             ingress.main.primary=false,\
             ingress.main.ingressClassName=nginx,\
@@ -365,6 +381,10 @@
             persistence.media.type=hostPath,\
             persistence.media.mountPath={{ dir_mount_path }},\
             persistence.media.hostPath={{ dir_minikube_mount }},\
+            resources.requests.cpu={{ charts.resources.requests.cpu }},\
+            resources.requests.memory={{ charts.resources.requests.memory }},\
+            resources.limits.cpu={{ charts.resources.limits.cpu }},\
+            resources.limits.memory={{ charts.resources.limits.memory }},\
             ingress.main.enabled=true,\
             ingress.main.primary=false,\
             ingress.main.ingressClassName=nginx,\
@@ -421,6 +441,10 @@
             persistence.media.type=hostPath,\
             persistence.media.mountPath={{ dir_mount_path }},\
             persistence.media.hostPath={{ dir_minikube_mount }},\
+            resources.requests.cpu={{ charts.resources.requests.cpu }},\
+            resources.requests.memory={{ charts.resources.requests.memory }},\
+            resources.limits.cpu={{ charts.resources.limits.cpu }},\
+            resources.limits.memory={{ charts.resources.limits.memory }},\
             ingress.main.enabled=true,\
             ingress.main.primary=false,\
             ingress.main.ingressClassName=nginx,\
@@ -476,6 +500,10 @@
             persistence.media.type=hostPath,\
             persistence.media.mountPath={{ dir_mount_path }},\
             persistence.media.hostPath={{ dir_minikube_mount }},\
+            resources.requests.cpu={{ charts.resources.requests.cpu }},\
+            resources.requests.memory={{ charts.resources.requests.memory }},\
+            resources.limits.cpu={{ charts.resources.limits.cpu }},\
+            resources.limits.memory={{ charts.resources.limits.memory }},\
             ingress.main.enabled=true,\
             ingress.main.primary=false,\
             ingress.main.ingressClassName=nginx,\
@@ -531,6 +559,10 @@
             persistence.media.type=hostPath,\
             persistence.media.mountPath={{ dir_mount_path }},\
             persistence.media.hostPath={{ dir_minikube_mount }},\
+            resources.requests.cpu={{ charts.resources.requests.cpu }},\
+            resources.requests.memory={{ charts.resources.requests.memory }},\
+            resources.limits.cpu={{ charts.resources.limits.cpu }},\
+            resources.limits.memory={{ charts.resources.limits.memory }},\
             ingress.main.enabled=true,\
             ingress.main.primary=false,\
             ingress.main.ingressClassName=nginx,\
@@ -580,6 +612,10 @@
             common.podSecurityContext.fsGroup=568,\
             persistence.config.enabled=true,\
             persistence.config.size=1Gi,\
+            resources.requests.cpu={{ charts.resources.requests.cpu }},\
+            resources.requests.memory={{ charts.resources.requests.memory }},\
+            resources.limits.cpu={{ charts.resources.limits.cpu }},\
+            resources.limits.memory={{ charts.resources.limits.memory }},\
             ingress.main.enabled=true,\
             ingress.main.primary=false,\
             ingress.main.ingressClassName=nginx,\
@@ -630,6 +666,10 @@
             common.podSecurityContext.fsGroup=568,\
             persistence.config.enabled=true,\
             persistence.config.size=1Gi,\
+            resources.requests.cpu={{ charts.resources.requests.cpu }},\
+            resources.requests.memory={{ charts.resources.requests.memory }},\
+            resources.limits.cpu={{ charts.resources.limits.cpu }},\
+            resources.limits.memory={{ charts.resources.limits.memory }},\
             ingress.main.enabled=true,\
             ingress.main.primary=false,\
             ingress.main.ingressClassName=nginx,\
@@ -683,6 +723,10 @@
             persistence.media.type=hostPath,\
             persistence.media.mountPath={{ dir_mount_path }},\
             persistence.media.hostPath={{ dir_minikube_mount }},\
+            resources.requests.cpu={{ charts.resources.requests.cpu }},\
+            resources.requests.memory={{ charts.resources.requests.memory }},\
+            resources.limits.cpu={{ charts.resources.limits.cpu }},\
+            resources.limits.memory={{ charts.resources.limits.memory }},\
             ingress.main.enabled=true,\
             ingress.main.primary=false,\
             ingress.main.ingressClassName=nginx,\
@@ -738,6 +782,10 @@
             persistence.media.type=hostPath,\
             persistence.media.mountPath={{ dir_mount_path }},\
             persistence.media.hostPath={{ dir_minikube_mount }},\
+            resources.requests.cpu={{ charts.resources.requests.cpu }},\
+            resources.requests.memory={{ charts.resources.requests.memory }},\
+            resources.limits.cpu={{ charts.resources.limits.cpu }},\
+            resources.limits.memory={{ charts.resources.limits.memory }},\
             service.webserver.enabled=true"
 
       - name: Expose calibre service
