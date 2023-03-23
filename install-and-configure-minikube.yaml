@@ -65,13 +65,6 @@
             service_name: "{{ service_name_minikube }}"
             become: True
 
-        - name: Wait till minikube is running again
-          shell: minikube status
-          retries: 100000
-          delay: 10
-          register: result
-          until: result.rc == 0
-
         - name: Minikube notes
           debug:
             msg: "Directory '{{ dir_home }}' mounted on the minikube container at '{{ dir_minikube_mount }}' with UID '{{ uid }}''. More info https://github.com/kubernetes/minikube/pull/8159"
@@ -87,3 +80,10 @@
       vars:
         ports: 
           - "{{ api_server_forwarded_port }}"
+
+    - name: Wait till minikube is running
+      shell: minikube status
+      retries: 100000
+      delay: 10
+      register: result
+      until: result.rc == 0
