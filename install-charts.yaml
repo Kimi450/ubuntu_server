@@ -122,6 +122,10 @@
             common.manifests.enabled=false,\
             common.securityContext.privileged=true,\
             common.securityContext.allowPrivilegeEscalation=true,\
+            common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
+            common.podSecurityContext.runAsUser={{ uid }},\
+            common.podSecurityContext.runAsGroup=568,\
+            common.podSecurityContext.fsGroup=568,\
             persistence.config.enabled=true,\
             persistence.config.size=1Gi,\
             persistence.cache.enabled=true,\
@@ -570,6 +574,10 @@
             common.persistence.temp.enabled=false,\
             common.persistence.varlogs.enabled=false,\
             common.manifests.enabled=false,\
+            common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
+            common.podSecurityContext.runAsUser={{ uid }},\
+            common.podSecurityContext.runAsGroup=568,\
+            common.podSecurityContext.fsGroup=568,\
             persistence.config.enabled=true,\
             persistence.config.size=1Gi,\
             ingress.main.enabled=true,\
@@ -617,6 +625,9 @@
             common.persistence.varlogs.enabled=false,\
             common.manifests.enabled=false,\
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
+            env.PUID=\"{{ uid }}\",\
+            env.PGID=\"568\",\
+            common.podSecurityContext.fsGroup=568,\
             persistence.config.enabled=true,\
             persistence.config.size=1Gi,\
             ingress.main.enabled=true,\
@@ -665,6 +676,7 @@
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
             env.PUID=\"{{ uid }}\",\
             env.PGID=\"568\",\
+            podSecurityContext.fsGroup=568,\
             persistence.config.enabled=true,\
             persistence.config.size=1Gi,\
             persistence.media.enabled=true,\
@@ -719,6 +731,7 @@
             common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
             env.PUID=\"{{ uid }}\",\
             env.PGID=\"568\",\
+            podSecurityContext.fsGroup=568,\
             persistence.config.enabled=true,\
             persistence.config.size=1Gi,\
             persistence.media.enabled=true,\
