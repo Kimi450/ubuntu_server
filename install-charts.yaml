@@ -125,7 +125,7 @@
       - debug:
           msg: >
             You can log into Grafana at 'grafana.{{ domain_name }}' using
-            admin/{{ default_grafana_admin_password }}"
+            admin/{{ default_grafana_admin_password }}
 
     - name: Install jellyfin
       when: charts.services.jellyfin
