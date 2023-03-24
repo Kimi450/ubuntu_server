@@ -139,8 +139,9 @@
           timeout: "{{ charts.timeout }}"
           release_name: jellyfin
           chart_name: jellyfin
-          # to allow the pod # to be able to use the /dev mount
+          # to allow the pod to be able to use the /dev mount
           # to access /dev/dri/renderD128 for hwa, these options are set to true
+          # - common.podSecurityContext.runAsUser=0
           # - common.securityContext.privileged=true
           # - common.securityContext.allowPrivilegeEscalation=true
           set_options: "--set \
@@ -150,6 +151,7 @@
             {{ helm_common_persistence_media }},\
             {{ helm_common_resources }},\
             {{ helm_common_ingress }},\
+            common.podSecurityContext.runAsUser=0,\
             common.securityContext.privileged=true,\
             common.securityContext.allowPrivilegeEscalation=true,\
             persistence.cache.enabled=true,\
