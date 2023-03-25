@@ -89,7 +89,6 @@ Use your own server
 
 - #### After the installation
   - ##### Setup Grafana
-    - Change the default login details 
     - Add the recommended dashboards
       - [Node Exporter Full](https://grafana.com/grafana/dashboards/1860)
       - [Pods (Aggregated view)](https://grafana.com/grafana/dashboards/8860)

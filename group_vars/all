@@ -55,32 +55,48 @@ charts:
   # timeout as helm expects it in --timeout for the charts
   timeout: 15m
   services:
-    # monitoring
-    kube_prometheus_stack: True
+    # metrics monitoring
+    kube_prometheus_stack:
+      enabled: True
+      grafana:
+        admin_username: "admin" # FILL OUT
+        admin_password: "admin" # FILL OUT
     # media client
-    jellyfin: True
+    jellyfin:
+      enabled: True
     # torrents
-    qbittorrent: True
+    qbittorrent:
+      enabled: True
     # to manage indexers
-    prowlarr: True
+    prowlarr:
+      enabled: True
     # movie monitoring
-    radarr: True
+    radarr:
+      enabled: True
     # show monitoring
-    sonarr: True
+    sonarr:
+      enabled: True
     # subtitle hunting
-    bazarr: True
+    bazarr:
+      enabled: True
     # book monitoring
-    readarr: False
+    readarr:
+      enabled: False
     # music monitoring
-    lidarr: False
+    lidarr:
+      enabled: False
     # movie and show interface
-    ombi: True
+    ombi:
+      enabled: True
     # speed test to server
-    librespeed: True
+    librespeed:
+      enabled: True
     # book client
-    calibre_web: False
+    calibre_web:
+      enabled: False
     # book management
-    calibre: False
+    calibre:
+      enabled: False
 
 # ==== To install Docker, helm and kubectl ====
 

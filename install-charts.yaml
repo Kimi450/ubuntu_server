@@ -85,7 +85,7 @@
         msg: You can access the ingress controller at port '8080' and '8081' for HTTP and HTTPS.
 
     - name: Install grafana
-      when: charts.services.kube_prometheus_stack
+      when: charts.services.kube_prometheus_stack.enabled
       block:
       - name: Install/Upgrade the grafana chart
         include_tasks: tasks-install-chart.yaml
@@ -99,7 +99,6 @@
           chart_name: kube-prometheus-stack
           set_options: "--set \
             prometheus.prometheusSpec.retention=730d,\
-            grafana.persistence.enabled=true,\
             prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.accessModes={'ReadWriteOnce'},\
             prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage='50Gi',\
             prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false,\
@@ -114,21 +113,22 @@
             prometheus.prometheusSpec.probeSelectorNilUsesHelmValues=false,\
             prometheus.prometheusSpec.probeSelectorNamespaceSelector=null,\
             prometheus.prometheusSpec.probeSelector=null,\
+            grafana.persistence.enabled=true,\
+            grafana.adminUser={{ charts.services.kube_prometheus_stack.grafana.admin_username }},\
+            grafana.adminPassword={{ charts.services.kube_prometheus_stack.grafana.admin_password }},\
             grafana.ingress.enabled=true,\
             grafana.ingress.ingressClassName=nginx,\
             grafana.ingress.hosts={grafana.{{ domain_name }}},\
             grafana.ingress.enabled=true"
             
-      - name: "Reset Grafana admin password to '{{ default_grafana_admin_password }}'"  
-        shell: "kubectl exec -it -n {{ namespace_monitoring }} $(kubectl get pods -n {{ namespace_monitoring }} | grep grafana | awk '{print $1}') -c grafana -- grafana-cli admin reset-admin-password {{ default_grafana_admin_password }}"
-      
       - debug:
           msg: >
             You can log into Grafana at 'grafana.{{ domain_name }}' using
-            admin/{{ default_grafana_admin_password }}
+            {{ charts.services.kube_prometheus_stack.grafana.admin_username }}/
+            {{ charts.services.kube_prometheus_stack.grafana.admin_password }}
 
     - name: Install jellyfin
-      when: charts.services.jellyfin
+      when: charts.services.jellyfin.enabled
       block:
       - name: Install/Upgrade the jellyfin chart
         include_tasks: tasks-install-chart.yaml
@@ -174,7 +174,7 @@
               URL mention above once again to setup a new server.
 
     - name: Install qbittorrent
-      when: charts.services.qbittorrent
+      when: charts.services.qbittorrent.enabled
       block:
       - name: Install/Upgrade the qbittorrent chart
         include_tasks: tasks-install-chart.yaml
@@ -205,7 +205,7 @@
             the directories under {{ dir_data }} will be picked up by Jellyfin.
 
     - name: Install prowlarr
-      when: charts.services.prowlarr
+      when: charts.services.prowlarr.enabled
       block:
       - name: Install/Upgrade the prowlarr chart
         include_tasks: tasks-install-chart.yaml
@@ -236,7 +236,7 @@
             the directories under {{ dir_data }} will be picked up by Jellyfin.
 
     - name: Install radarr
-      when: charts.services.radarr
+      when: charts.services.radarr.enabled
       block:
       - name: Install/Upgrade the radarr chart
         include_tasks: tasks-install-chart.yaml
@@ -266,7 +266,7 @@
             the directories under {{ dir_data }} will be picked up by Jellyfin.
 
     - name: Install sonarr
-      when: charts.services.sonarr
+      when: charts.services.sonarr.enabled
       block:
       - name: Install/Upgrade the sonarr chart
         include_tasks: tasks-install-chart.yaml
@@ -296,7 +296,7 @@
             the directories under {{ dir_data }} will be picked up by Jellyfin.
 
     - name: Install bazarr
-      when: charts.services.bazarr
+      when: charts.services.bazarr.enabled
       block:
       - name: Install/Upgrade the bazarr chart
         include_tasks: tasks-install-chart.yaml
@@ -325,7 +325,7 @@
             can be used by the application.
 
     - name: Install readarr
-      when: charts.services.readarr
+      when: charts.services.readarr.enabled
       block:
       - name: Install/Upgrade the readarr chart
         include_tasks: tasks-install-chart.yaml
@@ -354,7 +354,7 @@
             can be used by the application.
 
     - name: Install lidarr
-      when: charts.services.lidarr
+      when: charts.services.lidarr.enabled
       block:
       - name: Install/Upgrade the lidarr chart
         include_tasks: tasks-install-chart.yaml
@@ -383,7 +383,7 @@
             can be used by the application.
 
     - name: Install ombi
-      when: charts.services.ombi
+      when: charts.services.ombi.enabled
       block:
       - name: Install/Upgrade the ombi chart
         include_tasks: tasks-install-chart.yaml
@@ -412,7 +412,7 @@
               URL mention above once again to setup a new server.
 
     - name: Install librespeed
-      when: charts.services.librespeed
+      when: charts.services.librespeed.enabled
       block:
       - name: Install/Upgrade the librespeed chart
         include_tasks: tasks-install-chart.yaml
@@ -442,7 +442,7 @@
             You can log into librespeed at 'librespeed.{{ domain_name }}'.
 
     - name: Install calibre-web
-      when: charts.services.calibre_web
+      when: charts.services.calibre_web.enabled
       block:
       - name: Install/Upgrade the calibre-web chart
         include_tasks: tasks-install-chart.yaml
@@ -475,7 +475,7 @@
             can be used by the application.
 
     - name: Install calibre
-      when: charts.services.calibre
+      when: charts.services.calibre.enabled
       block:
       - name: Install/Upgrade the calibre chart
         include_tasks: tasks-install-chart.yaml
