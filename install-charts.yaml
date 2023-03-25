@@ -153,6 +153,7 @@
             {{ helm_common_ingress }},\
             common.podSecurityContext.runAsUser=0,\
             common.securityContext.privileged=true,\
+            common.securityContext.runAsNonRoot=false,\
             common.securityContext.allowPrivilegeEscalation=true,\
             persistence.cache.enabled=true,\
             persistence.cache.accessMode=ReadWriteOnce,\
