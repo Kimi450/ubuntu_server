@@ -129,6 +129,7 @@ Use your own server
             - Recommend not selecting ```HEVC 10bit``` because for some reason that breaks it
           - Defaults to CPU/software encoding if hardware acceleration does not work for a file, I think.
           - More infomarmation on their [Jellyfin's page for Hardware Acceleration](https://jellyfin.org/docs/general/administration/hardware-acceleration.html)
+
   - ##### Setup qBittorrent
     - Default login credentials are admin/adminadmin
     - Change the default login details
@@ -143,21 +144,23 @@ Use your own server
   - ##### Setup Calibre
     - Do base setup
       - Set folder to be ``/media/data/books`` and select ``Yes`` for it to rebuild the library if asked.
-    - Go to ``Preferences > Sharing over the net`` (click on the 3 dots on the top right)
+    - Go to ``Preferences > Sharing over the net``
       - Check the box for ``Require username and password to access the Content server``
       - Check the box for ``Run the server automatically when calibre starts``
       - Click on ``Start server``
       - Go to the ``User accounts tab`` and create a user
         - Make a note of the credentials for use in ``Readarr`` setup
       - Restart the app/pod
+        - You can do so by also pressing `CTRL + R` on the main screen
 
   - ##### Setup Calibre Web
-    - Set folder to be ``/media/data/books``
     - Default login is ``admin/admin123``
-    - To enable web reading, click on ``Admin`` on the top right
+    - Set folder to be ``/media/data/books``
+    - To enable web reading, click on ``Admin`` (case sensitive) on the top right
       - Click on the user, default is ``admin``
-      - Click on ``Allow ebook viewer``
+      - Enable ``Allow ebook viewer``
       - Change password to something more secure
+      - Save settings
 
   - ##### Setup Radarr/Sonarr/Readarr/Lidarr
     - Service function
@@ -195,7 +198,7 @@ Use your own server
 
     - Readarr specific config
       - Go to ``Settings > Media Management``
-        - Add root folder
+        - Add root folder (you cannot edit an existing one)
           - Set the path to be ``/media/data/books/``
           - Enable ``Use Calibre`` options the the following defaults
             - Calibre host: ``calibre-webserver``
