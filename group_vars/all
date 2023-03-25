@@ -45,8 +45,8 @@ charts:
   resources:
     # kubernetes resource requests for all the pods
     requests:
-      cpu: 0
-      memory: 0
+      cpu: 10m
+      memory: 50M
     # kubernetes resource limits for all the pods
     # probably should match these with the minikube resources from below
     limits:
