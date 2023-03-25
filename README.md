@@ -104,6 +104,7 @@ Use your own server
         ```
         avg(irate(container_cpu_usage_seconds_total[2m])) by (pod,container)
         ```
+    - You can find information on how to use [Loki](https://grafana.com/oss/loki/) in Grafana [here](https://grafana.com/docs/loki/latest/operations/grafana/)
 
   - ##### Setup Jellyfin
     - Initial setup is just following on-screen instructions.

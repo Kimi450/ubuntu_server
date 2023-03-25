@@ -109,13 +109,13 @@
             fluent-bit.enabled=true,\
             promtail.enabled=false"
 
-      - name: Set config for prometheus
+      - name: Set config for Grafana to add Loki as a data source
         set_fact:
           helm_kube_prometheus_stack_loki_config: "\
             grafana.additionalDataSources[0].name=Loki,\
             grafana.additionalDataSources[0].access=proxy,\
-            grafana.additionalDataSources[0].url=http://loki-stack:3100,\
-            grafana.additionalDataSources[0].type=loki"
+            grafana.additionalDataSources[0].url=http://loki-stack.{{ namespace_monitoring }}:3100,\
+            grafana.additionalDataSources[0].type=loki,"
 
     - name: Install kube-prometheus-stack
       when: charts.services.kube_prometheus_stack.enabled
@@ -131,7 +131,7 @@
           release_name: kube-prometheus-stack
           chart_name: kube-prometheus-stack
           set_options: "--set \
-            {{ helm_kube_prometheus_stack_loki_config }},\
+            {{ helm_kube_prometheus_stack_loki_config }}\
             prometheus.prometheusSpec.retention=730d,\
             prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.accessModes={'ReadWriteOnce'},\
             prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage='50Gi',\
@@ -154,6 +154,14 @@
             grafana.ingress.ingressClassName=nginx,\
             grafana.ingress.hosts={grafana.{{ domain_name }}},\
             grafana.ingress.enabled=true"
+
+      - name: Restart all pods if loki-stack was installed after kube-prometheus-stack
+        when: charts.services.loki_stack.retrospectively_enabled
+        include_tasks: tasks-kubernetes-delete-kind-instances.yaml
+        vars:
+          kind: pod
+          namespace: "{{ namespace_monitoring }}"
+          contains: kube-prometheus-stack
             
       - debug:
           msg: >
