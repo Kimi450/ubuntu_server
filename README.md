@@ -94,6 +94,7 @@ Use your own server
       - [Pods (Aggregated view)](https://grafana.com/grafana/dashboards/8860)
       - [Monitor Pod CPU and Memory usage](https://grafana.com/grafana/dashboards/15055)
       - [Node Exporter for Prometheus Dashboard EN v20201010](https://grafana.com/grafana/dashboards/11074)
+      - [Loki Kubernetes Logs](https://grafana.com/grafana/dashboards/15141)
     - Would recommend adding a panel with the following query as it is useful to monitor pods as well
       - For sum (Probably better)
         ```

@@ -55,6 +55,9 @@ charts:
   # timeout as helm expects it in --timeout for the charts
   timeout: 15m
   services:
+    # log monitoring
+    loki_stack:
+      enabled: True
     # metrics monitoring
     kube_prometheus_stack:
       enabled: True
