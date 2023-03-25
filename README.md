@@ -94,6 +94,7 @@ Use your own server
       - [Pods (Aggregated view)](https://grafana.com/grafana/dashboards/8860)
       - [Monitor Pod CPU and Memory usage](https://grafana.com/grafana/dashboards/15055)
       - [Node Exporter for Prometheus Dashboard EN v20201010](https://grafana.com/grafana/dashboards/11074)
+      - [Loki Kubernetes Logs](https://grafana.com/grafana/dashboards/15141)
     - Would recommend adding a panel with the following query as it is useful to monitor pods as well
       - For sum (Probably better)
         ```
@@ -103,6 +104,7 @@ Use your own server
         ```
         avg(irate(container_cpu_usage_seconds_total[2m])) by (pod,container)
         ```
+    - You can find information on how to use [Loki](https://grafana.com/oss/loki/) in Grafana [here](https://grafana.com/docs/loki/latest/operations/grafana/)
 
   - ##### Setup Jellyfin
     - Initial setup is just following on-screen instructions.

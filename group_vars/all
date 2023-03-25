@@ -39,15 +39,15 @@ bluetooth:
   pinless:
     enabled: False
 
-# ==== Select what services you wish to install ====
+# ==== Select what charts you wish to install ====
 charts:
   enabled: True
   resources:
-    # kubernetes resource requests for all the pods
+    # kubernetes resource requests for the pods
     requests:
       cpu: 10m
       memory: 50M
-    # kubernetes resource limits for all the pods
+    # kubernetes resource limits for the pods
     # probably should match these with the minikube resources from below
     limits:
       cpu: 4
@@ -55,7 +55,10 @@ charts:
   # timeout as helm expects it in --timeout for the charts
   timeout: 15m
   services:
-    # metrics monitoring
+    # log monitoring with Loki (Needs Grafana for a UI)
+    loki_stack:
+      enabled: True
+    # metrics monitoring with Grafana and Prometheus
     kube_prometheus_stack:
       enabled: True
       grafana:

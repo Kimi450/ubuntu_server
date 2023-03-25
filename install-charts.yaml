@@ -6,18 +6,21 @@
     namespace_user: "{{ ansible_user }}"
     namespace_monitoring: monitoring
     namespace_generic_services: generic-services
-    default_grafana_admin_password: "{{ ansible_user }}"
-    
+
+    helm_kube_prometheus_stack_loki_config: "" # default
+
     # The following has been set to disable Truecharts own injection
     # of manifests for SCALE products I believe either way I dont need it:
     # - common.manifests.enabled=false
-    helm_common_general: "controller.type=statefulset,\
+    helm_common_general: "\
+      controller.type=statefulset,\
       global.addMetalLBAnnotations=false,\
       global.addTraefikAnnotations=false,\
       common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
       common.manifests.enabled=false"
     
-    helm_common_ingress: "ingress.main.enabled=true,\
+    helm_common_ingress: "\
+      ingress.main.enabled=true,\
       ingress.main.primary=false,\
       ingress.main.ingressClassName=nginx,\
       ingress.main.fixedMiddlewares={},\
@@ -25,19 +28,22 @@
       ingress.main.hosts[0].paths[0].path='/',\
       ingress.main.hosts[0].paths[0].pathType='Prefix'"
     
-    helm_common_resources: "resources.requests.cpu={{ charts.resources.requests.cpu }},\
+    helm_common_resources: "\
+      resources.requests.cpu={{ charts.resources.requests.cpu }},\
       resources.requests.memory={{ charts.resources.requests.memory }},\
       resources.limits.cpu={{ charts.resources.limits.cpu }},\
       resources.limits.memory={{ charts.resources.limits.memory }}"
 
-    helm_common_persistence: "common.persistence.shared.enabled=false,\
+    helm_common_persistence: "\
+      common.persistence.shared.enabled=false,\
       common.persistence.shm.enabled=false,\
       common.persistence.temp.enabled=false,\
       common.persistence.varlogs.enabled=false,\
       persistence.config.enabled=true,\
       persistence.config.size=1Gi"
 
-    helm_common_persistence_media: "persistence.media.enabled=true,\
+    helm_common_persistence_media: "\
+      persistence.media.enabled=true,\
       persistence.media.type=hostPath,\
       persistence.media.mountPath={{ dir_mount_path }},\
       persistence.media.hostPath={{ dir_minikube_mount }}"
@@ -45,7 +51,8 @@
     # runAsUser={{ uid }} gives write access on the pod
     # 568 is the default user ID, added to the groups cause why not
     # fsgroup is not supported for hostpaths, but it is still present here
-    helm_common_pod_security_context: "common.podSecurityContext.runAsUser={{ uid }},\
+    helm_common_pod_security_context: "\
+      common.podSecurityContext.runAsUser={{ uid }},\
       common.podSecurityContext.runAsGroup=568,\
       common.podSecurityContext.fsGroup=568"
 
@@ -84,10 +91,37 @@
     - debug:
         msg: You can access the ingress controller at port '8080' and '8081' for HTTP and HTTPS.
 
-    - name: Install grafana
+    - name: Install loki-stack
+      when: charts.services.loki_stack.enabled
+      block:
+      - name: Install/Upgrade the loki-stack chart
+        include_tasks: tasks-install-chart.yaml
+        # https://artifacthub.io/packages/helm/grafana/loki-stack
+        vars:
+          repo_name: grafana
+          repo_link: https://grafana.github.io/helm-charts
+          install_namespace: "{{ namespace_monitoring }}"
+          timeout: "{{ charts.timeout }}"
+          release_name: loki-stack
+          chart_name: loki-stack
+          set_options: "--set \
+            test_pod.enable=false,\
+            fluent-bit.enabled=true,\
+            promtail.enabled=false"
+
+      - name: Set config for Grafana to add Loki as a data source
+        set_fact:
+          helm_kube_prometheus_stack_loki_config: "\
+            grafana.additionalDataSources[0].name=Loki,\
+            grafana.additionalDataSources[0].type=loki,\
+            grafana.additionalDataSources[0].access=proxy,\
+            grafana.additionalDataSources[0].isDefault=False,\
+            grafana.additionalDataSources[0].url='http://loki-stack.{{ namespace_monitoring }}:3100',"
+
+    - name: Install kube-prometheus-stack
       when: charts.services.kube_prometheus_stack.enabled
       block:
-      - name: Install/Upgrade the grafana chart
+      - name: Install/Upgrade the kube-prometheus-stack chart
         include_tasks: tasks-install-chart.yaml
         # https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
         vars:
@@ -98,6 +132,7 @@
           release_name: kube-prometheus-stack
           chart_name: kube-prometheus-stack
           set_options: "--set \
+            {{ helm_kube_prometheus_stack_loki_config }}\
             prometheus.prometheusSpec.retention=730d,\
             prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.accessModes={'ReadWriteOnce'},\
             prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage='50Gi',\
@@ -120,6 +155,13 @@
             grafana.ingress.ingressClassName=nginx,\
             grafana.ingress.hosts={grafana.{{ domain_name }}},\
             grafana.ingress.enabled=true"
+
+      - name: Restart pods to pick up any config updates
+        include_tasks: tasks-kubernetes-delete-kind-instances.yaml
+        vars:
+          kind: pod
+          namespace: "{{ namespace_monitoring }}"
+          contains: kube-prometheus-stack
             
       - debug:
           msg: >
