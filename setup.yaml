@@ -53,6 +53,7 @@
   when:
     - cloud_native.enabled or charts.enabled
     - minikube.enabled or charts.enabled
+    - charts.enabled
 
 - import_playbook: install-and-configure-samba.yaml
   when:
