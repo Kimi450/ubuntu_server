@@ -58,11 +58,6 @@ charts:
     # log monitoring with Loki (Needs Grafana for a UI)
     loki_stack:
       enabled: True
-      # If you are enabling loki_stack on retrospectively (after
-      # kube_prometheus_stack was installed), please turn
-      # retrospectively_enabled to "True" to restart the
-      # kube_prometheus_stack pods to pick up config changes
-      retrospectively_enabled: False
     # metrics monitoring with Grafana and Prometheus
     kube_prometheus_stack:
       enabled: True
