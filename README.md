@@ -176,7 +176,7 @@ Use your own server
     - Add torrent client
       - Go to ``Settings > Download Clients > Add > qBittorent > Custom``
       - Add the host: ``qbittorrent``
-      - Add the port: ``8080``
+      - Add the port: ``10095``
       - Add the username: ``<qBittorrent_username>``
       - Add the password: ``<qBittorrent_password>``
       - Uncheck the ``Remove Completed`` option.
@@ -257,8 +257,8 @@ Use your own server
           ```
           Nyaa.si
           ```
-    - Add Sonarr, Radarr and Readarr to the ``Settings > Apps > Application`` section using the correct API token and kubernetes service names
-      - By default the services will be ``http://sonarr:8989``, ``http://radarr:7878`` and ``http://readarr:8787``
+    - Add Sonarr, Radarr, Lidarr and Readarr to the ``Settings > Apps > Application`` section using the correct API token and kubernetes service names
+      - By default the services will be ``http://sonarr:8989``, ``http://radarr:7878``, ``http://lidarr:8686`` and ``http://readarr:8787``
 
   - ##### Setup Bazarr
     - Enable authentication

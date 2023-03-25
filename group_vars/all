@@ -42,6 +42,16 @@ bluetooth:
 # ==== Select what services you wish to install ====
 charts:
   enabled: True
+  resources:
+    # kubernetes resource requests for all the pods
+    requests:
+      cpu: 0
+      memory: 0
+    # kubernetes resource limits for all the pods
+    # probably should match these with the minikube resources from below
+    limits:
+      cpu: 4
+      memory: "6000M"
   # timeout as helm expects it in --timeout for the charts
   timeout: 15m
   services:
