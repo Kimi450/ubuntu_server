@@ -32,10 +32,6 @@
   when:
     - basics.enabled
 
-- import_playbook: install-tightvnc-and-ssh.yaml
-  when:
-    - vnc.enabled
-
 - import_playbook: install-cn-basics.yaml
   when:
     - minikube.enabled or cloud_native.enabled
@@ -54,6 +50,10 @@
     - cloud_native.enabled or charts.enabled
     - minikube.enabled or charts.enabled
     - charts.enabled
+
+- import_playbook: install-tightvnc-and-ssh.yaml
+  when:
+    - vnc.enabled
 
 - import_playbook: install-and-configure-samba.yaml
   when:
