@@ -4,10 +4,12 @@
 # Domain name to be used
 domain_name: "" # FILL OUT
 
-basics: # for basic server setup (in my opinion)
+# for basic server setup (in my opinion)
+basics:
   enabled: True
 
-vnc: # vnc for remote desktop with GUI
+# vnc for remote desktop with GUI
+vnc:
   enabled: True
   # will be truncated to 8 characters
   password: "" # FILL OUT
@@ -15,17 +17,22 @@ vnc: # vnc for remote desktop with GUI
   # use 0-9 only for access port to be 590{{display}}
   display: "4"
 
-squid: # squid credentials, for proxy
+# squid credentials, for proxy
+squid:
   enabled: True
   username: "" # FILL OUT
   password: "" # FILL OUT
   port: "3128"
 
-smb: # sambashare for network attached storage
+# sambashare for network attached storage
+smb:
   enabled: True
   password: "" # FILL OUT
   share_name: "sambashare"
 
+# If you are using cloudflare and want to auto update entries
+# when the server IP changes
+# NOTE: It doesnt add entries, refer to the README.md file for instructions
 cloudflare:
   enabled: True
   # Set your Cloudflare Zone ID
@@ -34,10 +41,6 @@ cloudflare:
   auth_key: "" # FILL OUT
   # WORK_IN_PROGRESS: Set your Cloudfare API token for editing zone DNS
   api_token: "WORK_IN_PROGRESS"
-
-bluetooth:
-  pinless:
-    enabled: False
 
 # ==== Select what charts you wish to install ====
 charts:
@@ -119,6 +122,11 @@ minikube: # cli param values for minikube
   cert_expiration: "87660h0m0s"
   remote_access:
     enabled: True
+
+# to allow pinless bluetooth connections to the server
+bluetooth:
+  pinless:
+    enabled: False
 
 # ==== For the Archived playbooks ====
 
