@@ -49,13 +49,9 @@
       persistence.media.hostPath={{ dir_minikube_mount }}"
 
     # runAsUser={{ uid }} gives write access on the pod
-    # 568 is the default user ID, added to the groups cause why not
-    # fsgroup is not supported for hostpaths, but it is still present here
     helm_common_pod_security_context: "\
       common.podSecurityContext.runAsUser={{ uid }},\
-      common.podSecurityContext.runAsGroup=568,\
-      common.podSecurityContext.fsGroup=568"
-
+      common.podSecurityContext.runAsGroup=568"
   tasks:
     - name: Create namespaces namespace
       shell: "kubectl create namespace {{ item }} --dry-run=client -o yaml | kubectl apply -f -"
