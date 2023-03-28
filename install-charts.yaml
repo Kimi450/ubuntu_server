@@ -101,9 +101,10 @@
           release_name: loki-stack
           chart_name: loki-stack
           set_options: "--set \
-            test_pod.enable=false,\
-            fluent-bit.enabled=true,\
-            promtail.enabled=false"
+            loki.isDefault=False,\
+            test_pod.enable=False,\
+            fluent-bit.enabled=True,\
+            promtail.enabled=False"
 
       - name: Set config for Grafana to add Loki as a data source
         set_fact:
