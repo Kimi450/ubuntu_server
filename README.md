@@ -296,11 +296,14 @@ Use your own server
       - If it doesnt work, manually reinstall this service a few times. It just works, not sure whhy
 
   - ##### Setup Minikube for remote access
-    - Move the copied `minikube_client.crt` and `minikube_client.crt` file to appropriate locations
-    - Edit the `minikube_config` file copied over to:
-      - Reflect the new locations of the `minikube_client.crt` and `minikube_client.crt` files
-      - Change the server address to something public facing if needed and change protocol if needed
-    - Edit your local `~/.kube/config` and incorporate the information from the `minikube_config` into it
+    - Use the kubeconfig file copied over to the current working directory by exporting it
+      - `export KUBECONFIG=<KUBECONFIG_LOCATION>`
+    - Optionally, edit your local `~/.kube/config` and incorporate the information from the copied over kubeconfig into it
+    - **NOTE:**
+      - The port on which kube-apiserver is forwarded to, 3001 by default, should not be exposed to the internet (i.e., should be LAN access only) because anyone will be able to access it.
+      - The way it is set up at the moment, the certs dont really do anything. The apiserver itself is directly accessible without any authentication.
+        - See [issue #12](https://github.com/Kimi450/ubuntu_server/issues/12)).
+      - By default, `ansible_host` from the `hosts.yaml` file is used as the IP in the kubeconfig file. It is **strongly recommended** that you change that to the LAN IP of the server (to not have to port forward this on your router to access it)
 
   - ##### Use Squid
     - Use the username and password from the `group_vars/all` file to use this as a proxy server
@@ -334,7 +337,6 @@ Use your own server
       | Service     | Default access | Where                                                             | Port to be forwarded from server |
       |-------------|----------------|-------------------------------------------------------------------|----------------------------------|
       | ssh         | ssh            | `<LAN_IP>` or `<DOMAIN_NAME>`                                     |                               22 |
-      | minikube    | api-access     | `<LAN_IP>` or `<DOMAIN_NAME>`                                     |                             3001 |
       | squid       | proxy          | `<LAN_IP>:<GROUP_VARS_PORT>` or `<DOMAIN_NAME>:<GROUP_VARS_PORT>` |                             3128 |
       | samba       | proxy          | `\\<LAN_IP>\<SHARE_NAME>` or `\\<DOMAIN_NAME>\<SHARE_NAME>`       |   TCP: `139,445`, UDP: `137,138` |
       | grafana     | Ingress        | `grafana.<DOMAIN_NAME>`                                           |                               80 |
@@ -348,6 +350,7 @@ Use your own server
       | lidarr      | Ingress        | `lidarr.<DOMAIN_NAME>`                                            |                               80 |
       | librespeed  | Ingress        | `librespeed.<DOMAIN_NAME>`                                        |                               80 |
       | calibre-web | Ingress        | `calibre-web.<DOMAIN_NAME>`                                       |                               80 |
+      | minikube    | LAN api-access | `<LAN_IP>:3001`                                                   |                             3001 |
       | calibre     | LAN            | `<LAN_IP>:3002`                                                   |                             3002 |
 
       NOTE: Security is an unkown when exposing a service to the internet.

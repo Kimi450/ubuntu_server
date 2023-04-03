@@ -35,11 +35,11 @@
             dest: "{{ service_file_location }}"
 
         - name: "Service file edit: Add command to start minikube"
-          become: true  
-          lineinfile: 
+          become: true
+          lineinfile:
             path: "{{ service_file_location }}"
-            regexp: '^ExecStartPre=(.*)$' 
-            line: 'ExecStartPre=/usr/bin/minikube start --mount --mount-string "{{ dir_home }}:{{ dir_minikube_mount }}" --cpus="{{ minikube.cpus }}" --memory="{{ minikube.memory }}" --disk-size="{{ minikube.disk_size }}" --nodes="{{ minikube.nodes }}" --cert-expiration="{{ minikube.cert_expiration }}"'
+            regexp: '^ExecStartPre=(.*)$'
+            line: 'ExecStartPre=/usr/bin/minikube start --embed-certs=true --mount --mount-string "{{ dir_home }}:{{ dir_minikube_mount }}" --cpus="{{ minikube.cpus }}" --memory="{{ minikube.memory }}" --disk-size="{{ minikube.disk_size }}" --nodes="{{ minikube.nodes }}" --cert-expiration="{{ minikube.cert_expiration }}"'
             backrefs: yes
 
         - name: "Service file edit: Add reverse proxy script"
@@ -67,7 +67,10 @@
 
         - name: Minikube notes
           debug:
-            msg: "Directory '{{ dir_home }}' mounted on the minikube container at '{{ dir_minikube_mount }}' with UID '{{ uid }}''. More info https://github.com/kubernetes/minikube/pull/8159"
+            msg: >
+              Directory '{{ dir_home }}' mounted on the minikube container at
+              '{{ dir_minikube_mount }}' with UID '{{ uid }}''.
+              More info https://github.com/kubernetes/minikube/pull/8159"
 
     - name: Enable nginx ingress controller
       shell: minikube addons enable ingress

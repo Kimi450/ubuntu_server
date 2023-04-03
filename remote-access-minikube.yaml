@@ -3,50 +3,27 @@
   hosts: all
   gather_facts: false
   vars:
-    local_kube_config_name: "minikube_config_server"
-    local_kube_config_location: "minikube_config_server"
+    local_kube_config_name: "minikube_server.kubeconfig"
+    local_kube_config_location: "minikube_server.kubeconfig"
     remote_kube_config_location: "{{ dir_home }}/.kube/config"
-    remote_client_cert_location: "{{ dir_home }}/.minikube/profiles/minikube/client.crt"
-    remote_client_key_location: "{{ dir_home }}/.minikube/profiles/minikube/client.key"
     remote_temp_file_location: "/tmp/minikube_config"
     local_location: "./"
     protocol: "http"
 
   tasks:
-    - name: "Copy kube config to {{ remote_temp_file_location }}"
+    - name: "Copy kubeconfig to {{ remote_temp_file_location }}"
       copy:
         src: "{{ remote_kube_config_location }}"
         dest: "{{ remote_temp_file_location }}"
         mode: 0644
         remote_src: true
 
-    - name: "Edit kube config file to change IP to '{{protocol}}://{{ ip }}:{{ api_server_forwarded_port }}'"
+    - name: "Edit kubeconfig file to change IP to '{{ protocol }}://{{ ip }}:{{ api_server_forwarded_port }}'"
       become: true  
       replace: 
         path: "{{ remote_temp_file_location }}"
         regexp: 'https.*' 
-        replace: "{{protocol}}://{{ ip }}:{{ api_server_forwarded_port }}"
-
-    - name: "Edit kube config file to delete certificate authority"
-      become: true  
-      lineinfile: 
-        path: "{{ remote_temp_file_location }}"
-        regexp: '.*certificate-authority:.*' 
-        state: absent    
-
-    - name: "Edit kube config file to change '{{ remote_client_cert_location }}' to placeholder to be edited later"
-      become: true  
-      replace: 
-        path: "{{ remote_temp_file_location }}"
-        regexp: '{{ remote_client_cert_location }}' 
-        replace: '<LOCATION_TO_MINIKUBE_CLIENT_CERT>'
-
-    - name: "Edit kube config file to change '{{ remote_client_key_location }}' to placeholder to be edited later"
-      become: true  
-      replace: 
-        path: "{{ remote_temp_file_location }}"
-        regexp: '{{ remote_client_key_location }}' 
-        replace: '<LOCATION_TO_MINIKUBE_CLIENT_KEY>'
+        replace: "{{ protocol }}://{{ ip }}:{{ api_server_forwarded_port }}"
 
     - name: "Copy {{ remote_temp_file_location }} to current directory"
       fetch:
@@ -60,25 +37,14 @@
         path: "{{ remote_temp_file_location }}"
         state: absent
 
-    - name: "Copy {{ remote_client_key_location }} to current directory"
-      fetch:
-        src: "{{ remote_client_key_location }}"
-        dest: "{{ local_kube_config_name }}.key"
-        flat: true
-        mode: 0644
-
-    - name: "Copy {{ remote_client_cert_location }} to current directory"
-      fetch:
-        src: "{{ remote_client_cert_location }}"
-        dest: "{{ local_kube_config_name }}.crt"
-        flat: true
-        mode: 0644
-
     - include_tasks: tasks-allow-ports.yaml
       vars:
         ports: 
           - "{{ api_server_forwarded_port }}"
 
     - debug: 
-        msg: "Minikube is accessible at {{ ip }}:{{ api_server_forwarded_port }}. Please edit your kube config file to include the details from the file at '{{ local_location }}'"
+        msg: >
+          Minikube is accessible at {{ ip }}:{{ api_server_forwarded_port }},
+          please use the kubeconfig from '{{ local_kube_config_location }}' to
+          access it.
     
