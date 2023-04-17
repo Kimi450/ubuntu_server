@@ -256,6 +256,7 @@ Use your own server
           1337x
           Rarbg
           LimeTorrents
+          The Pirate Bay
           ```
         - Anime
           ```
