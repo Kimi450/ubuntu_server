@@ -264,6 +264,8 @@ Use your own server
           ```
     - Add Sonarr, Radarr, Lidarr and Readarr to the ``Settings > Apps > Application`` section using the correct API token and kubernetes service names
       - By default the services will be ``http://sonarr:8989``, ``http://radarr:7878``, ``http://lidarr:8686`` and ``http://readarr:8787``
+      - Select extra `Sync Catagories` for each application if required
+        - If you dont know what to do, add all of them for every app (comes at the cost of slower searches)
 
   - ##### Setup Bazarr
     - Enable authentication
