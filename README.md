@@ -257,6 +257,7 @@ Use your own server
           Rarbg
           LimeTorrents
           The Pirate Bay
+          EZTV
           ```
         - Anime
           ```
