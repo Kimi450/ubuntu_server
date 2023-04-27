@@ -46,8 +46,6 @@ Use your own server
   sudo apt install ansible
   ```
 
-- #### Update the `hosts.yaml` file to fill out the template
-
 - #### Update the `group_vars/all` file to fill out the required information there
   At the very least, search for the items with tags `# FILL OUT`
 
@@ -79,6 +77,8 @@ Use your own server
       - Put this token/key in the `group_vars/all` file
     - If not needed, remove the line below line from `setup.yaml`
     `- import_playbook: install-and-configure-cloudflare-dns-updater-service.yaml`
+
+- #### Update the `hosts.yaml` file to fill out the template
 
 - #### Expose required ports on your router
   - Expose (port forward on your router) ports for the services you wish to have available externally based on the list [here](#exposed-services).
