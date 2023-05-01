@@ -137,27 +137,6 @@ Use your own server
     - Set torrent download/upload limits
       - Recommended to keep 6 active torrents/downloads and 0 uploads. It is under ``Tools > Options > BitTorrent > Torrent Queueing``
 
-  - ##### Setup Calibre
-    - Do base setup
-      - Set folder to be ``/media/data/books`` and select ``Yes`` for it to rebuild the library if asked.
-    - Go to ``Preferences > Sharing over the net``
-      - Check the box for ``Require username and password to access the Content server``
-      - Check the box for ``Run the server automatically when calibre starts``
-      - Click on ``Start server``
-      - Go to the ``User accounts tab`` and create a user
-        - Make a note of the credentials for use in ``Readarr`` setup
-      - Restart the app/pod
-        - You can do so by also pressing `CTRL + R` on the main screen
-
-  - ##### Setup Calibre Web
-    - Default login is ``admin/admin123``
-    - Set folder to be ``/media/data/books``
-    - To enable web reading, click on ``Admin`` (case sensitive) on the top right
-      - Click on the user, default is ``admin``
-      - Enable ``Allow ebook viewer``
-      - Change password to something more secure
-      - Save settings
-
   - ##### Setup Radarr/Sonarr/Readarr/Lidarr
     - Service function
 
@@ -203,43 +182,6 @@ Use your own server
             - Calibre Password: ``<calibre_password>``
         - Enabled ``Rename Books`` and use the defaults
 
-  - ##### Setup Ombi
-    - One stop shop for Sonarr/Radarr/Lidarr requests
-    - Get the API keys for Jellyfin, Sonarr and Radarr
-      - Jellyfin
-        - Go to ``Admin > Dashboard > API Keys``
-        - Generate a new API key with an appropriate name
-      - Sonarr/Radarr/Lidarr
-        - Use the API tokens from the respective services, found under ``Settings > General > Security > API Key`` 
-    - Use the API key for Jellyfin at the first time setup, dont use SSL.
-      | Service Name | Port |
-      |--------------|------|
-      | jellyfin     | 8096 |
-
-    - Set credentials for login
-    - Go to ``Settings``
-      - Use the correct API keys, hostnames and ports for the services
-          | Service Name | Port |
-          |--------------|------|
-          | sonarr       | 8989 |
-          | radarr       | 7878 |
-          | lidarr       | 8686 |
-      - Click on the ``Load Profiles`` and ``Load Root Folders`` buttons and use the appropriate defaults as used in the services seen [here](#setup-radarrsonarrreadarrlidarr).
-      - Setup ``Movies`` using ``Radarr``
-      - Setup  ``TV`` using ``Sonarr``
-        - Enable the ``Enable season folders`` option
-        - Enable the ``V3`` option
-      - Setup  ``Music`` using ``Lidarr``
-      - Dont forget to click on ``Enable`` for each of those setups as well
-    - Go to ``Users``
-      - Setup additional users
-      - Give the following roles to *trusted* users for convinience
-        ```
-        AutoApproveMovie
-        AutoApproveMusic
-        AutoApproveTv
-        ```
-
   - ##### Setup Prowlarr
     - Enable authentication
       - Go to ``Settings > General``
@@ -258,9 +200,20 @@ Use your own server
         - Anime
           ```
           Nyaa.si
+          Tokyo Toshokan
           ```
     - Add Sonarr, Radarr, Lidarr and Readarr to the ``Settings > Apps > Application`` section using the correct API token and kubernetes service names
-      - By default the services will be ``http://sonarr:8989``, ``http://radarr:7878``, ``http://lidarr:8686`` and ``http://readarr:8787``
+      - By default prowlarr server will be:
+        ```
+        http://prowlarr:9696
+        ```
+      - By default the services will be:
+        ```
+        http://sonarr:8989
+        http://radarr:7878
+        http://lidarr:8686
+        http://readarr:8787
+        ```
       - Select extra `Sync Catagories` for each application if required
         - If you dont know what to do, add all of them for every app (comes at the cost of slower searches)
 
@@ -269,9 +222,9 @@ Use your own server
       - Go to ``Settings > General``
       - Under ``Security`` select ``Form`` as the form of ``Authentication``
       - Set username and password for access
-    - Follow this page
-      - ``https://wiki.bazarr.media/Getting-Started/Setup-Guide/``
+    - Follow the official [Setup Guide](https://wiki.bazarr.media/Getting-Started/Setup-Guide/)
       - Go to ``Settings > Radarr`` and ``Settings > Sonarr``
+        - Click on `Enable`
         - Fill out the details and save
           - Use the API tokens from the respective services, found under ``Settings > General > Security > API Key``
           - Use the kubernetes service name and port
@@ -281,7 +234,8 @@ Use your own server
             | radarr       | 7878 |
             | sonarr       | 8989 |
 
-        - Fill out the path mappings if the directories in which data is stored is different for both services (same by default)
+          - Set a suitable minimum score, probabl `70` is fine
+        - Fill out the path mappings if the directories in which data is stored is different for both services (by default both services will use the same directory to access data, so you dont need to change anything for a default install)
       - Go to ``Settings > Languages``
         - Add a language profile and set defaults for movies and series'
       - Go to ``Settings > Provider`` and add providers for subtitles
@@ -293,7 +247,65 @@ Use your own server
       - Go to ``Settings > Subtitles`` and make changes if needed
       - Manually add the language profile to all the scanned media after first installation
     - NOTE:
-      - If it doesnt work, manually reinstall this service a few times. It just works, not sure whhy
+      - If it doesnt work, manually reinstall this service a few times. It just works, not sure why
+
+  - ##### Setup Ombi
+    - One stop shop for Sonarr/Radarr/Lidarr requests
+    - Get the API keys for Jellyfin, Sonarr and Radarr
+      - Jellyfin
+        - Go to ``Admin > Dashboard > API Keys``
+        - Generate a new API key with an appropriate name
+      - Sonarr/Radarr/Lidarr
+        - Use the API tokens from the respective services, found under ``Settings > General > Security > API Key`` 
+    - Set credentials for login
+    - Go to ``Settings``
+      - Use the correct API keys, hostnames and ports for the services
+          | Service Name | Port |
+          |--------------|------|
+          | jellyfin     | 8096 |
+          | sonarr       | 8989 |
+          | radarr       | 7878 |
+          | lidarr       | 8686 |
+      - Click on the ``Load Profiles`` and ``Load Root Folders`` buttons and use the appropriate defaults as used in the services seen [here](#setup-radarrsonarrreadarrlidarr).
+      - Setup ``Movies`` using ``Radarr``
+      - Setup ``TV`` using ``Sonarr``
+        - Enable the ``Enable season folders`` option
+        - Enable the ``V3`` option
+      - Setup ``Music`` using ``Lidarr``
+      - Setup ``Media Server`` using ``Jellyfin``
+      - **Dont forget to click on ``Enable`` for each of those setups as well**
+    - Go to ``Users``
+      - Setup additional users
+      - Give the following roles to *trusted* users for convinience
+        ```
+        AutoApproveMusic
+        RequestMovie
+        AutoApproveTv
+        RequestMusic
+        AutoApproveMovie
+        RequestTv
+        ```
+
+  - ##### Setup Calibre
+    - Do base setup
+      - Set folder to be ``/media/data/books`` and select ``Yes`` for it to rebuild the library if asked.
+    - Go to ``Preferences > Sharing over the net``
+      - Check the box for ``Require username and password to access the Content server``
+      - Check the box for ``Run the server automatically when calibre starts``
+      - Click on ``Start server``
+      - Go to the ``User accounts tab`` and create a user
+        - Make a note of the credentials for use in ``Readarr`` setup
+      - Restart the app/pod
+        - You can do so by also pressing `CTRL + R` on the main screen
+
+  - ##### Setup Calibre Web
+    - Default login is ``admin/admin123``
+    - Set folder to be ``/media/data/books``
+    - To enable web reading, click on ``Admin`` (case sensitive) on the top right
+      - Click on the user, default is ``admin``
+      - Enable ``Allow ebook viewer``
+      - Change password to something more secure
+      - Save settings
 
   - ##### Setup Minikube for remote access
     - Use the kubeconfig file copied over to the current working directory by exporting it
