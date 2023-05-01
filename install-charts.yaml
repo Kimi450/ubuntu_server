@@ -48,8 +48,11 @@
       persistence.media.mountPath={{ dir_mount_path }},\
       persistence.media.hostPath={{ dir_minikube_mount }}"
 
+    # readOnlyRootFilesystem=false is needed for the app to be able to take
+    # backups in /config/Backups
     # runAsUser={{ uid }} gives write access on the pod
-    helm_common_pod_security_context: "\
+    helm_common_security_contexts: "\
+      common.securityContext.readOnlyRootFilesystem=false,\
       common.podSecurityContext.runAsUser={{ uid }},\
       common.podSecurityContext.runAsGroup=568"
   tasks:
@@ -186,7 +189,7 @@
           set_options: "--set \
             {{ helm_common_general }},\
             {{ helm_common_persistence }},\
-            {{ helm_common_pod_security_context }},\
+            {{ helm_common_security_contexts }},\
             {{ helm_common_persistence_media }},\
             {{ helm_common_resources }},\
             {{ helm_common_ingress }},\
@@ -227,7 +230,7 @@
           set_options: "--set \
             {{ helm_common_general }},\
             {{ helm_common_persistence }},\
-            {{ helm_common_pod_security_context }},\
+            {{ helm_common_security_contexts }},\
             {{ helm_common_persistence_media }},\
             {{ helm_common_resources }},\
             {{ helm_common_ingress }},\
@@ -258,7 +261,7 @@
           set_options: "--set \
             {{ helm_common_general }},\
             {{ helm_common_persistence }},\
-            {{ helm_common_pod_security_context }},\
+            {{ helm_common_security_contexts }},\
             {{ helm_common_persistence_media }},\
             {{ helm_common_resources }},\
             {{ helm_common_ingress }},\
@@ -289,7 +292,7 @@
           set_options: "--set \
             {{ helm_common_general }},\
             {{ helm_common_persistence }},\
-            {{ helm_common_pod_security_context }},\
+            {{ helm_common_security_contexts }},\
             {{ helm_common_persistence_media }},\
             {{ helm_common_resources }},\
             {{ helm_common_ingress }},\
@@ -319,7 +322,7 @@
           set_options: "--set \
             {{ helm_common_general }},\
             {{ helm_common_persistence }},\
-            {{ helm_common_pod_security_context }},\
+            {{ helm_common_security_contexts }},\
             {{ helm_common_persistence_media }},\
             {{ helm_common_resources }},\
             {{ helm_common_ingress }},\
@@ -349,7 +352,7 @@
           set_options: "--set \
             {{ helm_common_general }},\
             {{ helm_common_persistence }},\
-            {{ helm_common_pod_security_context }},\
+            {{ helm_common_security_contexts }},\
             {{ helm_common_persistence_media }},\
             {{ helm_common_resources }},\
             {{ helm_common_ingress }},\
@@ -378,7 +381,7 @@
           set_options: "--set \
             {{ helm_common_general }},\
             {{ helm_common_persistence }},\
-            {{ helm_common_pod_security_context }},\
+            {{ helm_common_security_contexts }},\
             {{ helm_common_persistence_media }},\
             {{ helm_common_resources }},\
             {{ helm_common_ingress }},\
@@ -407,7 +410,7 @@
           set_options: "--set \
             {{ helm_common_general }},\
             {{ helm_common_persistence }},\
-            {{ helm_common_pod_security_context }},\
+            {{ helm_common_security_contexts }},\
             {{ helm_common_persistence_media }},\
             {{ helm_common_resources }},\
             {{ helm_common_ingress }},\
@@ -436,7 +439,7 @@
           set_options: "--set \
             {{ helm_common_general }},\
             {{ helm_common_persistence }},\
-            {{ helm_common_pod_security_context }},\
+            {{ helm_common_security_contexts }},\
             {{ helm_common_resources }},\
             {{ helm_common_ingress }},\
             ingress.main.hosts[0].host='ombi.{{ domain_name }}',\
