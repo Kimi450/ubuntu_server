@@ -34,7 +34,7 @@
     lineinfile:
       path: "{{ service_file_location_base }}{{ service_file_name }}"
       regexp: '^ExecStart=(.*)$' 
-      line: "ExecStart=ssh -NT -o StrictHostKeyChecking=no -o ExitOnForwardFailure=yes -o GatewayPorts=true -i {{ dir_minikube_ssh_key.stdout }} docker@{{ minikube_ip.stdout }} -L {{ host_port }}:0.0.0.0:{{ service_port.stdout }}"
+      line: "ExecStart=ssh -NT -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o ExitOnForwardFailure=yes -o GatewayPorts=true -i {{ dir_minikube_ssh_key.stdout }} docker@{{ minikube_ip.stdout }} -L {{ host_port }}:0.0.0.0:{{ service_port.stdout }}"
       backrefs: yes
     when: service_name != "SKIP"
 
@@ -44,7 +44,7 @@
     lineinfile:
       path: "{{ service_file_location_base }}{{ service_file_name }}"
       regexp: '^ExecStart=(.*)$'
-      line: "ExecStart=ssh -NT -o StrictHostKeyChecking=no -o ExitOnForwardFailure=yes -o GatewayPorts=true -i {{ dir_minikube_ssh_key.stdout }} docker@{{ minikube_ip.stdout }} -L {{ host_port }}:0.0.0.0:{{ service_port }}"
+      line: "ExecStart=ssh -NT -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o ExitOnForwardFailure=yes -o GatewayPorts=true -i {{ dir_minikube_ssh_key.stdout }} docker@{{ minikube_ip.stdout }} -L {{ host_port }}:0.0.0.0:{{ service_port }}"
       backrefs: yes
     when: service_name == "SKIP"
 
