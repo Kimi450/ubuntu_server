@@ -17,7 +17,8 @@
       global.addMetalLBAnnotations=false,\
       global.addTraefikAnnotations=false,\
       common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
-      common.manifests.enabled=false"
+      common.manifests.enabled=false,\
+      common.manifestManager.enabled=false"
     
     helm_common_ingress: "\
       ingress.main.enabled=true,\
