@@ -60,9 +60,7 @@
     - name: Create namespaces namespace
       shell: "kubectl create namespace {{ item }} --dry-run=client -o yaml | kubectl apply -f -"
       with_items:
-        - "{{ namespace_monitoring }}"
         - "{{ namespace_user }}"
-        - "{{ namespace_generic_services }}"
 
     - include_tasks: tasks-allow-ports.yaml
       vars:

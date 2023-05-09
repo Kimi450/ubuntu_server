@@ -8,4 +8,4 @@
     shell: helm repo update
 
   - name: Install chart
-    shell: "helm upgrade -i -n {{ install_namespace }} {{ release_name }} {{ repo_name }}/{{ chart_name }} {{ set_options }} --timeout {{ timeout }} --wait"
+    shell: "helm upgrade -i -n {{ install_namespace }} {{ release_name }} {{ repo_name }}/{{ chart_name }} {{ set_options }} --timeout {{ timeout }} --create-namespace --wait"
