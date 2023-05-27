@@ -208,6 +208,12 @@ Use your own server
       - Go to ``Settings > General``
       - Set Authentication to `Forms (Login Page)`
       - Set username and password for access
+    - Add `FlareSolverr` service as a proxy, refer to [this](https://trash-guides.info/Prowlarr/prowlarr-setup-flaresolverr/) guide for help
+      - Go to ``Settings > Indexers``
+      - Add a new proxy for `FlareSolverr`
+        - Add a tag to it, for example `flaresolverr`
+          - **NOTE:** This tag needs to be used for any indexer that needs to bypass CloudFlare and DDoS-Gaurd protection
+        - The default host will be `http://flaresolverr:8191/`
     - Follow the [official Quick Start Guide](https://wiki.servarr.com/prowlarr/quick-start-guide)
       - Add all the indexers you wish to use, some good ones listed below. Find more indexers on [Prowlarr's Supported Indexers page](https://wiki.servarr.com/prowlarr/supported-indexers).
         - Standard
@@ -220,9 +226,13 @@ Use your own server
           ```
         - Anime
           ```
+          Anidex
+            Add with higher priority, example "1", since it has good english subtitled content
+            Add "flaresolverr" tag
           Nyaa.si
           Tokyo Toshokan
           ```
+        - It is recommended to use private indexers for books and music as they are harder to find otherwise
     - Add Sonarr, Radarr, Lidarr and Readarr to the ``Settings > Apps > Application`` section using the correct API token and kubernetes service names
       - By default prowlarr server will be:
         ```
@@ -236,7 +246,8 @@ Use your own server
         http://readarr:8787
         ```
       - Select extra `Sync Catagories` for each application if required
-        - If you dont know what to do, add all of them for every app (comes at the cost of slower searches)
+        - I would recommend keeping the default categories for the most part
+        - For the apps `Sonarr` and `Radarr`, it might be worthwhile using both `TV` and `Movies` categories
 
   - ##### Setup Bazarr
     - Enable authentication
