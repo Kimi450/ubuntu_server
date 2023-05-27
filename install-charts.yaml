@@ -218,6 +218,27 @@
             can be used by the application to download things. Downloading in
             the directories under {{ dir_data }} will be picked up by Jellyfin.
 
+    - name: Install flaresolverr
+      when: charts.services.flaresolverr.enabled
+      block:
+      - name: Install/Upgrade the flaresolverr chart
+        include_tasks: tasks-install-chart.yaml
+        vars:
+          repo_name: TrueCharts
+          repo_link: https://charts.truecharts.org
+          install_namespace: "{{ namespace_generic_services }}"
+          timeout: "{{ charts.timeout }}"
+          release_name: flaresolverr
+          chart_name: flaresolverr
+          set_options: "--set \
+            {{ helm_common_general }},\
+            {{ helm_common_persistence }},\
+            {{ helm_common_resources }}"
+
+      - debug:
+          msg: >
+            You can flaresolverr to bypass Cloudflare's protection
+
     - name: Install prowlarr
       when: charts.services.prowlarr.enabled
       block:

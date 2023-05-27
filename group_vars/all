@@ -75,7 +75,7 @@ charts:
       enabled: True
     # to bypass cloudflare protection
     flaresolverr:
-      enabled: false
+      enabled: True
     # to manage indexers
     prowlarr:
       enabled: True
