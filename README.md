@@ -268,7 +268,7 @@ Use your own server
       - Go to ``Settings > Subtitles`` and make changes if needed
       - Manually add the language profile to all the scanned media after first installation
     - NOTE:
-      - If it doesnt work, manually reinstall this service a few times. It just works, not sure why
+      - If it doesnt work, manually restart the pod few times. It just works, not sure why. If that doesnt work, try reinstalling.
 
   - ##### Setup Ombi
     - One stop shop for Sonarr/Radarr/Lidarr requests
