@@ -446,7 +446,6 @@
             {{ helm_common_ingress }},\
             securityContext.container.PUID=\"{{ uid }}\",\
             securityContext.container.PGID=\"568\",\
-            securityContext.pod.fsGroup=568,\
             ingress.main.hosts[0].host='librespeed.{{ domain_name }}',\
             ingress.main.hosts[0].paths[0].service.name=librespeed,\
             ingress.main.hosts[0].paths[0].service.port=10016"
@@ -477,7 +476,6 @@
             {{ helm_common_ingress }},\
             securityContext.container.PUID=\"{{ uid }}\",\
             securityContext.container.PGID=\"568\",\
-            securityContext.pod.fsGroup=568,\
             ingress.main.hosts[0].host='calibre-web.{{ domain_name }}',\
             ingress.main.hosts[0].paths[0].service.name=calibre-web,\
             ingress.main.hosts[0].paths[0].service.port=8083"
@@ -509,7 +507,6 @@
             {{ helm_common_resources }},\
             securityContext.container.PUID=\"{{ uid }}\",\
             securityContext.container.PGID=\"568\",\
-            securityContext.pod.fsGroup=568,\
             service.webserver.enabled=true"
 
       - name: Expose calibre service
