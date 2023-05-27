@@ -57,7 +57,7 @@
 
       - name: Download google cloud public signing key
         become: true
-        shell: curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        shell: curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://dl.k8s.io/apt/doc/apt-key.gpg
 
       - name: Add the Kubernetes apt repository
         become: true
