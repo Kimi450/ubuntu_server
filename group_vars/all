@@ -73,6 +73,9 @@ charts:
     # torrents
     qbittorrent:
       enabled: True
+    # to bypass cloudflare protection
+    flaresolverr:
+      enabled: True
     # to manage indexers
     prowlarr:
       enabled: True
