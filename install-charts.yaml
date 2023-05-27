@@ -500,6 +500,8 @@
           chart_name: calibre
           # PUID={{ uid }} gives write access on the pod
           # 568 is the default user ID, added to the groups cause why not
+          # securityContext.container.seccompProfile.type is required for the
+          # guacamole VNC client to be able to make sys calls (required )
           set_options: "--set \
             {{ helm_common_general }},\
             {{ helm_common_persistence }},\
@@ -507,6 +509,7 @@
             {{ helm_common_resources }},\
             securityContext.container.PUID=\"{{ uid }}\",\
             securityContext.container.PGID=\"568\",\
+            securityContext.container.seccompProfile.type=Unconfined,\
             service.webserver.enabled=true"
 
       - name: Expose calibre service
