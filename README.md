@@ -137,6 +137,27 @@ Use your own server
     - Set torrent download/upload limits
       - Recommended to keep 6 active torrents/downloads and 0 uploads. It is under ``Tools > Options > BitTorrent > Torrent Queueing``
 
+  - ##### Setup Calibre
+    - Do base setup
+      - Set folder to be ``/media/data/books`` and select ``Yes`` for it to rebuild the library if asked.
+    - Go to ``Preferences > Sharing over the net``
+      - Check the box for ``Require username and password to access the Content server``
+      - Check the box for ``Run the server automatically when calibre starts``
+      - Click on ``Start server``
+      - Go to the ``User accounts tab`` and create a user
+        - Make a note of the credentials for use in ``Readarr`` setup
+      - Restart the app/pod
+        - You can do so by also pressing `CTRL + R` on the main screen
+
+  - ##### Setup Calibre Web
+    - Default login is ``admin/admin123``
+    - Set folder to be ``/media/data/books``
+    - To enable web reading, click on ``Admin`` (case sensitive) on the top right
+      - Click on the user, default is ``admin``
+      - Enable ``Allow ebook viewer``
+      - Change password to something more secure
+      - Save settings
+
   - ##### Setup Radarr/Sonarr/Readarr/Lidarr
     - Service function
 
@@ -285,27 +306,6 @@ Use your own server
         AutoApproveMovie
         RequestTv
         ```
-
-  - ##### Setup Calibre
-    - Do base setup
-      - Set folder to be ``/media/data/books`` and select ``Yes`` for it to rebuild the library if asked.
-    - Go to ``Preferences > Sharing over the net``
-      - Check the box for ``Require username and password to access the Content server``
-      - Check the box for ``Run the server automatically when calibre starts``
-      - Click on ``Start server``
-      - Go to the ``User accounts tab`` and create a user
-        - Make a note of the credentials for use in ``Readarr`` setup
-      - Restart the app/pod
-        - You can do so by also pressing `CTRL + R` on the main screen
-
-  - ##### Setup Calibre Web
-    - Default login is ``admin/admin123``
-    - Set folder to be ``/media/data/books``
-    - To enable web reading, click on ``Admin`` (case sensitive) on the top right
-      - Click on the user, default is ``admin``
-      - Enable ``Allow ebook viewer``
-      - Change password to something more secure
-      - Save settings
 
   - ##### Setup Minikube for remote access
     - Use the kubeconfig file copied over to the current working directory by exporting it
