@@ -248,6 +248,7 @@ Use your own server
       - Select extra `Sync Catagories` for each application if required
         - I would recommend keeping the default categories for the most part
         - For the apps `Sonarr` and `Radarr`, it might be worthwhile using both `TV` and `Movies` categories
+        - **NOTE:** If you dont know what to do, add all of them for every app (comes at the cost of slower searches). But this may also result in some weird behaviour which would need troubleshooting.
 
   - ##### Setup Bazarr
     - Enable authentication
