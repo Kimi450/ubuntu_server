@@ -13,12 +13,11 @@
     # of manifests for SCALE products I believe either way I dont need it:
     # - common.manifests.enabled=false
     helm_common_general: "\
-      controller.type=statefulset,\
       global.addMetalLBAnnotations=false,\
       global.addTraefikAnnotations=false,\
-      common.dnsConfig.nameservers={8.8.8.8,8.8.4.4},\
-      common.manifests.enabled=false,\
-      common.manifestManager.enabled=false"
+      manifestManager.enabled=false,\
+      workload.main.type=StatefulSet,\
+      podOptions.dnsConfig.nameservers={8.8.8.8,8.8.4.4}"
     
     helm_common_ingress: "\
       ingress.main.enabled=true,\
@@ -36,10 +35,10 @@
       resources.limits.memory={{ charts.resources.limits.memory }}"
 
     helm_common_persistence: "\
-      common.persistence.shared.enabled=false,\
-      common.persistence.shm.enabled=false,\
-      common.persistence.temp.enabled=false,\
-      common.persistence.varlogs.enabled=false,\
+      persistence.shared.enabled=false,\
+      persistence.shm.enabled=false,\
+      persistence.temp.enabled=false,\
+      persistence.varlogs.enabled=false,\
       persistence.config.enabled=true,\
       persistence.config.size=1Gi"
 
@@ -53,9 +52,9 @@
     # backups in /config/Backups
     # runAsUser={{ uid }} gives write access on the pod
     helm_common_security_contexts: "\
-      common.securityContext.readOnlyRootFilesystem=false,\
-      common.podSecurityContext.runAsUser={{ uid }},\
-      common.podSecurityContext.runAsGroup=568"
+      securityContext.container.readOnlyRootFilesystem=false,\
+      securityContext.container.runAsUser={{ uid }},\
+      securityContext.container.runAsGroup=568"
 
   tasks:
     - name: Create namespaces namespace
@@ -156,9 +155,9 @@
           chart_name: jellyfin
           # to allow the pod to be able to use the /dev mount
           # to access /dev/dri/renderD128 for hwa, these options are set to true
-          # - common.podSecurityContext.runAsUser=0
-          # - common.securityContext.privileged=true
-          # - common.securityContext.allowPrivilegeEscalation=true
+          # - securityContext.container.runAsUser=0
+          # - securityContext.container.privileged=true
+          # - securityContext.container.allowPrivilegeEscalation=true
           set_options: "--set \
             {{ helm_common_general }},\
             {{ helm_common_persistence }},\
@@ -166,10 +165,10 @@
             {{ helm_common_persistence_media }},\
             {{ helm_common_resources }},\
             {{ helm_common_ingress }},\
-            common.podSecurityContext.runAsUser=0,\
-            common.securityContext.privileged=true,\
-            common.securityContext.runAsNonRoot=false,\
-            common.securityContext.allowPrivilegeEscalation=true,\
+            securityContext.container.runAsUser=0,\
+            securityContext.container.privileged=true,\
+            securityContext.container.runAsNonRoot=false,\
+            securityContext.container.allowPrivilegeEscalation=true,\
             persistence.cache.enabled=true,\
             persistence.cache.accessMode=ReadWriteOnce,\
             persistence.cache.size=50G,\
@@ -445,9 +444,8 @@
             {{ helm_common_persistence }},\
             {{ helm_common_resources }},\
             {{ helm_common_ingress }},\
-            env.PUID=\"{{ uid }}\",\
-            env.PGID=\"568\",\
-            common.podSecurityContext.fsGroup=568,\
+            securityContext.container.PUID=\"{{ uid }}\",\
+            securityContext.container.PGID=\"568\",\
             ingress.main.hosts[0].host='librespeed.{{ domain_name }}',\
             ingress.main.hosts[0].paths[0].service.name=librespeed,\
             ingress.main.hosts[0].paths[0].service.port=10016"
@@ -476,9 +474,8 @@
             {{ helm_common_persistence_media }},\
             {{ helm_common_resources }},\
             {{ helm_common_ingress }},\
-            env.PUID=\"{{ uid }}\",\
-            env.PGID=\"568\",\
-            podSecurityContext.fsGroup=568,\
+            securityContext.container.PUID=\"{{ uid }}\",\
+            securityContext.container.PGID=\"568\",\
             ingress.main.hosts[0].host='calibre-web.{{ domain_name }}',\
             ingress.main.hosts[0].paths[0].service.name=calibre-web,\
             ingress.main.hosts[0].paths[0].service.port=8083"
@@ -503,14 +500,16 @@
           chart_name: calibre
           # PUID={{ uid }} gives write access on the pod
           # 568 is the default user ID, added to the groups cause why not
+          # securityContext.container.seccompProfile.type is required for the
+          # guacamole VNC client to be able to make sys calls (required )
           set_options: "--set \
             {{ helm_common_general }},\
             {{ helm_common_persistence }},\
             {{ helm_common_persistence_media }},\
             {{ helm_common_resources }},\
-            env.PUID=\"{{ uid }}\",\
-            env.PGID=\"568\",\
-            podSecurityContext.fsGroup=568,\
+            securityContext.container.PUID=\"{{ uid }}\",\
+            securityContext.container.PGID=\"568\",\
+            securityContext.container.seccompProfile.type=Unconfined,\
             service.webserver.enabled=true"
 
       - name: Expose calibre service
