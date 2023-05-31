@@ -219,7 +219,6 @@ Use your own server
         - Standard
           ```
           1337x
-          Rarbg
           LimeTorrents
           The Pirate Bay
           EZTV
