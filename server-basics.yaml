@@ -85,6 +85,7 @@
         - "{{ dir_data_books }}"
         - "{{ dir_data_music }}"
         - "{{ dir_data_downloads }}"
+        - "{{ dir_home }}{{ dir_data_config_suffix }}"
 
     - name: Setup the bashrc file and the vimrc file
       block:
