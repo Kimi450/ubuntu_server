@@ -3,6 +3,8 @@ Highly opinionated server setup to cater to my needs
 
 ## Server Setup
 
+***NOTE:*** If things dont work for some reason, try restarting and seeing if that fixes it.
+
 ### Cloud
 Probably get a VM from [Oracle Always Free Tier](https://www.oracle.com/ie/cloud/free/) stuff.
 
