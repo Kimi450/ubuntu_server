@@ -11,10 +11,11 @@
 
     # The following has been set to disable Truecharts own injection
     # of manifests for SCALE products I believe either way I dont need it:
-    # - common.manifests.enabled=false
+    # - manifestManager.enabled=false
     helm_common_general: "\
       global.addMetalLBAnnotations=false,\
       global.addTraefikAnnotations=false,\
+      operator.verify.enabled=false,\
       manifestManager.enabled=false,\
       workload.main.type=StatefulSet,\
       podOptions.dnsConfig.nameservers={8.8.8.8,8.8.4.4}"
