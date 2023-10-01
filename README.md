@@ -25,6 +25,11 @@ Use your own server
   sudo ufw allow ssh
   ```
 
+- #### Disable sleep for the server
+  This is to make sure it doesnt turn off mid install or when idle. If its a laptop, make sure power off when lid is closed is also turned off.
+
+  You can do this via the UI or refer to this [stackoverflow post](https://askubuntu.com/questions/47311/how-do-i-disable-my-system-from-going-to-sleep).
+
 ## Client Setup
 
 - #### Enable passwordless ssh access from remote machine to server (required for ansible to work)
