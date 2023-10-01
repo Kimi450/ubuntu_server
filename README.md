@@ -354,29 +354,31 @@ Use your own server
     - More information [here](https://ubuntu.com/tutorials/install-and-configure-samba#4-setting-up-user-accounts-and-connecting-to-share)
 
   - ##### Exposed Services
-    - You can port forward the following ports on your router to gain external.
     - You need to create DNS entries to access the Ingress services. The following entries are recommended:
       - `*.<DOMAIN_NAME>`
       - `<DOMAIN_NAME>`
+    - You can port forward the following ports on your router to gain external access. On your router:
+      - Set a static IP for your server (if applicable) so the router doesnt assign a different IP to the machine breaking your port-forwarding setup
+      - Following are some sample rules based on the `all` file defaults for port forwarding, feel free to tweak to your needs.
 
-      | Service     | Default access | Where                                                             | Port to be forwarded from server |
-      |-------------|----------------|-------------------------------------------------------------------|----------------------------------|
-      | ssh         | ssh            | `<LAN_IP>` or `<DOMAIN_NAME>`                                     |                               22 |
-      | squid       | proxy          | `<LAN_IP>:<GROUP_VARS_PORT>` or `<DOMAIN_NAME>:<GROUP_VARS_PORT>` |                             3128 |
-      | samba       | proxy          | `\\<LAN_IP>\<SHARE_NAME>` or `\\<DOMAIN_NAME>\<SHARE_NAME>`       |   TCP: `139,445`, UDP: `137,138` |
-      | grafana     | Ingress        | `grafana.<DOMAIN_NAME>`                                           |                               80 |
-      | jellyfin    | Ingress        | `jellyin.<DOMAIN_NAME>`                                           |                               80 |
-      | ombi        | Ingress        | `ombi.<DOMAIN_NAME>`                                              |                               80 |
-      | prowlarr    | Ingress        | `prowlarr.<DOMAIN_NAME>`                                          |                               80 |
-      | bazarr      | Ingress        | `bazarr.<DOMAIN_NAME>`                                            |                               80 |
-      | radarr      | Ingress        | `radarr.<DOMAIN_NAME>`                                            |                               80 |
-      | sonarr      | Ingress        | `sonarr.<DOMAIN_NAME>`                                            |                               80 |
-      | readarr     | Ingress        | `readarr.<DOMAIN_NAME>`                                           |                               80 |
-      | lidarr      | Ingress        | `lidarr.<DOMAIN_NAME>`                                            |                               80 |
-      | librespeed  | Ingress        | `librespeed.<DOMAIN_NAME>`                                        |                               80 |
-      | calibre-web | Ingress        | `calibre-web.<DOMAIN_NAME>`                                       |                               80 |
-      | minikube    | LAN api-access | `<LAN_IP>:3001`                                                   |                             3001 |
-      | calibre     | LAN            | `<LAN_IP>:3002`                                                   |                             3002 |
+      | Service     | Default access | Where                                                             | Server port                      |                Public facing port |
+      |-------------|----------------|-------------------------------------------------------------------|----------------------------------|-----------------------------------|
+      | ssh         | ssh            | `<LAN_IP>` or `<DOMAIN_NAME>`                                     |                               22 | `<IN_LINE_WITH_HOSTS_FILE_OR_22>` |
+      | samba       | proxy          | `\\<LAN_IP>\<SHARE_NAME>` or `\\<DOMAIN_NAME>\<SHARE_NAME>`       |   TCP: `139,445`, UDP: `137,138` |       `<BEST_NOT_TO_EXPOSE_THIS>` |
+      | squid       | proxy          | `<LAN_IP>:<GROUP_VARS_PORT>` or `<DOMAIN_NAME>:<GROUP_VARS_PORT>` |        `<IN_LINE_WITH_ALL_FILE>` |                    `<YOU_DECIDE>` |
+      | grafana     | Ingress        | `grafana.<DOMAIN_NAME>`                                           |                             8080 |                                80 |
+      | jellyfin    | Ingress        | `jellyin.<DOMAIN_NAME>`                                           |                             8080 |                                80 |
+      | ombi        | Ingress        | `ombi.<DOMAIN_NAME>`                                              |                             8080 |                                80 |
+      | prowlarr    | Ingress        | `prowlarr.<DOMAIN_NAME>`                                          |                             8080 |                                80 |
+      | bazarr      | Ingress        | `bazarr.<DOMAIN_NAME>`                                            |                             8080 |                                80 |
+      | radarr      | Ingress        | `radarr.<DOMAIN_NAME>`                                            |                             8080 |                                80 |
+      | sonarr      | Ingress        | `sonarr.<DOMAIN_NAME>`                                            |                             8080 |                                80 |
+      | readarr     | Ingress        | `readarr.<DOMAIN_NAME>`                                           |                             8080 |                                80 |
+      | lidarr      | Ingress        | `lidarr.<DOMAIN_NAME>`                                            |                             8080 |                                80 |
+      | librespeed  | Ingress        | `librespeed.<DOMAIN_NAME>`                                        |                             8080 |                                80 |
+      | calibre-web | Ingress        | `calibre-web.<DOMAIN_NAME>`                                       |                             8080 |                                80 |
+      | calibre     | LAN            | `<LAN_IP>:3002` (No ingress rules defined)                        |                             3002 |                    `<YOU_DECIDE>` |
+      | minikube    | LAN api-access | `<LAN_IP>:3001`                                                   |                             3001 |                    `<YOU_DECIDE>` |
 
       NOTE: Security is an unkown when exposing a service to the internet.
 
