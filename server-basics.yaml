@@ -63,6 +63,7 @@
           - fzf # fuzzy find, to get a list of things to select from
           - intel-gpu-tools # for intel GPU usage, MIGHT NOT BE FOUND
           - firefox # browser
+          - testdisk # life saver if your disk is a bit sus, so its a nice util to have handy
 
       - name: Install kubectx/kubens
         # https://github.com/ahmetb/kubectx
