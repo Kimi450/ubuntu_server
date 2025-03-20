@@ -32,10 +32,6 @@
   when:
     - kubespray.enabled
 
-- import_playbook: after-install-kubernetes-kubespray.yaml
-  when:
-    - kubespray.enabled
-
 - import_playbook: server-basics.yaml
   when:
     - basics.enabled
