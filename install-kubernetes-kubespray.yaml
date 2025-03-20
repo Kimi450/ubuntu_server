@@ -24,7 +24,7 @@
     - name: kubespray installation
       delegate_to: localhost
       block:
-        - name: Clone useful_files from github
+        - name: Clone kuberspray from github
           include_tasks: tasks-clone-git-repo.yaml
           vars:
             repo_dir: "{{ kubespray_repo_dir }}"
