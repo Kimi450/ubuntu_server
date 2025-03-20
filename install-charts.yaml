@@ -284,7 +284,7 @@
         file:
           path: "{{ dir_home }}{{ dir_data_config_suffix }}/prowlarr"
           state: directory
-          mode: '0755'
+          mode: '0777'
 
       - name: Install/Upgrade the prowlarr chart
         include_tasks: tasks-install-chart.yaml
@@ -323,7 +323,7 @@
         file:
           path: "{{ dir_home }}{{ dir_data_config_suffix }}/radarr"
           state: directory
-          mode: '0755'
+          mode: '0777'
 
       - name: Install/Upgrade the radarr chart
         include_tasks: tasks-install-chart.yaml
@@ -361,7 +361,7 @@
         file:
           path: "{{ dir_home }}{{ dir_data_config_suffix }}/sonarr"
           state: directory
-          mode: '0755'
+          mode: '0777'
 
       - name: Install/Upgrade the sonarr chart
         include_tasks: tasks-install-chart.yaml
@@ -399,7 +399,7 @@
         file:
           path: "{{ dir_home }}{{ dir_data_config_suffix }}/bazarr"
           state: directory
-          mode: '0755'
+          mode: '0777'
 
       - name: Install/Upgrade the bazarr chart
         include_tasks: tasks-install-chart.yaml
@@ -437,7 +437,7 @@
         file:
           path: "{{ dir_home }}{{ dir_data_config_suffix }}/readarr"
           state: directory
-          mode: '0755'
+          mode: '0777'
 
       - name: Install/Upgrade the readarr chart
         include_tasks: tasks-install-chart.yaml
@@ -474,7 +474,7 @@
         file:
           path: "{{ dir_home }}{{ dir_data_config_suffix }}/lidarr"
           state: directory
-          mode: '0755'
+          mode: '0777'
 
       - name: Install/Upgrade the lidarr chart
         include_tasks: tasks-install-chart.yaml
