@@ -16,8 +16,7 @@
         uid: "{{ uid_output.stdout }}"
         user: "{{ ansible_user }}"
         architecture: "{{ architecture_output.stdout }}"
-        dir_minikube_mount: "/minikube-host"
-        dir_mount_path: "/media"
+        dir_mount_path: "/data"
         dir_home: "/home/{{ ansible_user }}"
         dir_data: "/home/{{ ansible_user }}/data"
         dir_repos: "/home/{{ ansible_user }}/repos"
@@ -33,23 +32,14 @@
   when:
     - basics.enabled
 
-- import_playbook: install-cn-basics.yaml
+- import_playbook: install-kubernetes-kubespray.yaml
   when:
-    - minikube.enabled or cloud_native.enabled
-
-- import_playbook: install-and-configure-minikube.yaml
-  vars:
-    api_server_forwarded_port: "3001"
-  when:
-    - cloud_native.enabled
-    - minikube.enabled
+    - kubespray.enabled
 
 - import_playbook: install-charts.yaml
   vars:
     ip: "{{ ansible_host }}"
   when:
-    - cloud_native.enabled or charts.enabled
-    - minikube.enabled or charts.enabled
     - charts.enabled
 
 - import_playbook: install-tightvnc-and-ssh.yaml
@@ -67,15 +57,6 @@
 - import_playbook: install-and-configure-cloudflare-dns-updater-service.yaml
   when:
     - cloudflare.enabled
-
-- import_playbook: remote-access-minikube.yaml
-  vars:
-    api_server_forwarded_port: "3001"
-    ip: "{{ ansible_host }}"
-  when:
-    - cloud_native.enabled
-    - minikube.enabled
-    - minikube.remote_access.enabled
 
 - import_playbook: install-and-configure-pinless-bluetooth-pairing.yaml
   when:
