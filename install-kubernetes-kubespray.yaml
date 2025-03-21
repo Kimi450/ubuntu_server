@@ -5,22 +5,6 @@
   hosts: all
   gather_facts: true
   tasks:
-    - name: setup ufw
-      include_tasks: tasks-allow-ports.yaml
-      vars:
-        ports:
-          - "179"
-          - "4789"
-          - "5473"
-          - "443"
-          - "6443"
-          - "2379"
-          - "4149"
-          - "10250"
-          - "10255"
-          - "10256"
-          - "9099"
-
     - name: kubespray installation
       delegate_to: localhost
       block:
