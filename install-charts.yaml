@@ -25,6 +25,8 @@
       ingress.main.primary=true,\
       ingress.main.expandObjectName=true,\
       ingress.main.ingressClassName=nginx,\
+      ingress.main.integrations.certManager.enabled=true,\
+      ingress.main.integrations.certManager.certificateIssuer=letsencrypt-prod,\
       ingress.main.integrations.traefik.enabled=false,\
       ingress.main.hosts[0].paths[0].path='/',\
       ingress.main.hosts[0].paths[0].pathType='Prefix'"
@@ -54,7 +56,7 @@
       persistence.media.enabled=true,\
       persistence.media.type=hostPath,\
       persistence.media.mountPath={{ dir_mount_path }},\
-      persistence.media.hostPath={{ dir_minikube_mount }}"
+      persistence.media.hostPath={{ dir_data }}"
 
     # readOnlyRootFilesystem=false is needed for the app to be able to take
     # backups in /config/Backups
@@ -69,6 +71,78 @@
       shell: "kubectl create namespace {{ item }} --dry-run=client -o yaml | kubectl apply -f -"
       with_items:
         - "{{ namespace_user }}"
+
+    - name: Install rancher local-path-provisioner
+      when: charts.services.local_path_provisioner.enabled
+      block:
+      - name: apply manifests
+        shell: "kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/{{ charts.services.local_path_provisioner.version }}/deploy/local-path-storage.yaml"
+
+      - name: set default storage class
+        shell: "kubectl patch storageclass local-path -p '{\"metadata\": {\"annotations\":{\"storageclass.kubernetes.io/is-default-class\":\"true\"}}}'"
+
+    - name: Install ingress-nginx
+      # https://github.com/kubernetes/ingress-nginx/blob/main/docs/deploy/index.md#quick-start
+      # https://github.com/kubernetes/ingress-nginx/blob/main/docs/deploy/baremetal.md#over-a-nodeport-service
+      when: charts.services.ingress_nginx.enabled
+      block:
+      - name: Install/Upgrade the ingress-nginx chart
+        include_tasks: tasks-install-chart.yaml
+        vars:
+          repo_name: nginx-ingress
+          repo_link: https://kubernetes.github.io/ingress-nginx
+          install_namespace: "ingress-nginx"
+          timeout: "{{ charts.timeout }}"
+          release_name: ingress-nginx
+          chart_name: ingress-nginx
+          set_options: "--set \
+            controller.service.type=NodePort,\
+            controller.service.nodePorts.http=30080,\
+            controller.service.nodePorts.https=30443,\
+            controller.service.externalTrafficPolicy=Local"
+    
+    - name: Install cert-manager
+      # https://cert-manager.io/docs/installation/helm/
+      # https://cert-manager.io/docs/tutorials/acme/nginx-ingress/
+      when: charts.services.cert_manager.enabled
+      block:
+      - name: Install/Upgrade the cert-manager chart
+        include_tasks: tasks-install-chart.yaml
+        vars:
+          repo_name: jetstack
+          repo_link: https://charts.jetstack.io
+          install_namespace: "cert-manager"
+          timeout: "{{ charts.timeout }}"
+          release_name: cert-manager
+          chart_name: cert-manager
+          set_options: "--set \
+            ingressShim.defaultIssuerName=letsencrypt-prod,\
+            prometheus.enabled=true,\
+            crds.enabled=true"
+
+      - name: "install clusterissuer CR with account email: {{ charts.services.cert_manager.email }}"
+        shell: |
+          kubectl apply -f - <<EOF
+            apiVersion: cert-manager.io/v1
+            kind: ClusterIssuer
+            metadata:
+              name: letsencrypt-prod
+              namespace: cert-manager
+            spec:
+              acme:
+                # The ACME server URL
+                server: https://acme-v02.api.letsencrypt.org/directory
+                # Email address used for ACME registration
+                email: "{{ charts.services.cert_manager.email }}"
+                # Name of a secret used to store the ACME account private key
+                privateKeySecretRef:
+                  name: letsencrypt-prod
+                # Enable the HTTP-01 challenge provider
+                solvers:
+                  - http01:
+                      ingress:
+                        ingressClassName: nginx
+          EOF
 
     - name: Install loki-stack
       when: charts.services.loki_stack.enabled
@@ -134,8 +208,12 @@
             grafana.adminUser={{ charts.services.kube_prometheus_stack.grafana.admin_username }},\
             grafana.adminPassword={{ charts.services.kube_prometheus_stack.grafana.admin_password }},\
             grafana.ingress.enabled=true,\
+            grafana.ingress.annotations.cert-manager\\\\.io/cluster-issuer=letsencrypt-prod,\
+            grafana.ingress.annotations.cert-manager\\\\.io/private-key-rotation-policy=Always,\
+            grafana.ingress.tls[0].hosts[0]=grafana.{{ domain_name }},\
+            grafana.ingress.tls[0].secretName=grafana-tls,\
             grafana.ingress.ingressClassName=nginx,\
-            grafana.ingress.hosts={grafana.{{ domain_name }}}"
+            grafana.ingress.hosts[0]=grafana.{{ domain_name }}"
 
       - name: Setup plugins for Grafana
         block:
@@ -209,7 +287,7 @@
       - debug:
           msg: >
               You can log into Jellyfin at 'jellyfin.{{ domain_name }}'.
-              '{{ dir_home }}' is available under '/media' and can be used by
+              '{{ dir_data }}' is available under '/data' and can be used by
               Jellyfin. If need be, delete any existing server and go to the
               URL mention above once again to setup a new server.
 
@@ -252,7 +330,7 @@
           msg: >
             You can log into qBittorrent at 'qbittorrent.{{ domain_name }}' using
             "admin/{{ qbittorrent_random_password.stdout }}" as the default creds. Change this after deployment.
-            '{{ dir_home }}' from the host is available under '/media' and
+            '{{ dir_data }}' from the host is available under '/data' and
             can be used by the application to download things. Downloading in
             the directories under {{ dir_data }} will be picked up by Jellyfin.
 
@@ -284,7 +362,7 @@
         file:
           path: "{{ dir_home }}{{ dir_data_config_suffix }}/prowlarr"
           state: directory
-          mode: '0755'
+          mode: '0777'
 
       - name: Install/Upgrade the prowlarr chart
         include_tasks: tasks-install-chart.yaml
@@ -303,7 +381,7 @@
             {{ helm_common_resources }},\
             {{ helm_common_ingress }},\
             {{ helm_common_persistence_config }},\
-            persistence.config.hostPath={{ dir_minikube_mount }}{{ dir_data_config_suffix }}/prowlarr,\
+            persistence.config.hostPath={{ dir_home }}{{ dir_data_config_suffix }}/prowlarr,\
             ingress.main.hosts[0].host='prowlarr.{{ domain_name }}',\
             ingress.main.hosts[0].paths[0].service.name=prowlarr,\
             ingress.main.hosts[0].paths[0].service.port=9696"
@@ -312,7 +390,7 @@
           msg: >
             You can log into prowlarr at 'prowlarr.{{ domain_name }}'. Go to this
             URL and add the indexers you wish to use.
-            '{{ dir_home }}' from the host is available under '/media' and
+            '{{ dir_data }}' from the host is available under '/data' and
             can be used by the application to download things. Downloading in
             the directories under {{ dir_data }} will be picked up by Jellyfin.
 
@@ -323,7 +401,7 @@
         file:
           path: "{{ dir_home }}{{ dir_data_config_suffix }}/radarr"
           state: directory
-          mode: '0755'
+          mode: '0777'
 
       - name: Install/Upgrade the radarr chart
         include_tasks: tasks-install-chart.yaml
@@ -342,7 +420,7 @@
             {{ helm_common_resources }},\
             {{ helm_common_ingress }},\
             {{ helm_common_persistence_config }},\
-            persistence.config.hostPath={{ dir_minikube_mount }}{{ dir_data_config_suffix }}/radarr,\
+            persistence.config.hostPath={{ dir_home }}{{ dir_data_config_suffix }}/radarr,\
             ingress.main.hosts[0].host='radarr.{{ domain_name }}',\
             ingress.main.hosts[0].paths[0].service.name=radarr,\
             ingress.main.hosts[0].paths[0].service.port=7878"
@@ -350,7 +428,7 @@
       - debug:
           msg: >
             You can log into radarr at 'radarr.{{ domain_name }}'.
-            '{{ dir_home }}' from the host is available under '/media' and
+            '{{ dir_data }}' from the host is available under '/data' and
             can be used by the application to download things. Downloading in
             the directories under {{ dir_data }} will be picked up by Jellyfin.
 
@@ -361,7 +439,7 @@
         file:
           path: "{{ dir_home }}{{ dir_data_config_suffix }}/sonarr"
           state: directory
-          mode: '0755'
+          mode: '0777'
 
       - name: Install/Upgrade the sonarr chart
         include_tasks: tasks-install-chart.yaml
@@ -380,7 +458,7 @@
             {{ helm_common_resources }},\
             {{ helm_common_ingress }},\
             {{ helm_common_persistence_config }},\
-            persistence.config.hostPath={{ dir_minikube_mount }}{{ dir_data_config_suffix }}/sonarr,\
+            persistence.config.hostPath={{ dir_home }}{{ dir_data_config_suffix }}/sonarr,\
             ingress.main.hosts[0].host='sonarr.{{ domain_name }}',\
             ingress.main.hosts[0].paths[0].service.name=sonarr,\
             ingress.main.hosts[0].paths[0].service.port=8989"
@@ -388,7 +466,7 @@
       - debug:
           msg: >
             You can log into sonarr at 'sonarr.{{ domain_name }}'.
-            '{{ dir_home }}' from the host is available under '/media' and
+            '{{ dir_data }}' from the host is available under '/data' and
             can be used by the application to download things. Downloading in
             the directories under {{ dir_data }} will be picked up by Jellyfin.
 
@@ -399,7 +477,7 @@
         file:
           path: "{{ dir_home }}{{ dir_data_config_suffix }}/bazarr"
           state: directory
-          mode: '0755'
+          mode: '0777'
 
       - name: Install/Upgrade the bazarr chart
         include_tasks: tasks-install-chart.yaml
@@ -418,7 +496,7 @@
             {{ helm_common_resources }},\
             {{ helm_common_ingress }},\
             {{ helm_common_persistence_config }},\
-            persistence.config.hostPath={{ dir_minikube_mount }}{{ dir_data_config_suffix }}/bazarr,\
+            persistence.config.hostPath={{ dir_home }}{{ dir_data_config_suffix }}/bazarr,\
             metrics.main.enabled=false,\
             ingress.main.hosts[0].host='bazarr.{{ domain_name }}',\
             ingress.main.hosts[0].paths[0].service.name=bazarr,\
@@ -427,7 +505,7 @@
       - debug:
           msg: >
             You can log into bazarr at 'bazarr.{{ domain_name }}'.
-            '{{ dir_home }}' from the host is available under '/media' and
+            '{{ dir_data }}' from the host is available under '/data' and
             can be used by the application.
 
     - name: Install readarr
@@ -437,7 +515,7 @@
         file:
           path: "{{ dir_home }}{{ dir_data_config_suffix }}/readarr"
           state: directory
-          mode: '0755'
+          mode: '0777'
 
       - name: Install/Upgrade the readarr chart
         include_tasks: tasks-install-chart.yaml
@@ -456,7 +534,7 @@
             {{ helm_common_resources }},\
             {{ helm_common_ingress }},\
             {{ helm_common_persistence_config }},\
-            persistence.config.hostPath={{ dir_minikube_mount }}{{ dir_data_config_suffix }}/readarr,\
+            persistence.config.hostPath={{ dir_home }}{{ dir_data_config_suffix }}/readarr,\
             ingress.main.hosts[0].host='readarr.{{ domain_name }}',\
             ingress.main.hosts[0].paths[0].service.name=readarr,\
             ingress.main.hosts[0].paths[0].service.port=8787"
@@ -464,7 +542,7 @@
       - debug:
           msg: >
             You can log into readarr at 'readarr.{{ domain_name }}'.
-            '{{ dir_home }}' from the host is available under '/media' and
+            '{{ dir_data }}' from the host is available under '/data' and
             can be used by the application.
 
     - name: Install lidarr
@@ -474,7 +552,7 @@
         file:
           path: "{{ dir_home }}{{ dir_data_config_suffix }}/lidarr"
           state: directory
-          mode: '0755'
+          mode: '0777'
 
       - name: Install/Upgrade the lidarr chart
         include_tasks: tasks-install-chart.yaml
@@ -493,7 +571,7 @@
             {{ helm_common_resources }},\
             {{ helm_common_ingress }},\
             {{ helm_common_persistence_config }},\
-            persistence.config.hostPath={{ dir_minikube_mount }}{{ dir_data_config_suffix }}/lidarr,\
+            persistence.config.hostPath={{ dir_home }}{{ dir_data_config_suffix }}/lidarr,\
             ingress.main.hosts[0].host='lidarr.{{ domain_name }}',\
             ingress.main.hosts[0].paths[0].service.name=lidarr,\
             ingress.main.hosts[0].paths[0].service.port=8686"
@@ -501,7 +579,7 @@
       - debug:
           msg: >
             You can log into lidarr at 'lidarr.{{ domain_name }}'.
-            '{{ dir_home }}' from the host is available under '/media' and
+            '{{ dir_data }}' from the host is available under '/data' and
             can be used by the application.
 
     - name: Install ombi
@@ -528,7 +606,7 @@
       - debug:
           msg: >
               You can log into ombi at 'ombi.{{ domain_name }}'.
-              '{{ dir_home }}' is available under '/media' and can be used by
+              '{{ dir_data }}' is available under '/data' and can be used by
               ombi. If need be, delete any existing server and go to the
               URL mention above once again to setup a new server.
 
@@ -556,7 +634,7 @@
       - debug:
           msg: >
               You can log into jellyseerr at 'jellyseerr.{{ domain_name }}'.
-              '{{ dir_home }}' is available under '/media' and can be used by
+              '{{ dir_data }}' is available under '/data' and can be used by
               jellyseerr. If need be, delete any existing server and go to the
               URL mention above once again to setup a new server.
 
@@ -618,7 +696,7 @@
       - debug:
           msg: >
             You can log into calibre-web at 'calibre-web.{{ domain_name }}'.
-            '{{ dir_home }}' from the host is available under '/media' and
+            '{{ dir_data }}' from the host is available under '/data' and
             can be used by the application.
 
     - name: Install calibre
@@ -645,24 +723,12 @@
             securityContext.container.PUID=\"{{ uid }}\",\
             securityContext.container.PGID=\"568\",\
             securityContext.container.seccompProfile.type=Unconfined,\
+            service.main.type=NodePort,\
+            service.main.ports.main.nodePort=30000,\
             service.webserver.enabled=true"
-
-      - name: Expose calibre service
-        include_tasks: tasks-kubernetes-port-forward-service.yaml
-        vars:
-          service_name: calibre
-          service_file_name: calibre.service
-          service_file_location_base: /etc/systemd/system/
-          service_namespace: "{{ namespace_generic_services }}"
-          host_port: 3002
-
-      - include_tasks: tasks-allow-ports.yaml
-        vars:
-          ports:
-            - "3002"
 
       - debug:
           msg: >
-            You can log into calibre at '{{ ip }}:3002'.
-            '{{ dir_home }}' from the host is available under '/media' and
+            You can log into calibre at '{{ ip }}:30000'.
+            '{{ dir_data }}' from the host is available under '/data' and
             can be used by the application.

@@ -21,8 +21,6 @@ Use your own server
   sudo apt install openssh-server
   sudo systemctl enable ssh
   sudo systemctl start ssh
-  sudo ufw enable
-  sudo ufw allow ssh
   ```
 
 - #### Disable sleep for the server
@@ -45,13 +43,10 @@ Use your own server
   ssh-copy-id -i ~/.ssh/id_ed25519.pub -o 'IdentityFile ~/.ssh/<your-existing-private-key-for-access>.key' -p <ssh-port> <remote-user>@<server-ip>
   ```
 
-- #### Install ansible
+- #### Install python and pip
   ```
   sudo apt update
-  sudo apt install software-properties-common
-  sudo add-apt-repository --yes --update ppa:ansible/ansible
-  sudo apt install ansible
-  ansible-galaxy collection install kubernetes.core
+  sudo apt install python3 pip
   ```
 
 - #### Update the `group_vars/all` file to fill out the required information there
@@ -118,10 +113,10 @@ Use your own server
     - Point Jellyfin to use the directories mentioned in the playbooks for shows, movies, music and books.
       - By default, on the Jellyfin pod, the directories it will be:
         ```
-        /media/data/shows
-        /media/data/movies
-        /media/data/music
-        /media/data/books
+        /data/shows
+        /data/movies
+        /data/music
+        /data/books
         ```
     - Add any other config required.
       - Recommend setting up the Open Subtitles plugin which requires creating an account on [their website](https://www.opensubtitles.org/en/?).
@@ -157,15 +152,15 @@ Use your own server
       - Go to ``Tools > Options > Web UI > Authentication``
     - Set default download location to one the mentioned directories (or make sure to put it in the right directory when downloading for ease)
       - Go to ``Tools > Options > Downloads > Default Save Path``
-      - Recommend using ``/media/data/downloads``
+      - Recommend using ``/data/downloads``
     - Set seeding limits
       - Recommend seeding limits for when seeding ratio hits "0". It is under ``Tools > Options > BitTorrent > Seeding Limits``
     - Set torrent download/upload limits
-      - Recommended to keep 6 active torrents/downloads and 0 uploads. It is under ``Tools > Options > BitTorrent > Torrent Queueing``
+      - Recommended to keep 12 active torrents/downloads and 0 uploads. It is under ``Tools > Options > BitTorrent > Torrent Queueing``
 
   - ##### Setup Calibre
     - Do base setup
-      - Set folder to be ``/media/data/books`` and select ``Yes`` for it to rebuild the library if asked.
+      - Set folder to be ``/data/books`` and select ``Yes`` for it to rebuild the library if asked.
     - Go to ``Preferences > Sharing over the net``
       - Check the box for ``Require username and password to access the Content server``
       - Check the box for ``Run the server automatically when calibre starts``
@@ -177,7 +172,7 @@ Use your own server
 
   - ##### Setup Calibre Web
     - Default login is ``admin/admin123``
-    - Set folder to be ``/media/data/books``
+    - Set folder to be ``/data/books``
     - To enable web reading, click on ``Admin`` (case sensitive) on the top right
       - Click on the user, default is ``admin``
       - Enable ``Allow ebook viewer``
@@ -196,12 +191,11 @@ Use your own server
 
     - Go to ``Settings`` and click on ``Show Advanced``
     - Enable authentication
-      - Go to ``Settings > General``
       - Set `Authentication` to `Forms (Login Page)`
       - Set `Authentication Required` to `Enabled`
       - Set username and password for access
     - Add torrent client
-      - Go to ``Settings > Download Clients > Add > qBittorent > Custom``
+      - Go to ``Settings > Download Clients > Add > qBittorent``
       - Add the host: ``qbittorrent``
       - Add the port: ``10095``
       - Add the username: ``<qBittorrent_username>``
@@ -211,20 +205,23 @@ Use your own server
     - Set the root directories to be the following
       - Go to ``Settings > Media Management``
 
-        | Service | Root Directory          |
-        |---------|-------------------------|
-        | Readarr | ``/media/data/books/``  |
-        | Sonarr  | ``/media/data/shows/``  |
-        | Radarr  | ``/media/data/movies/`` |
-        | Lidarr  | ``/media/data/music/``  |
+        | Service | Root Directory    |
+        |---------|-------------------|
+        | Readarr | ``/data/books/``  |
+        | Sonarr  | ``/data/shows/``  |
+        | Radarr  | ``/data/movies/`` |
+        | Lidarr  | ``/data/music/``  |
       - Enable renaming
     - Adjust quality definitions
       - Go to ``Settings > Quality``
       - Set the ``Size Limit`` or ``Megabytes Per Minute`` (or equivalent) to appropriate numbers
         - This will ensure your downloads are not "too big"
       - For movies and shows, ``2-3GiB/h`` would usually be sufficient as the ``Preferred`` value, and you can leave the ``Max`` value a bit higher to ensure a better chance of download grabs
+        - Min: 0
+        - Preferred: 30
+        - Max: 2000
     - Radarr/Sonarr specific config
-      - [EXPERIMENTAL] Enforce downloads of original language media only
+      - **[EXPERIMENTAL]** Enforce downloads of original language media only
         - Go to ``Settings > Custom Formats``
           - Add a new Custom Format with ``Language`` Condition
             - Set ``Language: Original``
@@ -238,7 +235,7 @@ Use your own server
     - Readarr specific config
       - Go to ``Settings > Media Management``
         - Add root folder (you cannot edit an existing one)
-          - Set the path to be ``/media/data/books/``
+          - Set the path to be ``/data/books/``
           - Enable ``Use Calibre`` options the the following defaults
             - Calibre host: ``calibre-webserver``
             - Calibre port: ``8081``
@@ -248,7 +245,6 @@ Use your own server
 
   - ##### Setup Prowlarr
     - Enable authentication
-      - Go to ``Settings > General``
       - Set `Authentication` to `Forms (Login Page)`
       - Set `Authentication Required` to `Enabled`
       - Set username and password for access
@@ -274,7 +270,6 @@ Use your own server
             Add with higher priority, example "1", since it has good english subtitled content
             Add "flaresolverr" tag
           Bangumi Moe
-          AniRena
           Nyaa.si
           Tokyo Toshokan
           ```
@@ -317,6 +312,8 @@ Use your own server
         - Fill out the path mappings if the directories in which data is stored is different for both services (by default both services will use the same directory to access data, so you dont need to change anything for a default install)
       - Go to ``Settings > Languages``
         - Add a language profile and set defaults for movies and series'
+        - You may need to set language filters first before being able to create a profile with the languages in them
+        - Add both, for hearing impaired and regular ones, to increase your chances
       - Go to ``Settings > Provider`` and add providers for subtitles
         - Decent options are:
           - Opensubtitles.com
@@ -355,8 +352,16 @@ Use your own server
           - Quality profile can be `HD-1080p` or `HD - 720/1080p`
           - Select the applicable root folders
           - Check relevant options that suit your needs
+            - General
+              - Enable `Tag Requests`
+              - Enable `Scan`
+              - Enable `Default Server`
+            - Sonarr specific
+              - Enable `Season Folders`
     - Go to `Users` and either add new users or import from Jellyfin directly
-      - Give them `Auto approve` and `Request` permissions for ease where applicable
+      - This is not required by default
+      - Give them `Manage Requests` and other permissions for ease where applicable
+    - Go to `Settings -> Users` and give them all `Auto-Approve` and `Auto-Request` Permissions by default for ease.
 
   - ##### Setup Ombi
     - One stop shop for Sonarr/Radarr/Lidarr requests
@@ -395,33 +400,12 @@ Use your own server
         Auto Approve Music
         ```
 
-  - ##### Setup Minikube for remote access
-    - Use the kubeconfig file copied over to the current working directory by exporting it
-      - `export KUBECONFIG=<KUBECONFIG_LOCATION>`
-    - Optionally, edit your local `~/.kube/config` and incorporate the information from the copied over kubeconfig into it
-    - **NOTE:**
-      - The port on which kube-apiserver is forwarded to, 3001 by default, should not be exposed to the internet (i.e., should be LAN access only) because anyone will be able to access it.
-      - The way it is set up at the moment, the certs dont really do anything. The apiserver itself is directly accessible without any authentication.
-        - See [issue #12](https://github.com/Kimi450/ubuntu_server/issues/12)).
-      - By default, `ansible_host` from the `hosts.yaml` file is used as the IP in the kubeconfig file. It is **strongly recommended** that you change that to the LAN IP of the server (to not have to port forward this on your router to access it)
-
   - ##### Use Squid
     - Use the username and password from the `group_vars/all` file to use this as a proxy server
     - The address would be `<PUBLIC_IP>:<GROUP_VARS_PORT>` or `<DOMAIN_NAME>:<GROUP_VARS_PORT>` or `<LAN_IP>:<GROUP_VARS_PORT>`
 
   - ##### Use Sambashare
     - For external access:
-      - The following info was retrieved by running `sudo ufw status verbose | grep -i samba` on the server which lists what ports were exposed as part of `sudo ufw allow samba`
-      - Expose the following ports for TCP
-        ```
-        139
-        445
-        ```
-      - Expose the following ports for UDP
-        ```
-        137
-        138
-        ```
     - To authenticate
       - Thee username will be the `<ANSIBLE_USER>` you used in the `hosts.yaml` file
       - The password will be in the `group_vars/all` file (`smb.password` section).
@@ -441,19 +425,95 @@ Use your own server
       | ssh         | ssh            | `<LAN_IP>` or `<DOMAIN_NAME>`                                     |                               22 | `<IN_LINE_WITH_HOSTS_FILE_OR_22>` |
       | samba       | proxy          | `\\<LAN_IP>\<SHARE_NAME>` or `\\<DOMAIN_NAME>\<SHARE_NAME>`       |   TCP: `139,445`, UDP: `137,138` |       `<BEST_NOT_TO_EXPOSE_THIS>` |
       | squid       | proxy          | `<LAN_IP>:<GROUP_VARS_PORT>` or `<DOMAIN_NAME>:<GROUP_VARS_PORT>` |        `<IN_LINE_WITH_ALL_FILE>` |                    `<YOU_DECIDE>` |
-      | grafana     | Ingress        | `grafana.<DOMAIN_NAME>`                                           |                             8080 |                                80 |
-      | jellyfin    | Ingress        | `jellyin.<DOMAIN_NAME>`                                           |                             8080 |                                80 |
-      | ombi        | Ingress        | `ombi.<DOMAIN_NAME>`                                              |                             8080 |                                80 |
-      | prowlarr    | Ingress        | `prowlarr.<DOMAIN_NAME>`                                          |                             8080 |                                80 |
-      | bazarr      | Ingress        | `bazarr.<DOMAIN_NAME>`                                            |                             8080 |                                80 |
-      | radarr      | Ingress        | `radarr.<DOMAIN_NAME>`                                            |                             8080 |                                80 |
-      | sonarr      | Ingress        | `sonarr.<DOMAIN_NAME>`                                            |                             8080 |                                80 |
-      | readarr     | Ingress        | `readarr.<DOMAIN_NAME>`                                           |                             8080 |                                80 |
-      | lidarr      | Ingress        | `lidarr.<DOMAIN_NAME>`                                            |                             8080 |                                80 |
-      | librespeed  | Ingress        | `librespeed.<DOMAIN_NAME>`                                        |                             8080 |                                80 |
-      | calibre-web | Ingress        | `calibre-web.<DOMAIN_NAME>`                                       |                             8080 |                                80 |
-      | calibre     | LAN            | `<LAN_IP>:3002` (No ingress rules defined)                        |                             3002 |                    `<YOU_DECIDE>` |
-      | minikube    | LAN api-access | `<LAN_IP>:3001`                                                   |                             3001 |                    `<YOU_DECIDE>` |
+      | grafana     | Ingress        | `grafana.<DOMAIN_NAME>`                                           |     30080 (HTTP) / 30443 (HTTPS) |           80 (HTTP) / 443 (HTTPS) |
+      | jellyfin    | Ingress        | `jellyin.<DOMAIN_NAME>`                                           |     30080 (HTTP) / 30443 (HTTPS) |           80 (HTTP) / 443 (HTTPS) |
+      | ombi        | Ingress        | `ombi.<DOMAIN_NAME>`                                              |     30080 (HTTP) / 30443 (HTTPS) |           80 (HTTP) / 443 (HTTPS) |
+      | prowlarr    | Ingress        | `prowlarr.<DOMAIN_NAME>`                                          |     30080 (HTTP) / 30443 (HTTPS) |           80 (HTTP) / 443 (HTTPS) |
+      | bazarr      | Ingress        | `bazarr.<DOMAIN_NAME>`                                            |     30080 (HTTP) / 30443 (HTTPS) |           80 (HTTP) / 443 (HTTPS) |
+      | radarr      | Ingress        | `radarr.<DOMAIN_NAME>`                                            |     30080 (HTTP) / 30443 (HTTPS) |           80 (HTTP) / 443 (HTTPS) |
+      | sonarr      | Ingress        | `sonarr.<DOMAIN_NAME>`                                            |     30080 (HTTP) / 30443 (HTTPS) |           80 (HTTP) / 443 (HTTPS) |
+      | readarr     | Ingress        | `readarr.<DOMAIN_NAME>`                                           |     30080 (HTTP) / 30443 (HTTPS) |           80 (HTTP) / 443 (HTTPS) |
+      | lidarr      | Ingress        | `lidarr.<DOMAIN_NAME>`                                            |     30080 (HTTP) / 30443 (HTTPS) |           80 (HTTP) / 443 (HTTPS) |
+      | librespeed  | Ingress        | `librespeed.<DOMAIN_NAME>`                                        |     30080 (HTTP) / 30443 (HTTPS) |           80 (HTTP) / 443 (HTTPS) |
+      | calibre-web | Ingress        | `calibre-web.<DOMAIN_NAME>`                                       |     30080 (HTTP) / 30443 (HTTPS) |           80 (HTTP) / 443 (HTTPS) |
+      | calibre     | LAN            | `<LAN_IP>:30000` (No ingress rules defined)                       |                            30100 |       `<BEST_NOT_TO_EXPOSE_THIS>` |
 
       NOTE: Security is an unkown when exposing a service to the internet.
 
+# Appendix
+
+## Prometheus TSDB Backup Restore
+
+In case of a migration, you may choose to wnat to migrate data from prometheus along with the app backups stored in the server's app-config dir.
+
+Resources:
+- https://devopstales.github.io/home/backup-and-retore-prometheus/
+- https://prometheus.io/docs/prometheus/latest/querying/api/
+- https://gist.github.com/ksingh7/d5e4414d92241e0802e59fa4c585b98b
+
+### Enable admin API
+
+```bash
+kubectl -n monitoring patch prometheus kube-prometheus-stack-prometheus --type merge --patch '{"spec":{"enableAdminAPI":true}}'
+```
+
+### Verify admin API is enabled
+
+```bash
+kubectl describe pod -n monitoring prometheus-kube-prometheus-stack-prometheus-0 | grep -i admin
+```
+
+To see
+
+```bash
+      --web.enable-admin-api
+```
+
+### Create TSDB snapshot
+
+Start port forwardning in a different terminal and leave it running
+
+```bash
+kubectl -n monitoring port-forward svc/kube-prometheus-stack-prometheus 9090
+```
+
+Take snapshot
+
+```bash
+curl -v -X 'POST' -ks 'localhost:9090/api/v1/admin/tsdb/snapshot'
+```
+
+### Download TSDB snapshot
+
+#### Option 1: Download from pod to host
+
+```bash
+TMP_DIR=$(mktemp -d)
+kubectl cp -c prometheus prometheus-kube-prometheus-stack-prometheus-0:/prometheus/snapshots ${TMP_DIR}
+```
+
+#### Option 2: Find the PV on your host and make a backup of the contents [RECOMMENDED]
+
+This is easier and in the context of this server's setup.
+
+```bash
+export TMP_DIR=$(mktemp -d)
+
+export PV_DIR=$(kubectl get pv -o yaml $(kubectl get pv | grep monitoring/prometheus-kube-prometheus-stack-prometheus-db-prometheus-kube-prometheus-stack-prometheus-0 | cut -d' ' -f1) | grep "path:" | cut -d " " -f 6)
+
+cp -r ${PV_DIR}/prometheus-db/snapshots/* ${TMP_DIR}
+```
+
+### Restore Backup
+
+Copy over your backup to any other host if applicable.
+
+```bash
+export PV_DIR=$(kubectl get pv -o yaml $(kubectl get pv | grep monitoring/prometheus-kube-prometheus-stack-prometheus-db-prometheus-kube-prometheus-stack-prometheus-0 | cut -d' ' -f1) | grep "path:" | cut -d " " -f 6)
+
+# clear dir. Might not be needed
+rm -rf ${PV_DIR}/prometheus-db/*
+
+# copy over old data
+mv ${TMP_DIR}/* ${PV_DIR}/prometheus-db/
+```
