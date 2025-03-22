@@ -1,3 +1,7 @@
+> [!CAUTION]
+> This branch is deprecated and no longer maintained. It probably still works but use at your own risk.
+
+
 # Ubuntu Server
 Highly opinionated server setup to cater to my needs
 
