@@ -239,28 +239,8 @@ charts:
 
 # ==== k8s settings ====
 
-kubespray:
+docker:
   enabled: true
-  
-  # Use reset.yml to reset cluster
-  playbook: "cluster.yml"
-  # extra args for playbook
-  playbook_args: "-e reset_confirmation=yes"
-
-  # release branch from the repo: https://github.com/kubernetes-sigs/kubespray
-  release: "release-2.27"
-
-  # enable addons config
-  addons: []
-  # - helm_enabled
-  # - ingress_nginx_enabled
-  # - cert_manager_enabled
-  # - metallb_enabled
-  # - local_path_provisioner_enabled
-  
-  # enable cluster yml config
-  k8s_cluster: []
-  # - kube_proxy_strict_arp
   
 
 # to allow pinless bluetooth connections to the server

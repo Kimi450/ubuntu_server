@@ -13,5 +13,8 @@ if ! command -v "ansible-playbook --version" 2>&1 >/dev/null; then
     pip install ansible
 fi
 
+echo "installing docker role..."
+ansible-galaxy role install geerlingguy.docker
+
 echo "running playbook"
 ansible-playbook setup.yaml -i hosts.yaml $@
