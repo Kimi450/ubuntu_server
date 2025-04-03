@@ -1,3 +1,4 @@
 ***/kubespray/
 
 .server-venv
+compose/jellyfin/.env
