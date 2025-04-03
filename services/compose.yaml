@@ -1,0 +1,198 @@
+services:
+  loki:
+    image: grafana/loki:latest
+    command: -config.file=/etc/loki/local-config.yaml
+
+  promtail:
+    image: grafana/promtail:latest
+    volumes:
+      - /var/log:/var/log
+    command: -config.file=/etc/promtail/config.yml
+
+
+
+
+
+  # https://github.com/bluepuma77/traefik-best-practice/blob/main/docker-traefik-dashboard-letsencrypt/docker-compose.yml
+  # https://doc.traefik.io/traefik/user-guides/docker-compose/acme-tls/
+  traefik:
+    image: "traefik:v3.3"
+    container_name: "traefik"
+    command:
+      #- --log.filepath=/var/log/traefik.log
+      - --log.level=DEBUG
+      - --accesslog=true
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--api.insecure=false"
+      - --api.dashboard=true
+      #- --accesslog.filepath=/var/log/traefik-access.log
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entryPoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.websecure.address=:443
+      # remove next line when using Traefik v2
+      - --entrypoints.websecure.asDefault=true 
+      - --entrypoints.websecure.http.tls.certresolver=myresolver
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--certificatesresolvers.myresolver.acme.email=test@yahoo.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - "${CONFIG_DIR}/letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    # networks:
+    #   - monitoring
+
+
+
+  # https://grafana.com/docs/grafana-cloud/send-data/metrics/metrics-prometheus/prometheus-config-examples/docker-compose-linux/
+  grafana:
+    image: grafana/grafana-enterprise:latest
+    container_name: grafana
+    restart: unless-stopped
+    # if you are running as root then set it to 0
+    # else find the right id with the id -u command
+    user: '0' # TODO change
+    # adding the mount volume point which we create earlier
+    volumes: # TODO change
+      - ./grafana.yml:/etc/grafana/provisioning/datasources/grafana.yml
+      - '${CONFIG_DIR}/grafana/data:/var/lib/grafana'
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`grafana.${DOMAIN_NAME}`)"
+    depends_on:
+      - prometheus
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_SECURITY_ADMIN_USER=admin # TODO change
+      - GF_SECURITY_ADMIN_PASSWORD=admin # TODO change
+      - GF_FEATURE_TOGGLES_ENABLE=alertingSimplifiedRouting,alertingQueryAndExpressionsStepMode
+
+    # networks:
+    #   - monitoring
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    privileged: true
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+      # TODO mounted dirs
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      # TODO mounteddirs
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    # networks:
+    #   - monitoring
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    # networks:
+    #   - monitoring
+
+
+
+
+  # https://hub.docker.com/r/linuxserver/librespeed
+  librespeed:
+    image: lscr.io/linuxserver/librespeed:latest
+    container_name: librespeed
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=UTC
+      # - PASSWORD=PASSWORD
+      # - CUSTOM_RESULTS=false #optional
+      # - DB_TYPE=sqlite #optional
+      # - DB_NAME=DB_NAME #optional
+      # - DB_HOSTNAME=DB_HOSTNAME #optional
+      # - DB_USERNAME=DB_USERNAME #optional
+      # - DB_PASSWORD=DB_PASSWORD #optional
+      # - DB_PORT=DB_PORT #optional
+      # - IPINFO_APIKEY=ACCESS_TOKEN #optional
+    volumes:
+      - ${CONFIG_DIR}/librespeed/:/config
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.librespeed.rule=Host(`librespeed.${DOMAIN_NAME}`)"
+
+  # https://jellyfin.org/docs/general/installation/container/#using-docker-compose
+  jellyfin:
+    image: jellyfin/jellyfin
+    container_name: jellyfin
+    user: ${UID}:${GID}
+    volumes:
+      - ${CONFIG_DIR}/jellyfin:/config
+      - ${CACHE_DIR}/cache:/cache
+      - type: bind
+        source: ${MEDIA_DIR}
+        target: /data
+      - type: bind
+        source: /dev/dri
+        target: /dev/dri
+    restart: 'unless-stopped'
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jellyfin.rule=Host(`jellyfin.${DOMAIN_NAME}`)"
+
+  # sonarr:
+  #   image: lscr.io/linuxserver/sonarr:latest
+  #   container_name: sonarr
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - TZ=Etc/UTC
+  #   volumes:
+  #     - ${CONFIG_DIR}/jellyfin:/config
+  #     - /home/kimi450/data:/data
+  #   ports:
+  #     - 8989:8989
+  #   restart: unless-stopped
+  #   env_file:
+  #     - path: .env
+  #       required: true # default
+  #   labels:
+  #     - homepage.group=Media Automation
+  #     - homepage.name=Sonarr
+  #     - homepage.icon=sonarr.svg
+  #     - homepage.href=https://sonarr.local.haak.pw
+  #     - homepage.description=TV show tracker
+  #     - homepage.widget.type=sonarr
+  #     - homepage.widget.key=${SONARR_API_KEY}
+  #     - homepage.widget.url=http://192.168.177.25:8989
+  #     # - "traefik.enable=true"
+  #     # - "traefik.http.routers.sonarr.rule=Host(`sonarr.local.haak.pw`)"
+  #     # - "traefik.http.routers.sonarr.entrypoints=https"
+  #     # - "traefik.http.routers.sonarr.tls.certresolver=cloudflare"
+  #     # - "traefik.http.services.sonarr.loadbalancer.server.port=8989"
+
+networks:
+  # monitoring:
+  proxy:
+    external: true
+
+volumes:
+  prometheus_data: {}
