@@ -219,6 +219,7 @@
     - name: Install/Upgrade monitoring
       when: services.monitoring.enabled
       block:
+
         - name: Install/Upgrade node exporter
           block:
             - name: Create config directory on hostpath for node-exporter
@@ -227,10 +228,13 @@
                 state: directory
                 mode: '0777'
               become: true
+
             - name: docker compose node-exporter down
               shell: "docker compose -f {{ basics.home_dir }}/compose.yaml down node-exporter"
+
             - name: docker compose node-exporter up
               shell: "docker compose -f {{ basics.home_dir }}/compose.yaml up -d node-exporter"
+
         - name: Install/Upgrade prometheus
           block:
             - name: Create config directory on hostpath for prometheus
@@ -239,12 +243,16 @@
                 state: directory
                 mode: '0777'
               become: true
+
             - name: docker compose prometheus down
               shell: "docker compose -f {{ basics.home_dir }}/compose.yaml down prometheus"
+
             - name: docker compose prometheus up
               shell: "docker compose -f {{ basics.home_dir }}/compose.yaml up -d prometheus"
+
         - name: Install/Upgrade grafana
           block:
+
             - name: Create config directory on hostpath for grafana
               file:
                 path: "{{ services.configs_dir }}/grafana"
@@ -255,113 +263,30 @@
               shell: "docker compose -f {{ basics.home_dir }}/compose.yaml down grafana"
             - name: docker compose grafana up
               shell: "docker compose -f {{ basics.home_dir }}/compose.yaml up -d grafana"
-        - name: Install/Upgrade loki
+ 
+        # - name: Install/Upgrade loki
+        #   block:
+        #     - name: docker compose loki down
+        #       shell: "docker compose -f {{ basics.home_dir }}/compose.yaml down loki"
+        #     - name: docker compose loki up
+        #       shell: "docker compose -f {{ basics.home_dir }}/compose.yaml up -d loki"
+ 
+        # - name: Install/Upgrade promtail
+        #   block:
+        #     - name: docker compose promtail down
+        #       shell: "docker compose -f {{ basics.home_dir }}/compose.yaml down promtail"
+        #     - name: docker compose promtail up
+        #       shell: "docker compose -f {{ basics.home_dir }}/compose.yaml up -d promtail"
+ 
+        - name: Install/Upgrade cadvisor
           block:
-            - name: docker compose loki down
-              shell: "docker compose -f {{ basics.home_dir }}/compose.yaml down loki"
-            - name: docker compose loki up
-              shell: "docker compose -f {{ basics.home_dir }}/compose.yaml up -d loki"
-        - name: Install/Upgrade promtail
-          block:
-            - name: docker compose promtail down
-              shell: "docker compose -f {{ basics.home_dir }}/compose.yaml down promtail"
-            - name: docker compose promtail up
-              shell: "docker compose -f {{ basics.home_dir }}/compose.yaml up -d promtail"
+            - name: docker compose cadvisor down
+              shell: "docker compose -f {{ basics.home_dir }}/compose.yaml down cadvisor"
+            - name: docker compose cadvisor up
+              shell: "docker compose -f {{ basics.home_dir }}/compose.yaml up -d cadvisor"
 
         - debug:
             msg: You can login into grafana at 'grafana.{{ domain_name }}'.
-
-    # - name: Install loki-stack
-    #   when: services.loki_stack.enabled
-    #   block:
-    #   - name: Install/Upgrade the loki-stack chart
-    #     include_tasks: tasks-install-chart.yaml
-    #     # https://artifacthub.io/packages/helm/grafana/loki-stack
-    #     vars:
-    #       repo_name: grafana
-    #       repo_link: https://grafana.github.io/helm-charts
-    #       install_namespace: "{{ namespace_monitoring }}"
-    #       timeout: "{{ charts.timeout }}"
-    #       release_name: loki-stack
-    #       chart_name: loki-stack
-    #       set_options: "--set \
-    #         loki.isDefault=False,\
-    #         test_pod.enable=False,\
-    #         fluent-bit.enabled=True,\
-    #         promtail.enabled=False"
-
-    #   - name: Set config for Grafana to add Loki as a data source
-    #     set_fact:
-    #       helm_kube_prometheus_stack_loki_config: "\
-    #         grafana.additionalDataSources[0].name=Loki,\
-    #         grafana.additionalDataSources[0].type=loki,\
-    #         grafana.additionalDataSources[0].access=proxy,\
-    #         grafana.additionalDataSources[0].isDefault=False,\
-    #         grafana.additionalDataSources[0].url='http://loki-stack.{{ namespace_monitoring }}:3100',"
-
-    # - name: Install kube-prometheus-stack
-    #   when: services.kube_prometheus_stack.enabled
-    #   block:
-    #   - name: Install/Upgrade the kube-prometheus-stack chart
-    #     include_tasks: tasks-install-chart.yaml
-    #     # https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
-    #     vars:
-    #       repo_name: prometheus-community
-    #       repo_link: https://prometheus-community.github.io/helm-charts
-    #       install_namespace: "{{ namespace_monitoring }}"
-    #       timeout: "{{ charts.timeout }}"
-    #       release_name: kube-prometheus-stack
-    #       chart_name: kube-prometheus-stack
-    #       set_options: "--set \
-    #         {{ helm_kube_prometheus_stack_loki_config }}\
-    #         prometheus.prometheusSpec.retention=730d,\
-    #         prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.accessModes={'ReadWriteOnce'},\
-    #         prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage='50Gi',\
-    #         prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false,\
-    #         prometheus.prometheusSpec.serviceMonitorNamespaceSelector=null,\
-    #         prometheus.prometheusSpec.serviceMonitorSelector=null,\
-    #         prometheus.prometheusSpec.ruleSelectorNilUsesHelmValues=false,\
-    #         prometheus.prometheusSpec.ruleNamespaceSelector=null,\
-    #         prometheus.prometheusSpec.ruleSelector=null,\
-    #         prometheus.prometheusSpec.podMonitorSelectorNilUsesHelmValues=false,\
-    #         prometheus.prometheusSpec.podMonitorNamespaceSelector=null,\
-    #         prometheus.prometheusSpec.podMonitorSelector=null,\
-    #         prometheus.prometheusSpec.probeSelectorNilUsesHelmValues=false,\
-    #         prometheus.prometheusSpec.probeSelectorNamespaceSelector=null,\
-    #         prometheus.prometheusSpec.probeSelector=null,\
-
-
-    #   - name: Search for all Pods labelled app.kubernetes.io/name=grafana
-    #     vars:
-    #       ansible_python_interpreter: "{{ venv_python }}"
-    #     kubernetes.core.k8s_info:
-    #       kind: Pod
-    #       label_selectors:
-    #         - app.kubernetes.io/name = grafana
-    #     register: output
-
-    #   - name: Install piechart panel plugin for Grafana
-    #     vars:
-    #       ansible_python_interpreter: "{{ venv_python }}"
-    #     kubernetes.core.k8s_exec:
-    #       namespace: "{{ namespace_monitoring }}"
-    #       pod: "{{ output.resources[0].metadata.name }}"
-    #       container: grafana
-    #       command: grafana cli plugins install grafana-piechart-panel
-    #     ignore_errors: True
-
-    #   - name: Restart pods to pick up any config updates
-    #     include_tasks: tasks-kubernetes-delete-kind-instances.yaml
-    #     vars:
-    #       kind: pod
-    #       namespace: "{{ namespace_monitoring }}"
-    #       contains: kube-prometheus-stack
-
-    #   - debug:
-    #       msg: >
-    #         You can log into Grafana at 'grafana.{{ domain_name }}' using
-    #         {{ services.kube_prometheus_stack.grafana.admin_username }}/
-    #         {{ services.kube_prometheus_stack.grafana.admin_password }}
 
     # - name: Install cnpg
     #   when: services.cnpg.enabled

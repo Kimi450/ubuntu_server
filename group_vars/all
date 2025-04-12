@@ -72,10 +72,6 @@ services:
     # FYI: you dont need to create any account for this, just use an email ID
     email: "" # FILL OUT
   
-  # log monitoring with Loki (Needs Grafana for a UI)
-  loki_stack:
-    enabled: false
-  
   # metrics monitoring with Grafana and Prometheus
   monitoring:
     enabled: true

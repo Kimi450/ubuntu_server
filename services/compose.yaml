@@ -1,17 +1,38 @@
 services:
-  loki:
-    image: grafana/loki:latest
-    command: -config.file=/etc/loki/local-config.yaml
+#   loki:
+#     image: grafana/loki:latest
+#     command: -config.file=/etc/loki/local-config.yaml
 
-  promtail:
-    image: grafana/promtail:latest
-    volumes:
-      - /var/log:/var/log
-    command: -config.file=/etc/promtail/config.yml
+# # https://github.com/grafana/loki/issues/333
+#   promtail:
+#     image: grafana/promtail:latest
+#     volumes:
+#       - /var/log:/var/log
+#       - /var/lib/docker:/var/lib/docker:ro
+#       - ./promtail-config.yaml:/etc/promtail/promtail-config.yml
+#     command: -config.file=/etc/promtail/promtail-config.yml
 
 
 
-
+  # https://github.com/google/cadvisor/issues/2523
+  # https://medium.com/@sohammohite/docker-container-monitoring-with-cadvisor-prometheus-and-grafana-using-docker-compose-b47ec78efbc
+  cadvisor:
+    container_name: cadvisor
+    image: gcr.io/cadvisor/cadvisor:latest
+    command: 
+      - '--housekeeping_interval=15s' # TODO configure
+      - "--docker_only=true"
+      # - "--store_container_labels=false"
+      # - "--disable_metrics=percpu,sched,tcp,udp,disk,diskIO,hugetlb,referenced_memory,cpu_topology,resctrl"
+    volumes: 
+      - "/:/rootfs"
+      - "/var/run:/var/run"
+      - "/sys:/sys"
+      - "/var/lib/docker/:/var/lib/docker"
+      - "/dev/disk/:/dev/disk"
+    privileged: true
+    devices: 
+      - "/dev/kmsg"
 
   # https://github.com/bluepuma77/traefik-best-practice/blob/main/docker-traefik-dashboard-letsencrypt/docker-compose.yml
   # https://doc.traefik.io/traefik/user-guides/docker-compose/acme-tls/
@@ -36,7 +57,7 @@ services:
       - --entrypoints.websecure.http.tls.certresolver=myresolver
       - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
       - "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
-      - "--certificatesresolvers.myresolver.acme.email=test@yahoo.com"
+      - "--certificatesresolvers.myresolver.acme.email=kimi450@yahoo.com"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
     ports:
       - "443:443"
@@ -44,36 +65,6 @@ services:
     volumes:
       - "${CONFIG_DIR}/letsencrypt:/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-    # networks:
-    #   - monitoring
-
-
-
-  # https://grafana.com/docs/grafana-cloud/send-data/metrics/metrics-prometheus/prometheus-config-examples/docker-compose-linux/
-  grafana:
-    image: grafana/grafana-enterprise:latest
-    container_name: grafana
-    restart: unless-stopped
-    # if you are running as root then set it to 0
-    # else find the right id with the id -u command
-    user: '0' # TODO change
-    # adding the mount volume point which we create earlier
-    volumes: # TODO change
-      - ./grafana.yml:/etc/grafana/provisioning/datasources/grafana.yml
-      - '${CONFIG_DIR}/grafana/data:/var/lib/grafana'
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.grafana.rule=Host(`grafana.${DOMAIN_NAME}`)"
-    depends_on:
-      - prometheus
-    environment:
-      - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
-      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
-      - GF_SECURITY_ADMIN_USER=admin # TODO change
-      - GF_SECURITY_ADMIN_PASSWORD=admin # TODO change
-      - GF_FEATURE_TOGGLES_ENABLE=alertingSimplifiedRouting,alertingQueryAndExpressionsStepMode
-
     # networks:
     #   - monitoring
 
@@ -96,6 +87,7 @@ services:
     # networks:
     #   - monitoring
 
+
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
@@ -109,6 +101,34 @@ services:
       - '--web.console.libraries=/etc/prometheus/console_libraries'
       - '--web.console.templates=/etc/prometheus/consoles'
       - '--web.enable-lifecycle'
+    # networks:
+    #   - monitoring
+
+
+
+  # https://grafana.com/docs/grafana-cloud/send-data/metrics/metrics-prometheus/prometheus-config-examples/docker-compose-linux/
+  grafana:
+    image: grafana/grafana-enterprise:latest
+    container_name: grafana
+    restart: unless-stopped
+    # if you are running as root then set it to 0
+    # else find the right id with the id -u command
+    user: '0' # TODO change
+    # adding the mount volume point which we create earlier
+    volumes: # TODO change
+      - ./grafana.yml:/etc/grafana/provisioning/datasources/grafana.yml
+      - '${CONFIG_DIR}/grafana/data:/var/lib/grafana'
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`grafana.${DOMAIN_NAME}`)"
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_SECURITY_ADMIN_USER=admin # TODO change
+      - GF_SECURITY_ADMIN_PASSWORD=admin # TODO change
+      - GF_FEATURE_TOGGLES_ENABLE=alertingSimplifiedRouting,alertingQueryAndExpressionsStepMode
+
     # networks:
     #   - monitoring
 

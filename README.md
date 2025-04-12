@@ -118,7 +118,7 @@ Use your own server
     - Would recommend adding a panel with the following query as it is useful to monitor pods as well
       - For average
         ```
-        avg(irate(container_cpu_usage_seconds_total[2m])) by (pod,container)
+        avg(irate(container_cpu_usage_seconds_total[2m])) by (name)
         ```
     - You can find information on how to use [Loki](https://grafana.com/oss/loki/) in Grafana [here](https://grafana.com/docs/loki/latest/operations/grafana/)
 
