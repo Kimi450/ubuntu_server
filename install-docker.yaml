@@ -1,0 +1,16 @@
+---
+# https://github.com/kubernetes-sigs/kubespray/blob/master/docs/ansible/ansible.md
+# https://github.com/kubernetes-sigs/kubespray/blob/master/docs/getting_started/getting-started.md
+- name: Install docker
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Install Docker
+      include_role:
+        name: geerlingguy.docker
+        apply:
+          become: True
+      vars:
+        docker_edition: "ce"
+        docker_users:
+          - "{{ ansible_user }}"

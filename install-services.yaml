@@ -1,0 +1,866 @@
+---
+- name: Install services
+  hosts: all
+  gather_facts: true
+  vars:
+    helm_kube_prometheus_stack_loki_config: "" # default
+
+    # The following has been set to disable Truecharts own injection
+    # of manifests for SCALE products I believe either way I dont need it:
+    # - manifestManager.enabled=false
+    helm_common_general: "\
+      global.metallb.addServiceAnnotations=false,\
+      global.traefik.addServiceAnnotations=false,\
+      portal.open.enabled=false,\
+      operator.verify.enabled=false,\
+      workload.main.type=StatefulSet,\
+      podOptions.dnsConfig.nameservers={8.8.8.8,8.8.4.4}"
+    
+    helm_common_ingress: "\
+      ingress.main.enabled=true,\
+      ingress.main.primary=true,\
+      ingress.main.expandObjectName=true,\
+      ingress.main.ingressClassName=nginx,\
+      ingress.main.integrations.certManager.enabled=true,\
+      ingress.main.integrations.certManager.certificateIssuer=letsencrypt-prod,\
+      ingress.main.integrations.traefik.enabled=false,\
+      ingress.main.hosts[0].paths[0].path='/',\
+      ingress.main.hosts[0].paths[0].pathType='Prefix'"
+    
+    helm_common_resources: "\
+      resources.requests.cpu={{ charts.resources.requests.cpu }},\
+      resources.requests.memory={{ charts.resources.requests.memory }},\
+      resources.limits.cpu={{ charts.resources.limits.cpu }},\
+      resources.limits.memory={{ charts.resources.limits.memory }}"
+
+    # persistence.config.hostPathType=DirectoryOrCreate doesnt work
+    # because it creates the dir with root ownership and no write permissions
+    helm_common_persistence: "\
+      persistence.shared.enabled=false,\
+      persistence.shm.enabled=false,\
+      persistence.temp.enabled=false,\
+      persistence.varlogs.enabled=false"
+
+    helm_common_persistence_config: "\
+      persistence.config.enabled=true,\
+      persistence.config.type=hostPath"
+
+    # readOnlyRootFilesystem=false is needed for the app to be able to take
+    # backups in /config/Backups
+    # runAsUser={{ uid }} gives write access on the pod
+    helm_common_security_contexts: "\
+      securityContext.container.readOnlyRootFilesystem=false,\
+      securityContext.container.runAsUser={{ uid }},\
+      securityContext.container.runAsGroup=568"
+
+    venv_dir: "{{ basics.home_dir }}/.venv-install-charts"
+    venv_python: "{{ venv_dir }}/bin/python3"
+
+  tasks:
+    # - name: "Create host path dir for config"
+    #   file:
+    #     path: "{{ services.configs_dir }}"
+    #     state: directory
+    #     mode: '0777'
+    #   become: true # incase the dirs are created at root level
+
+    # - name: Process variable to add disks
+    #   block:
+    #     - name: "Create host path dir"
+    #       file:
+    #         path: "{{ item.host_path }}"
+    #         state: directory
+    #         mode: '0777'
+    #       become: true # incase the dirs are created at root level
+    #       loop: "{{ services.radarr.persistence }}"
+    #     - name: Set facts
+    #       set_fact:
+    #         helm_common_persistence_movies: >-
+    #           {{- helm_common_persistence_movies | default('')
+    #               + 'persistence.movies-' + item.name + '.enabled=true,'
+    #               + 'persistence.movies-' + item.name + '.type=hostPath,'
+    #               + 'persistence.movies-' + item.name + '.hostPath=' +  item.host_path + ','
+    #               + 'persistence.movies-' + item.name + '.mountPath=/data/' + item.name + '/movies,'
+    #           -}}
+    #       loop: "{{ services.radarr.persistence }}"
+
+    # - name: Process variable to add disks
+    #   block:
+    #     - name: "Create host path dir"
+    #       file:
+    #         path: "{{ item.host_path }}"
+    #         state: directory
+    #         mode: '0777'
+    #       become: true # incase the dirs are created at root level
+    #       loop: "{{ services.sonarr.persistence }}"
+    #     - name: Set facts
+    #       set_fact:
+    #         helm_common_persistence_shows: >-
+    #           {{- helm_common_persistence_shows | default('')
+    #               + 'persistence.shows-' + item.name + '.enabled=true,'
+    #               + 'persistence.shows-' + item.name + '.type=hostPath,'
+    #               + 'persistence.shows-' + item.name + '.hostPath=' +  item.host_path + ','
+    #               + 'persistence.shows-' + item.name + '.mountPath=/data/' + item.name + '/shows,'
+    #           -}}
+    #       loop: "{{ services.sonarr.persistence }}"
+
+    # - name: Process variable to add disks
+    #   block:
+    #     - name: "Create host path dir"
+    #       file:
+    #         path: "{{ item.host_path }}"
+    #         state: directory
+    #         mode: '0777'
+    #       become: true # incase the dirs are created at root level
+    #       loop: "{{ services.readarr.persistence }}"
+    #     - name: Set facts
+    #       set_fact:
+    #         helm_common_persistence_books: >-
+    #           {{- helm_common_persistence_books | default('')
+    #               + 'persistence.books-' + item.name + '.enabled=true,'
+    #               + 'persistence.books-' + item.name + '.type=hostPath,'
+    #               + 'persistence.books-' + item.name + '.hostPath=' +  item.host_path + ','
+    #               + 'persistence.books-' + item.name + '.mountPath=/data/' + item.name + '/books,'
+    #           -}}
+    #       loop: "{{ services.readarr.persistence }}"
+
+    # - name: Process variable to add disks
+    #   block:
+    #     - name: "Create host path dir"
+    #       file:
+    #         path: "{{ item.host_path }}"
+    #         state: directory
+    #         mode: '0777'
+    #       become: true # incase the dirs are created at root level
+    #       loop: "{{ services.lidarr.persistence }}"
+    #     - name: Set facts
+    #       set_fact:
+    #         helm_common_persistence_music: >-
+    #           {{- helm_common_persistence_music | default('')
+    #               + 'persistence.music-' + item.name + '.enabled=true,'
+    #               + 'persistence.music-' + item.name + '.type=hostPath,'
+    #               + 'persistence.music-' + item.name + '.hostPath=' +  item.host_path + ','
+    #               + 'persistence.music-' + item.name + '.mountPath=/data/' + item.name + '/music,'
+    #           -}}
+    #       loop: "{{ services.lidarr.persistence }}"
+
+    # - name: Process variable to add disks
+    #   block:
+    #     - name: "Create host path dir"
+    #       file:
+    #         path: "{{ item.host_path }}"
+    #         state: directory
+    #         mode: '0777'
+    #       become: true # incase the dirs are created at root level
+    #       loop: "{{ services.qbittorrent.persistence }}"
+    #     - name: Set facts
+    #       set_fact:
+    #         helm_common_persistence_downloads: >-
+    #           {{- helm_common_persistence_downloads | default('')
+    #               + 'persistence.downloads-' + item.name + '.enabled=true,'
+    #               + 'persistence.downloads-' + item.name + '.type=hostPath,'
+    #               + 'persistence.downloads-' + item.name + '.hostPath=' +  item.host_path + ','
+    #               + 'persistence.downloads-' + item.name + '.mountPath=/data/' + item.name + '/downloads,'
+    #           -}}
+    #       loop: "{{ services.qbittorrent.persistence }}"
+
+    - name: Copy over compose file
+      ansible.builtin.copy:
+        src: ./services/
+        dest: "{{ basics.home_dir }}"
+        mode: '0777'
+        backup: yes
+
+    - name: Install/Upgrade traefik ingress
+      when: services.traefik.enabled
+      block:
+        - name: docker compose traefik down
+          shell: "docker compose -f {{ basics.home_dir }}/compose.yaml down traefik"
+        - name: docker compose traefik up
+          shell: "docker compose -f {{ basics.home_dir }}/compose.yaml up -d traefik"
+
+
+    - name: Install/Upgrade jellyfin
+      when: services.jellyfin.enabled
+      block:
+        - name: Create config directory on hostpath for jellyfin
+          file:
+            path: "{{ services.configs_dir }}/jellyfin"
+            state: directory
+            mode: '0777'
+          become: true
+        - name: docker compose jellyfin down
+          shell: "docker compose -f {{ basics.home_dir }}/compose.yaml down jellyfin"
+        - name: docker compose jellyfin up
+          shell: "docker compose -f {{ basics.home_dir }}/compose.yaml up -d jellyfin"
+        - debug:
+            msg: >
+              You can log into Jellyfin at 'jellyfin.{{ domain_name }}'.
+              Data directories are available under '/data' and can be used by
+              Jellyfin. If need be, delete any existing server and go to the
+              URL mention above once again to setup a new server.
+
+    - name: Install/Upgrade librespeed
+      when: services.librespeed.enabled
+      block:
+        - name: Create config directory on hostpath for librespeed
+          file:
+            path: "{{ services.configs_dir }}/librespeed"
+            state: directory
+            mode: '0777'
+          become: true
+        - name: docker compose librespeed down
+          shell: "docker compose -f {{ basics.home_dir }}/compose.yaml down librespeed"
+        - name: docker compose librespeed up
+          shell: "docker compose -f {{ basics.home_dir }}/compose.yaml up -d librespeed"
+        - debug:
+            msg: You can log into librespeed at 'librespeed.{{ domain_name }}'.
+
+    - name: Install/Upgrade monitoring
+      when: services.monitoring.enabled
+      block:
+
+        - name: Install/Upgrade node exporter
+          block:
+            - name: Create config directory on hostpath for node-exporter
+              file:
+                path: "{{ services.configs_dir }}/node-exporter"
+                state: directory
+                mode: '0777'
+              become: true
+
+            - name: docker compose node-exporter down
+              shell: "docker compose -f {{ basics.home_dir }}/compose.yaml down node-exporter"
+
+            - name: docker compose node-exporter up
+              shell: "docker compose -f {{ basics.home_dir }}/compose.yaml up -d node-exporter"
+
+        - name: Install/Upgrade prometheus
+          block:
+            - name: Create config directory on hostpath for prometheus
+              file:
+                path: "{{ services.configs_dir }}/prometheus"
+                state: directory
+                mode: '0777'
+              become: true
+
+            - name: docker compose prometheus down
+              shell: "docker compose -f {{ basics.home_dir }}/compose.yaml down prometheus"
+
+            - name: docker compose prometheus up
+              shell: "docker compose -f {{ basics.home_dir }}/compose.yaml up -d prometheus"
+
+        - name: Install/Upgrade grafana
+          block:
+
+            - name: Create config directory on hostpath for grafana
+              file:
+                path: "{{ services.configs_dir }}/grafana"
+                state: directory
+                mode: '0777'
+              become: true
+            - name: docker compose grafana down
+              shell: "docker compose -f {{ basics.home_dir }}/compose.yaml down grafana"
+            - name: docker compose grafana up
+              shell: "docker compose -f {{ basics.home_dir }}/compose.yaml up -d grafana"
+ 
+        # - name: Install/Upgrade loki
+        #   block:
+        #     - name: docker compose loki down
+        #       shell: "docker compose -f {{ basics.home_dir }}/compose.yaml down loki"
+        #     - name: docker compose loki up
+        #       shell: "docker compose -f {{ basics.home_dir }}/compose.yaml up -d loki"
+ 
+        # - name: Install/Upgrade promtail
+        #   block:
+        #     - name: docker compose promtail down
+        #       shell: "docker compose -f {{ basics.home_dir }}/compose.yaml down promtail"
+        #     - name: docker compose promtail up
+        #       shell: "docker compose -f {{ basics.home_dir }}/compose.yaml up -d promtail"
+ 
+        - name: Install/Upgrade cadvisor
+          block:
+            - name: docker compose cadvisor down
+              shell: "docker compose -f {{ basics.home_dir }}/compose.yaml down cadvisor"
+            - name: docker compose cadvisor up
+              shell: "docker compose -f {{ basics.home_dir }}/compose.yaml up -d cadvisor"
+
+        - debug:
+            msg: You can login into grafana at 'grafana.{{ domain_name }}'.
+
+    # - name: Install cnpg
+    #   when: services.cnpg.enabled
+    #   block:
+    #   - name: Install/Upgrade the cnpg chart
+    #     include_tasks: tasks-install-chart.yaml
+    #     vars:
+    #       repo_name: cnpg
+    #       repo_link: https://cloudnative-pg.github.io/charts
+    #       install_namespace: "{{ namespace_cloudnative_postgres }}"
+    #       timeout: "{{ charts.timeout }}"
+    #       release_name: cnpg
+    #       chart_name: cloudnative-pg
+    #       set_options: "--set \
+    #         crds.create=true"
+
+    # - name: Install immich
+    #   when: services.immich.enabled
+    #   block:
+    #   - name: Install/Upgrade the immich chart
+    #     include_tasks: tasks-install-chart.yaml
+    #     vars:
+    #       repo_name: TrueCharts
+    #       repo_link: oci://tccr.io/truecharts
+    #       install_namespace: "{{ namespace_generic_services }}"
+    #       timeout: "{{ charts.timeout }}"
+    #       release_name: immich
+    #       chart_name: immich
+    #       set_options: "--set \
+    #         {{ helm_common_general }},\
+    #         {{ helm_common_security_contexts }},\
+    #         {{ helm_common_resources }},\
+    #         {{ helm_common_ingress }},\
+    #         persistence.mlcache.enabled=true,\
+    #         persistence.mlcache.type=hostPath,\
+    #         persistence.mlcache.hostPath={{ services.immich.host_path }}/mlcache,\
+    #         persistence.microcache.enabled=true,\
+    #         persistence.microcache.type=hostPath,\
+    #         persistence.microcache.hostPath={{ services.immich.host_path }}/microcache,\
+    #         persistence.library.enabled=true,\
+    #         persistence.library.type=hostPath,\
+    #         persistence.library.hostPath={{ services.immich.host_path }}/library,\
+    #         persistence.uploads.enabled=true,\
+    #         persistence.uploads.type=hostPath,\
+    #         persistence.uploads.hostPath={{ services.immich.host_path }}/uploads,\
+    #         persistence.backups.enabled=true,\
+    #         persistence.backups.type=hostPath,\
+    #         persistence.backups.hostPath={{ services.immich.host_path }}/backups,\
+    #         persistence.thumbs.enabled=true,\
+    #         persistence.thumbs.type=hostPath,\
+    #         persistence.thumbs.hostPath={{ services.immich.host_path }}/thumbs,\
+    #         persistence.profile.enabled=true,\
+    #         persistence.profile.type=hostPath,\
+    #         persistence.profile.hostPath={{ services.immich.host_path }}/profile,\
+    #         persistence.video.enabled=true,\
+    #         persistence.video.type=hostPath,\
+    #         persistence.video.hostPath={{ services.immich.host_path }}/encoded-video,\
+    #         securityContext.container.runAsUser=0,\
+    #         securityContext.container.privileged=true,\
+    #         securityContext.container.runAsNonRoot=false,\
+    #         securityContext.container.allowPrivilegeEscalation=true,\
+    #         ingress.main.hosts[0].host='immich.{{ domain_name }}',\
+    #         ingress.main.hosts[0].paths[0].service.name=immich,\
+    #         ingress.main.hosts[0].paths[0].service.port=10323"
+
+    #   - debug:
+    #       msg: >
+    #           You can log into Immich at 'immich.{{ domain_name }}'.
+
+    # - name: Install home-assistant
+    #   when: services.home_assistant.enabled
+    #   block:
+    #   - name: Install/Upgrade the home-assistant chart
+    #     include_tasks: tasks-install-chart.yaml
+    #     vars:
+    #       repo_name: TrueCharts
+    #       repo_link: oci://tccr.io/truecharts
+    #       install_namespace: "{{ namespace_generic_services }}"
+    #       timeout: "{{ charts.timeout }}"
+    #       release_name: home-assistant
+    #       chart_name: home-assistant
+    #       # not incliuding config persistence as it impacts the init setup
+    #       # specifically the trusted proxies dont get configured blocking
+    #       # ingress access. This is because the configmaps cannot be mounted
+    #       # at the expected location (subdir in the hostpath mount)
+    #       set_options: "--set \
+    #         {{ helm_common_general }},\
+    #         {{ helm_common_persistence }},\
+    #         {{ helm_common_security_contexts }},\
+    #         {{ helm_common_persistence_downloads }}\
+    #         {{ helm_common_resources }},\
+    #         {{ helm_common_ingress }},\
+    #         homeassistant.trusted_proxies[0]='10.0.0.0/8',\
+    #         ingress.main.hosts[0].host='home-assistant.{{ domain_name }}',\
+    #         ingress.main.hosts[0].paths[0].service.name=home-assistant,\
+    #         ingress.main.hosts[0].paths[0].service.port=8123"
+
+    # - name: Install qbittorrent
+    #   when: services.qbittorrent.enabled
+    #   block:
+    #   - name: Create config directory on hostpath for qbittorrent
+    #     file:
+    #       path: "{{ services.configs_dir }}/qbittorrent"
+    #       state: directory
+    #       mode: '0777'
+    #     become: true
+
+    #   - name: Install/Upgrade the qbittorrent chart
+    #     include_tasks: tasks-install-chart.yaml
+    #     vars:
+    #       repo_name: TrueCharts
+    #       repo_link: oci://tccr.io/truecharts
+    #       install_namespace: "{{ namespace_generic_services }}"
+    #       timeout: "{{ charts.timeout }}"
+    #       release_name: qbittorrent
+    #       chart_name: qbittorrent
+    #       set_options: "--set \
+    #         {{ helm_common_general }},\
+    #         {{ helm_common_persistence }},\
+    #         {{ helm_common_security_contexts }},\
+    #         {{ helm_common_persistence_downloads }}\
+    #         {{ helm_common_resources }},\
+    #         {{ helm_common_ingress }},\
+    #         {{ helm_common_persistence_config }},\
+    #         persistence.config.hostPath={{ services.configs_dir }}/qbittorrent,\
+    #         ingress.main.hosts[0].host='qbittorrent.{{ domain_name }}',\
+    #         ingress.main.hosts[0].paths[0].service.name=qbittorrent,\
+    #         ingress.main.hosts[0].paths[0].service.port=10095"
+
+    #   - name: Search for qbittorent pod
+    #     vars:
+    #       ansible_python_interpreter: "{{ venv_python }}"
+    #     kubernetes.core.k8s_info:
+    #       kind: Pod
+    #       label_selectors:
+    #         - app.kubernetes.io/instance = qbittorrent
+    #         - app.kubernetes.io/name = qbittorrent
+    #     register: output
+
+    #   - name: Get randomly generated password from qbittorrent pod logs
+    #     shell: "kubectl logs {{ output.resources[0].metadata.name }} | grep -i 'temporary password' | cut -d ':' -f 2 | tr -d ' '"
+    #     register: qbittorrent_random_password
+
+    #   - debug:
+    #       msg: >
+    #         You can log into qBittorrent at 'qbittorrent.{{ domain_name }}' using
+    #         "admin/{{ qbittorrent_random_password.stdout }}" as the default creds.
+    #         Change this after deployment. Downloads directory from the host is
+    #         available under '/data' and can be used by the application to
+    #         download things. Downloads in that directory will be relevant
+    #         processing apps (like Radarr, Sonarr, etc if applicable).
+
+    # - name: Install flaresolverr
+    #   when: services.flaresolverr.enabled
+    #   block:
+    #   - name: Install/Upgrade the flaresolverr chart
+    #     include_tasks: tasks-install-chart.yaml
+    #     vars:
+    #       repo_name: TrueCharts
+    #       repo_link: oci://tccr.io/truecharts
+    #       install_namespace: "{{ namespace_generic_services }}"
+    #       timeout: "{{ charts.timeout }}"
+    #       release_name: flaresolverr
+    #       chart_name: flaresolverr
+    #       set_options: "--set \
+    #         {{ helm_common_general }},\
+    #         {{ helm_common_persistence }},\
+    #         {{ helm_common_resources }},\
+    #         persistence.config.enabled=false"
+
+    #   - debug:
+    #       msg: >
+    #         You can flaresolverr to bypass Cloudflare's protection
+
+    # - name: Install prowlarr
+    #   when: services.prowlarr.enabled
+    #   block:
+    #   - name: Create config directory on hostpath for prowlarr
+    #     file:
+    #       path: "{{ services.configs_dir }}/prowlarr"
+    #       state: directory
+    #       mode: '0777'
+    #     become: true
+
+    #   - name: Install/Upgrade the prowlarr chart
+    #     include_tasks: tasks-install-chart.yaml
+    #     vars:
+    #       repo_name: TrueCharts
+    #       repo_link: oci://tccr.io/truecharts
+    #       install_namespace: "{{ namespace_generic_services }}"
+    #       timeout: "{{ charts.timeout }}"
+    #       release_name: prowlarr
+    #       chart_name: prowlarr
+    #       set_options: "--set \
+    #         {{ helm_common_general }},\
+    #         {{ helm_common_persistence }},\
+    #         {{ helm_common_security_contexts }},\
+    #         {{ helm_common_resources }},\
+    #         {{ helm_common_ingress }},\
+    #         {{ helm_common_persistence_config }},\
+    #         persistence.config.hostPath={{ services.configs_dir }}/prowlarr,\
+    #         ingress.main.hosts[0].host='prowlarr.{{ domain_name }}',\
+    #         ingress.main.hosts[0].paths[0].service.name=prowlarr,\
+    #         ingress.main.hosts[0].paths[0].service.port=9696"
+
+    #   - debug:
+    #       msg: >
+    #         You can log into prowlarr at 'prowlarr.{{ domain_name }}'. Go to this
+    #         URL and add the indexers you wish to use.
+
+    # - name: Install radarr
+    #   when: services.radarr.enabled
+    #   block:
+    #   - name: Create config directory on hostpath for radarr
+    #     file:
+    #       path: "{{ services.configs_dir }}/radarr"
+    #       state: directory
+    #       mode: '0777'
+    #     become: true
+
+    #   - name: Install/Upgrade the radarr chart
+    #     include_tasks: tasks-install-chart.yaml
+    #     vars:
+    #       repo_name: TrueCharts
+    #       repo_link: oci://tccr.io/truecharts
+    #       install_namespace: "{{ namespace_generic_services }}"
+    #       timeout: "{{ charts.timeout }}"
+    #       release_name: radarr
+    #       chart_name: radarr
+    #       set_options: "--set \
+    #         {{ helm_common_general }},\
+    #         {{ helm_common_persistence }},\
+    #         {{ helm_common_security_contexts }},\
+    #         {{ helm_common_persistence_movies }}\
+    #         {{ helm_common_persistence_downloads }}\
+    #         {{ helm_common_resources }},\
+    #         {{ helm_common_ingress }},\
+    #         {{ helm_common_persistence_config }},\
+    #         persistence.config.hostPath={{ services.configs_dir }}/radarr,\
+    #         ingress.main.hosts[0].host='radarr.{{ domain_name }}',\
+    #         ingress.main.hosts[0].paths[0].service.name=radarr,\
+    #         ingress.main.hosts[0].paths[0].service.port=7878"
+
+    #   - debug:
+    #       msg: >
+    #         You can log into radarr at 'radarr.{{ domain_name }}'.
+    #         Data directories from the host are available under '/data' and
+    #         can be used by the application to download things. Downloads in
+    #         that directory will be picked up by Jellyfin.
+
+    # - name: Install sonarr
+    #   when: services.sonarr.enabled
+    #   block:
+    #   - name: Create config directory on hostpath for sonarr
+    #     file:
+    #       path: "{{ services.configs_dir }}/sonarr"
+    #       state: directory
+    #       mode: '0777'
+    #     become: true
+
+    #   - name: Install/Upgrade the sonarr chart
+    #     include_tasks: tasks-install-chart.yaml
+    #     vars:
+    #       repo_name: TrueCharts
+    #       repo_link: oci://tccr.io/truecharts
+    #       install_namespace: "{{ namespace_generic_services }}"
+    #       timeout: "{{ charts.timeout }}"
+    #       release_name: sonarr
+    #       chart_name: sonarr
+    #       set_options: "--set \
+    #         {{ helm_common_general }},\
+    #         {{ helm_common_persistence }},\
+    #         {{ helm_common_security_contexts }},\
+    #         {{ helm_common_persistence_shows }}\
+    #         {{ helm_common_persistence_downloads }}\
+    #         {{ helm_common_resources }},\
+    #         {{ helm_common_ingress }},\
+    #         {{ helm_common_persistence_config }},\
+    #         persistence.config.hostPath={{ services.configs_dir }}/sonarr,\
+    #         ingress.main.hosts[0].host='sonarr.{{ domain_name }}',\
+    #         ingress.main.hosts[0].paths[0].service.name=sonarr,\
+    #         ingress.main.hosts[0].paths[0].service.port=8989"
+
+    #   - debug:
+    #       msg: >
+    #         You can log into sonarr at 'sonarr.{{ domain_name }}'.
+    #         Data directories from the host are available under '/data' and
+    #         can be used by the application to download things. Downloads in
+    #         that directory will be picked up by Jellyfin.
+
+    # - name: Install bazarr
+    #   when: services.bazarr.enabled
+    #   block:
+    #   - name: Create config directory on hostpath for bazarr
+    #     file:
+    #       path: "{{ services.configs_dir }}/bazarr"
+    #       state: directory
+    #       mode: '0777'
+    #     become: true
+
+    #   - name: Install/Upgrade the bazarr chart
+    #     include_tasks: tasks-install-chart.yaml
+    #     vars:
+    #       repo_name: TrueCharts
+    #       repo_link: oci://tccr.io/truecharts
+    #       install_namespace: "{{ namespace_generic_services }}"
+    #       timeout: "{{ charts.timeout }}"
+    #       release_name: bazarr
+    #       chart_name: bazarr
+    #       set_options: "--set \
+    #         {{ helm_common_general }},\
+    #         {{ helm_common_persistence }},\
+    #         {{ helm_common_security_contexts }},\
+    #         {{ helm_common_persistence_shows }}\
+    #         {{ helm_common_persistence_movies }}\
+    #         {{ helm_common_resources }},\
+    #         {{ helm_common_ingress }},\
+    #         {{ helm_common_persistence_config }},\
+    #         persistence.config.hostPath={{ services.configs_dir }}/bazarr,\
+    #         metrics.main.enabled=false,\
+    #         ingress.main.hosts[0].host='bazarr.{{ domain_name }}',\
+    #         ingress.main.hosts[0].paths[0].service.name=bazarr,\
+    #         ingress.main.hosts[0].paths[0].service.port=6767"
+
+    #   - debug:
+    #       msg: >
+    #         You can log into bazarr at 'bazarr.{{ domain_name }}'.
+    #         Data directories from the host are available under '/data' and
+    #         can be used by the application.
+
+    # - name: Install readarr
+    #   when: services.readarr.enabled
+    #   block:
+    #   - name: Create config directory on hostpath for readarr
+    #     file:
+    #       path: "{{ services.configs_dir }}/readarr"
+    #       state: directory
+    #       mode: '0777'
+    #     become: true
+
+    #   - name: Install/Upgrade the readarr chart
+    #     include_tasks: tasks-install-chart.yaml
+    #     vars:
+    #       repo_name: TrueCharts
+    #       repo_link: oci://tccr.io/truecharts
+    #       install_namespace: "{{ namespace_generic_services }}"
+    #       timeout: "{{ charts.timeout }}"
+    #       release_name: readarr
+    #       chart_name: readarr
+    #       set_options: "--set \
+    #         {{ helm_common_general }},\
+    #         {{ helm_common_persistence }},\
+    #         {{ helm_common_security_contexts }},\
+    #         {{ helm_common_persistence_books }}\
+    #         {{ helm_common_persistence_downloads }}}\
+    #         {{ helm_common_resources }},\
+    #         {{ helm_common_ingress }},\
+    #         {{ helm_common_persistence_config }},\
+    #         persistence.config.hostPath={{ services.configs_dir }}/readarr,\
+    #         ingress.main.hosts[0].host='readarr.{{ domain_name }}',\
+    #         ingress.main.hosts[0].paths[0].service.name=readarr,\
+    #         ingress.main.hosts[0].paths[0].service.port=8787"
+
+    #   - debug:
+    #       msg: >
+    #         You can log into readarr at 'readarr.{{ domain_name }}'.
+    #         Data directories from the host are available under '/data' and
+    #         can be used by the application.
+
+    # - name: Install lidarr
+    #   when: services.lidarr.enabled
+    #   block:
+    #   - name: Create config directory on hostpath for lidarr
+    #     file:
+    #       path: "{{ services.configs_dir }}/lidarr"
+    #       state: directory
+    #       mode: '0777'
+    #     become: true
+
+    #   - name: Install/Upgrade the lidarr chart
+    #     include_tasks: tasks-install-chart.yaml
+    #     vars:
+    #       repo_name: TrueCharts
+    #       repo_link: oci://tccr.io/truecharts
+    #       install_namespace: "{{ namespace_generic_services }}"
+    #       timeout: "{{ charts.timeout }}"
+    #       release_name: lidarr
+    #       chart_name: lidarr
+    #       set_options: "--set \
+    #         {{ helm_common_general }},\
+    #         {{ helm_common_persistence }},\
+    #         {{ helm_common_security_contexts }},\
+    #         {{ helm_common_persistence_music }}\
+    #         {{ helm_common_persistence_downloads }}}\
+    #         {{ helm_common_resources }},\
+    #         {{ helm_common_ingress }},\
+    #         {{ helm_common_persistence_config }},\
+    #         persistence.config.hostPath={{ services.configs_dir }}/lidarr,\
+    #         ingress.main.hosts[0].host='lidarr.{{ domain_name }}',\
+    #         ingress.main.hosts[0].paths[0].service.name=lidarr,\
+    #         ingress.main.hosts[0].paths[0].service.port=8686"
+
+    #   - debug:
+    #       msg: >
+    #         You can log into lidarr at 'lidarr.{{ domain_name }}'.
+    #         Data directories from the host are available under '/data' and
+    #         can be used by the application.
+
+    # - name: Install ombi
+    #   when: services.ombi.enabled
+    #   block:
+    #   - name: Create config directory on hostpath for ombi
+    #     file:
+    #       path: "{{ services.configs_dir }}/ombi"
+    #       state: directory
+    #       mode: '0777'
+    #     become: true
+
+    #   - name: Install/Upgrade the ombi chart
+    #     include_tasks: tasks-install-chart.yaml
+    #     vars:
+    #       repo_name: TrueCharts
+    #       repo_link: oci://tccr.io/truecharts
+    #       install_namespace: "{{ namespace_generic_services }}"
+    #       timeout: "{{ charts.timeout }}"
+    #       release_name: ombi
+    #       chart_name: ombi
+    #       set_options: "--set \
+    #         {{ helm_common_general }},\
+    #         {{ helm_common_persistence }},\
+    #         {{ helm_common_security_contexts }},\
+    #         {{ helm_common_resources }},\
+    #         {{ helm_common_ingress }},\
+    #         {{ helm_common_persistence_config }},\
+    #         persistence.config.hostPath={{ services.configs_dir }}/ombi,\
+    #         ingress.main.hosts[0].host='ombi.{{ domain_name }}',\
+    #         ingress.main.hosts[0].paths[0].service.name=ombi,\
+    #         ingress.main.hosts[0].paths[0].service.port=3579"
+    #   - debug:
+    #       msg: >
+    #           You can log into ombi at 'ombi.{{ domain_name }}'.
+    #           Data directories are available under '/data' and can be used by
+    #           ombi. If need be, delete any existing server and go to the
+    #           URL mention above once again to setup a new server.
+
+    # - name: Install jellyseerr
+    #   when: services.jellyseerr.enabled
+    #   block:
+    #   - name: Create config directory on hostpath for jellyseerr
+    #     file:
+    #       path: "{{ services.configs_dir }}/jellyseerr"
+    #       state: directory
+    #       mode: '0777'
+    #     become: true
+
+    #   - name: Install/Upgrade the jellyseerr chart
+    #     include_tasks: tasks-install-chart.yaml
+    #     vars:
+    #       repo_name: TrueCharts
+    #       repo_link: oci://tccr.io/truecharts
+    #       install_namespace: "{{ namespace_generic_services }}"
+    #       timeout: "{{ charts.timeout }}"
+    #       release_name: jellyseerr
+    #       chart_name: jellyseerr
+    #       set_options: "--set \
+    #         {{ helm_common_general }},\
+    #         {{ helm_common_persistence }},\
+    #         {{ helm_common_security_contexts }},\
+    #         {{ helm_common_resources }},\
+    #         {{ helm_common_ingress }},\
+    #         {{ helm_common_persistence_config }},\
+    #         persistence.config.hostPath={{ services.configs_dir }}/jellyseerr,\
+    #         ingress.main.hosts[0].host='jellyseerr.{{ domain_name }}',\
+    #         ingress.main.hosts[0].paths[0].service.name=jellyseerr,\
+    #         ingress.main.hosts[0].paths[0].service.port=5055"
+    #   - debug:
+    #       msg: >
+    #           You can log into jellyseerr at 'jellyseerr.{{ domain_name }}'.
+    #           Data directories are available under '/data' and can be used by
+    #           jellyseerr. If need be, delete any existing server and go to the
+    #           URL mention above once again to setup a new server.
+
+    # - name: Install librespeed
+    #   when: services.librespeed.enabled
+    #   block:
+    #   - name: Install/Upgrade the librespeed chart
+    #     include_tasks: tasks-install-chart.yaml
+    #     vars:
+    #       repo_name: TrueCharts
+    #       repo_link: oci://tccr.io/truecharts
+    #       install_namespace: "{{ namespace_generic_services }}"
+    #       timeout: "{{ charts.timeout }}"
+    #       release_name: librespeed
+    #       chart_name: librespeed
+    #       # PUID={{ uid }} gives write access on the pod
+    #       # 568 is the default user ID, added to the groups cause why not
+    #       set_options: "--set \
+    #         {{ helm_common_general }},\
+    #         {{ helm_common_persistence }},\
+    #         {{ helm_common_resources }},\
+    #         {{ helm_common_ingress }},\
+    #         {{ helm_common_persistence_config }},\
+    #         persistence.config.hostPath={{ services.configs_dir }}/librespeed,\
+    #         securityContext.container.PUID=\"{{ uid }}\",\
+    #         securityContext.container.PGID=\"568\",\
+    #         ingress.main.hosts[0].host='librespeed.{{ domain_name }}',\
+    #         ingress.main.hosts[0].paths[0].service.name=librespeed,\
+    #         ingress.main.hosts[0].paths[0].service.port=10016"
+
+ 
+    # - name: Install calibre-web
+    #   when: services.calibre_web.enabled
+    #   block:
+    #   - name: Install/Upgrade the calibre-web chart
+    #     include_tasks: tasks-install-chart.yaml
+    #     vars:
+    #       repo_name: TrueCharts
+    #       repo_link: oci://tccr.io/truecharts
+    #       install_namespace: "{{ namespace_generic_services }}"
+    #       timeout: "{{ charts.timeout }}"
+    #       release_name: calibre-web
+    #       chart_name: calibre-web
+    #       # PUID={{ uid }} gives write access on the pod
+    #       # 568 is the default user ID, added to the groups cause why not
+    #       set_options: "--set \
+    #         {{ helm_common_general }},\
+    #         {{ helm_common_persistence }},\
+    #         {{ helm_common_persistence_books }}\
+    #         {{ helm_common_persistence_downloads }}}\
+    #         {{ helm_common_resources }},\
+    #         {{ helm_common_ingress }},\
+    #         securityContext.container.PUID=\"{{ uid }}\",\
+    #         securityContext.container.PGID=\"568\",\
+    #         ingress.main.hosts[0].host='calibre-web.{{ domain_name }}',\
+    #         ingress.main.hosts[0].paths[0].service.name=calibre-web,\
+    #         ingress.main.hosts[0].paths[0].service.port=8083"
+
+    #   - debug:
+    #       msg: >
+    #         You can log into calibre-web at 'calibre-web.{{ domain_name }}'.
+    #         Data directories from the host are available under '/data' and
+    #         can be used by the application.
+
+    # - name: Install calibre
+    #   when: services.calibre.enabled
+    #   block:
+    #   - name: Install/Upgrade the calibre chart
+    #     include_tasks: tasks-install-chart.yaml
+    #     vars:
+    #       repo_name: TrueCharts
+    #       repo_link: oci://tccr.io/truecharts
+    #       install_namespace: "{{ namespace_generic_services }}"
+    #       timeout: "{{ charts.timeout }}"
+    #       release_name: calibre
+    #       chart_name: calibre
+    #       # PUID={{ uid }} gives write access on the pod
+    #       # 568 is the default user ID, added to the groups cause why not
+    #       # securityContext.container.seccompProfile.type is required for the
+    #       # guacamole VNC client to be able to make sys calls (required )
+    #       set_options: "--set \
+    #         {{ helm_common_general }},\
+    #         {{ helm_common_persistence }},\
+    #         {{ helm_common_persistence_books }}\
+    #         {{ helm_common_persistence_downloads }}}\
+    #         {{ helm_common_resources }},\
+    #         securityContext.container.PUID=\"{{ uid }}\",\
+    #         securityContext.container.PGID=\"568\",\
+    #         securityContext.container.seccompProfile.type=Unconfined,\
+    #         service.main.type=NodePort,\
+    #         service.main.ports.main.nodePort=30000,\
+    #         service.webserver.enabled=true"
+
+    #   - debug:
+    #       msg: >
+    #         You can log into calibre at '{{ ip }}:30000'.
+    #         Data directories from the host are available under '/data' and
+    #         can be used by the application.

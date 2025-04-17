@@ -6,9 +6,9 @@ domain_name: "" # FILL OUT
 
 # for basic server setup (in my opinion)
 basics:
-  enabled: true
+  enabled: false
   # reboot machine
-  reboot: true
+  reboot: false
 
   # user's home dir
   home_dir: "/home/{{ ansible_user }}"
@@ -18,7 +18,7 @@ basics:
 
 # vnc for remote desktop with GUI
 vnc:
-  enabled: true
+  enabled: false
   # will be truncated to 8 characters
   password: "" # FILL OUT
   # display for what port will be accessed
@@ -30,14 +30,14 @@ vnc:
 
 # squid credentials, for proxy
 squid:
-  enabled: true
+  enabled: false
   username: "" # FILL OUT
   password: "" # FILL OUT
   port: "3128"
 
 # sambashare for network attached storage
 smb:
-  enabled: true
+  enabled: false
   password: "" # FILL OUT
   share_name: "sambashare"
 
@@ -48,7 +48,7 @@ smb:
 # when the server IP changes
 # NOTE: It doesnt add entries, refer to the README.md file for instructions
 cloudflare:
-  enabled: true
+  enabled: false
 
   # Set your Cloudflare Zone ID
   zone_id: "" # FILL OUT
@@ -57,211 +57,162 @@ cloudflare:
   auth_key: "" # FILL OUT
 
 # ==== Select what charts you wish to install ====
-charts:
-  enabled: true
+services:
+  # directory in which the apps will store their configs
+  configs_dir: "/home/{{ ansible_user }}/data/app-configs"
+
+  # nginx ingress controller for reverse proxy
+  traefik:
+    enabled: false
   
-  resources:
-    # kubernetes resource requests for the pods
-    requests:
-      cpu: 10m
-      memory: 50M
+  # manager for tls certs
+  cert_manager:
+    enabled: false
+    # email for the ACME account registration
+    # FYI: you dont need to create any account for this, just use an email ID
+    email: "" # FILL OUT
   
-    # kubernetes resource limits for the pods
-    # leave some headroom for the OS to not lose server access in case of an issue
-    limits:
-      cpu: 4
-      memory: "6000M"
+  # metrics monitoring with Grafana and Prometheus
+  monitoring:
+    enabled: true
+    admin_username: "admin" # FILL OUT
+    admin_password: "admin" # FILL OUT
   
-  # timeout as helm expects it in --timeout for the charts
-  timeout: 15m
+  # cloud native instance of postgres DB
+  cnpg:
+    enabled: false
+
+  # google photos alternative
+  # NOTE: REQUIRES YOU TO HAVE CNPG INSTALLED BEFORE
+  #       - Either set `cnpg.enabled` to false or
+  #       - make sure you have installed it first (incase of an upgrade)
+  immich:
+    enabled: false
+    # base dir for all immich info, including backups, cache, etc
+    # look at `install-charts.yaml` for more information
+    host_path: "/home/{{ ansible_user }}/data/immich"
+
+  # home automation portal
+  home_assistant:
+    enabled: false
+
+  # media client
+  jellyfin:
+    enabled: false
   
-  services:
+  # torrents
+  qbittorrent:
+    enabled: false
 
-    # directory in which the apps will store their configs
-    configs_dir: "/home/{{ ansible_user }}/data/app-configs"
+    # dirs to download files
+    # you can specify different mounts present on your server
+    # NOTE: The 'name' must follow the following regex validation: '[a-z0-9]([-a-z0-9]*[a-z0-9])?'
+    #       If you dont know what that means, just use lower case characters
+    #       and dashes to separate them or a mix of upper and lowercase characters
+    persistence:
+      - name: root-disk
+        host_path: "/home/{{ ansible_user }}/data/downloads"
+      # - name: spare-disk
+      #   host_path: "/mnt/b/downloads"
+  
+  # to bypass cloudflare protection
+  flaresolverr:
+    enabled: false
+  
+  # to manage indexers
+  prowlarr:
+    enabled: false
+  
+  # movie monitoring
+  radarr:
+    enabled: false
 
-    # provision hostPaths using this controller
-    local_path_provisioner:
-      enabled: true
-      version: "v0.0.31"
-    
-    # nginx ingress controller for reverse proxy
-    ingress_nginx:
-      enabled: true
-    
-    # manager for tls certs
-    cert_manager:
-      enabled: true
-      # email for the ACME account registration
-      # FYI: you dont need to create any account for this, just use an email ID
-      email: "" # FILL OUT
-    
-    # log monitoring with Loki (Needs Grafana for a UI)
-    loki_stack:
-      enabled: true
-    
-    # metrics monitoring with Grafana and Prometheus
-    kube_prometheus_stack:
-      enabled: true
-      grafana:
-        admin_username: "admin" # FILL OUT
-        admin_password: "admin" # FILL OUT
-    
-    # cloud native instance of postgres DB
-    cnpg:
-      enabled: true
+    # dirs to store and organise movies
+    # you can specify different mounts present on your server
+    # NOTE: The 'name' must follow the following regex validation: '[a-z0-9]([-a-z0-9]*[a-z0-9])?'
+    #       If you dont know what that means, just use lower case characters
+    #       and dashes to separate them or a mix of upper and lowercase characters
+    persistence:
+      - name: root-disk
+        host_path: "/home/{{ ansible_user }}/data/movies"
+      # - name: spare-disk
+      #   host_path: "/mnt/b/movies"
 
-    # google photos alternative
-    # NOTE: REQUIRES YOU TO HAVE CNPG INSTALLED BEFORE
-    #       - Either set `cnpg.enabled` to true or
-    #       - make sure you have installed it first (incase of an upgrade)
-    immich:
-      enabled: true
-      # base dir for all immich info, including backups, cache, etc
-      # look at `install-charts.yaml` for more information
-      host_path: "/home/{{ ansible_user }}/data/immich"
+  # show monitoring
+  sonarr:
+    enabled: false
 
-    # home automation portal
-    home_assistant:
-      enabled: true
+    # dirs to store and organise shows
+    # you can specify different mounts present on your server
+    # NOTE: The 'name' must follow the following regex validation: '[a-z0-9]([-a-z0-9]*[a-z0-9])?'
+    #       If you dont know what that means, just use lower case characters
+    #       and dashes to separate them or a mix of upper and lowercase characters
+    persistence:
+      - name: root-disk
+        host_path: "/home/{{ ansible_user }}/data/shows"
+      # - name: spare-disk
+      #   host_path: "/mnt/b/shows"
+  
+  # subtitle hunting
+  bazarr:
+    enabled: false
+  
+  # movie and show interface
+  jellyseerr:
+    enabled: false
 
-    # media client
-    jellyfin:
-      enabled: true
-    
-    # torrents
-    qbittorrent:
-      enabled: true
+  # speed test to server
+  librespeed:
+    enabled: false
 
-      # dirs to download files
-      # you can specify different mounts present on your server
-      # NOTE: The 'name' must follow the following regex validation: '[a-z0-9]([-a-z0-9]*[a-z0-9])?'
-      #       If you dont know what that means, just use lower case characters
-      #       and dashes to separate them or a mix of upper and lowercase characters
-      persistence:
-        - name: root-disk
-          host_path: "/home/{{ ansible_user }}/data/downloads"
-        # - name: spare-disk
-        #   host_path: "/mnt/b/downloads"
-    
-    # to bypass cloudflare protection
-    flaresolverr:
-      enabled: true
-    
-    # to manage indexers
-    prowlarr:
-      enabled: true
-    
-    # movie monitoring
-    radarr:
-      enabled: true
+  # book monitoring
+  readarr:
+    enabled: false
 
-      # dirs to store and organise movies
-      # you can specify different mounts present on your server
-      # NOTE: The 'name' must follow the following regex validation: '[a-z0-9]([-a-z0-9]*[a-z0-9])?'
-      #       If you dont know what that means, just use lower case characters
-      #       and dashes to separate them or a mix of upper and lowercase characters
-      persistence:
-        - name: root-disk
-          host_path: "/home/{{ ansible_user }}/data/movies"
-        # - name: spare-disk
-        #   host_path: "/mnt/b/movies"
+    # dirs to store and organise books
+    # you can specify different mounts present on your server
+    # NOTE: The 'name' must follow the following regex validation: '[a-z0-9]([-a-z0-9]*[a-z0-9])?'
+    #       If you dont know what that means, just use lower case characters
+    #       and dashes to separate them or a mix of upper and lowercase characters
+    persistence:
+      - name: root-disk
+        host_path: "/home/{{ ansible_user }}/data/books"
+      # - name: spare-disk
+      #   host_path: "/mnt/b/books"
 
-    # show monitoring
-    sonarr:
-      enabled: true
+  # music monitoring
+  lidarr:
+    enabled: false
 
-      # dirs to store and organise shows
-      # you can specify different mounts present on your server
-      # NOTE: The 'name' must follow the following regex validation: '[a-z0-9]([-a-z0-9]*[a-z0-9])?'
-      #       If you dont know what that means, just use lower case characters
-      #       and dashes to separate them or a mix of upper and lowercase characters
-      persistence:
-        - name: root-disk
-          host_path: "/home/{{ ansible_user }}/data/shows"
-        # - name: spare-disk
-        #   host_path: "/mnt/b/shows"
-    
-    # subtitle hunting
-    bazarr:
-      enabled: true
-    
-    # movie and show interface
-    jellyseerr:
-      enabled: true
+    # dirs to store and organise music
+    # you can specify different mounts present on your server
+    # NOTE: The 'name' must follow the following regex validation: '[a-z0-9]([-a-z0-9]*[a-z0-9])?'
+    #       If you dont know what that means, just use lower case characters
+    #       and dashes to separate them or a mix of upper and lowercase characters
+    persistence:
+      - name: root-disk
+        host_path: "/home/{{ ansible_user }}/data/music"
+      # - name: spare-disk
+      #   host_path: "/mnt/b/music"
 
-    # speed test to server
-    librespeed:
-      enabled: true
+  # book client
+  calibre_web:
+    enabled: false
 
-    # book monitoring
-    readarr:
-      enabled: true
+  # book management
+  calibre:
+    enabled: false
 
-      # dirs to store and organise books
-      # you can specify different mounts present on your server
-      # NOTE: The 'name' must follow the following regex validation: '[a-z0-9]([-a-z0-9]*[a-z0-9])?'
-      #       If you dont know what that means, just use lower case characters
-      #       and dashes to separate them or a mix of upper and lowercase characters
-      persistence:
-        - name: root-disk
-          host_path: "/home/{{ ansible_user }}/data/books"
-        # - name: spare-disk
-        #   host_path: "/mnt/b/books"
-
-    # music monitoring
-    lidarr:
-      enabled: true
-
-      # dirs to store and organise music
-      # you can specify different mounts present on your server
-      # NOTE: The 'name' must follow the following regex validation: '[a-z0-9]([-a-z0-9]*[a-z0-9])?'
-      #       If you dont know what that means, just use lower case characters
-      #       and dashes to separate them or a mix of upper and lowercase characters
-      persistence:
-        - name: root-disk
-          host_path: "/home/{{ ansible_user }}/data/music"
-        # - name: spare-disk
-        #   host_path: "/mnt/b/music"
-
-    # book client
-    calibre_web:
-      enabled: false
-
-    # book management
-    calibre:
-      enabled: false
-
-    # movie, show and music interface
-    ombi:
-      enabled: false
+  # movie, show and music interface
+  ombi:
+    enabled: false
 
 
 # ==== k8s settings ====
 
-kubespray:
-  enabled: true
-  
-  # Use reset.yml to reset cluster
-  playbook: "cluster.yml"
-  # extra args for playbook
-  playbook_args: "-e reset_confirmation=yes"
+docker:
+  enabled: false
 
-  # release branch from the repo: https://github.com/kubernetes-sigs/kubespray
-  release: "release-2.27"
-
-  # enable addons config
-  addons: []
-  # - helm_enabled
-  # - ingress_nginx_enabled
-  # - cert_manager_enabled
-  # - metallb_enabled
-  # - local_path_provisioner_enabled
-  
-  # enable cluster yml config
-  k8s_cluster: []
-  # - kube_proxy_strict_arp
-  
 
 # to allow pinless bluetooth connections to the server
 bluetooth:

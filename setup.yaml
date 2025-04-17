@@ -15,15 +15,13 @@
   when:
     - basics.enabled
 
-- import_playbook: install-kubernetes-kubespray.yaml
+- import_playbook: install-docker.yaml
   when:
-    - kubespray.enabled
+    - docker.enabled
 
-- import_playbook: install-charts.yaml
+- import_playbook: install-services.yaml
   vars:
     ip: "{{ ansible_host }}"
-  when:
-    - charts.enabled
 
 - import_playbook: install-tightvnc-and-ssh.yaml
   when:
